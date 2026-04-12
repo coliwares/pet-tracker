@@ -88,16 +88,41 @@ export default function PetDetailPage() {
         {/* Pet Info */}
         <div className="bg-white rounded-2xl border-2 border-gray-100 p-8 mb-8 shadow-card hover:shadow-card-hover transition-shadow">
           <div className="flex items-start gap-6">
-          <div className="flex-shrink-0">
-            {pet.photo_url ? (
-              <img
-                src={pet.photo_url}
-                alt={pet.name}
-                className="w-40 h-40 rounded-3xl object-cover ring-4 ring-blue-100 shadow-xl"
-              />
-            ) : (
-              <div className="w-40 h-40 rounded-3xl bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center shadow-xl">
-                <PawPrint className="w-20 h-20 text-white" />
+          <div className="flex-shrink-0 space-y-4">
+            {/* Foto de mascota */}
+            <div>
+              {pet.photo_url ? (
+                <img
+                  src={pet.photo_url}
+                  alt={pet.name}
+                  className="w-40 h-40 rounded-3xl object-cover ring-4 ring-blue-100 shadow-xl"
+                />
+              ) : (
+                <div className="w-40 h-40 rounded-3xl bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center shadow-xl">
+                  <PawPrint className="w-20 h-20 text-white" />
+                </div>
+              )}
+              <p className="text-xs text-center text-gray-500 mt-2 font-medium">Foto de {pet.name}</p>
+            </div>
+
+            {/* Licencia de registro */}
+            {pet.license_url && (
+              <div>
+                <a
+                  href={pet.license_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block group"
+                >
+                  <img
+                    src={pet.license_url}
+                    alt="Licencia de registro"
+                    className="w-40 h-40 rounded-3xl object-cover ring-4 ring-purple-100 shadow-xl group-hover:ring-purple-300 transition-all"
+                  />
+                  <p className="text-xs text-center text-purple-700 mt-2 font-semibold group-hover:text-purple-800">
+                    📄 Licencia municipal
+                  </p>
+                </a>
               </div>
             )}
           </div>

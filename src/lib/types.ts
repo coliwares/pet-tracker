@@ -15,6 +15,7 @@ export type Pet = {
   birth_date: string | null;
   weight: number | null;
   photo_url: string | null;
+  license_url: string | null;
   notes: string | null;
   is_active: boolean;
   created_at: string;

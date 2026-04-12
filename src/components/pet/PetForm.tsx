@@ -5,6 +5,8 @@ import { Pet, Species } from '@/lib/types';
 import { SPECIES } from '@/lib/constants';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { uploadPetPhoto, validateFile, compressImage } from '@/lib/storage';
+import { useAuth } from '@/hooks/useAuth';
 
 interface PetFormProps {
   pet?: Pet;
@@ -13,6 +15,7 @@ interface PetFormProps {
 }
 
 export function PetForm({ pet, onSubmit, submitLabel = 'Guardar' }: PetFormProps) {
+  const { user } = useAuth();
   const [name, setName] = useState(pet?.name || '');
   const [species, setSpecies] = useState<Species>(pet?.species || 'Perro');
   const [breed, setBreed] = useState(pet?.breed || '');
@@ -21,6 +24,45 @@ export function PetForm({ pet, onSubmit, submitLabel = 'Guardar' }: PetFormProps
   const [notes, setNotes] = useState(pet?.notes || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Estados para archivos
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [licenseFile, setLicenseFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(pet?.photo_url || null);
+  const [licensePreview, setLicensePreview] = useState<string | null>(pet?.license_url || null);
+  const [uploadProgress, setUploadProgress] = useState<string>('');
+
+  // Manejar selección de foto de mascota
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validation = validateFile(file);
+    if (!validation.valid) {
+      setError(validation.error || 'Archivo inválido');
+      return;
+    }
+
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+    setError('');
+  };
+
+  // Manejar selección de licencia
+  const handleLicenseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validation = validateFile(file);
+    if (!validation.valid) {
+      setError(validation.error || 'Archivo inválido');
+      return;
+    }
+
+    setLicenseFile(file);
+    setLicensePreview(URL.createObjectURL(file));
+    setError('');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,20 +73,69 @@ export function PetForm({ pet, onSubmit, submitLabel = 'Guardar' }: PetFormProps
       return;
     }
 
+    if (!user?.id) {
+      setError('Usuario no autenticado');
+      return;
+    }
+
     try {
       setLoading(true);
+
+      // URLs de archivos
+      let photoUrl = pet?.photo_url || null;
+      let licenseUrl = pet?.license_url || null;
+
+      // Subir foto de mascota si se seleccionó
+      if (photoFile) {
+        setUploadProgress('Subiendo foto de mascota...');
+        const compressed = await compressImage(photoFile, 1200);
+        const uploadedUrl = await uploadPetPhoto(
+          compressed,
+          user.id,
+          pet?.id || 'temp-' + Date.now(),
+          'photo'
+        );
+        if (uploadedUrl) {
+          photoUrl = uploadedUrl;
+        } else {
+          throw new Error('Error al subir foto de mascota');
+        }
+      }
+
+      // Subir licencia si se seleccionó
+      if (licenseFile) {
+        setUploadProgress('Subiendo licencia de registro...');
+        const compressed = await compressImage(licenseFile, 1200);
+        const uploadedUrl = await uploadPetPhoto(
+          compressed,
+          user.id,
+          pet?.id || 'temp-' + Date.now(),
+          'license'
+        );
+        if (uploadedUrl) {
+          licenseUrl = uploadedUrl;
+        } else {
+          throw new Error('Error al subir licencia');
+        }
+      }
+
+      setUploadProgress('Guardando información...');
+
       await onSubmit({
         name: name.trim(),
         species,
         breed: breed.trim() || null,
         birth_date: birthDate || null,
         weight: weight ? parseFloat(weight) : null,
+        photo_url: photoUrl,
+        license_url: licenseUrl,
         notes: notes.trim() || null,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar');
     } finally {
       setLoading(false);
+      setUploadProgress('');
     }
   };
 
@@ -128,6 +219,111 @@ export function PetForm({ pet, onSubmit, submitLabel = 'Guardar' }: PetFormProps
         />
         <p className="text-xs text-gray-500 ml-1">Ej: Alérgico al pollo, toma medicamentos diarios, etc.</p>
       </div>
+
+      {/* Sección de archivos */}
+      <div className="border-t-2 border-gray-100 pt-6 space-y-6">
+        <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+          📸 Imágenes
+        </h3>
+
+        {/* Foto de mascota */}
+        <div className="space-y-3">
+          <label className="block text-sm font-semibold text-gray-700">
+            🐾 Foto de la mascota
+          </label>
+
+          {photoPreview && (
+            <div className="relative inline-block">
+              <img
+                src={photoPreview}
+                alt="Preview"
+                className="w-32 h-32 object-cover rounded-xl border-2 border-gray-200"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setPhotoFile(null);
+                  setPhotoPreview(null);
+                }}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+              >
+                ×
+              </button>
+            </div>
+          )}
+
+          <input
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/webp"
+            onChange={handlePhotoChange}
+            className="block w-full text-sm text-gray-600
+              file:mr-4 file:py-3 file:px-6
+              file:rounded-xl file:border-2 file:border-blue-200
+              file:text-sm file:font-semibold
+              file:bg-gradient-to-r file:from-blue-50 file:to-indigo-50
+              file:text-blue-700
+              hover:file:bg-blue-100 hover:file:border-blue-300
+              file:cursor-pointer file:transition-all"
+          />
+          <p className="text-xs text-gray-500">
+            JPG, PNG o WebP · Máximo 5MB · Se comprimirá automáticamente
+          </p>
+        </div>
+
+        {/* Licencia de registro */}
+        <div className="space-y-3">
+          <label className="block text-sm font-semibold text-gray-700">
+            📄 Licencia de registro municipal
+          </label>
+
+          {licensePreview && (
+            <div className="relative inline-block">
+              <img
+                src={licensePreview}
+                alt="Preview licencia"
+                className="w-32 h-32 object-cover rounded-xl border-2 border-gray-200"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setLicenseFile(null);
+                  setLicensePreview(null);
+                }}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+              >
+                ×
+              </button>
+            </div>
+          )}
+
+          <input
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/webp"
+            onChange={handleLicenseChange}
+            className="block w-full text-sm text-gray-600
+              file:mr-4 file:py-3 file:px-6
+              file:rounded-xl file:border-2 file:border-purple-200
+              file:text-sm file:font-semibold
+              file:bg-gradient-to-r file:from-purple-50 file:to-pink-50
+              file:text-purple-700
+              hover:file:bg-purple-100 hover:file:border-purple-300
+              file:cursor-pointer file:transition-all"
+          />
+          <p className="text-xs text-gray-500">
+            Opcional · Foto de la licencia municipal si tu mascota está registrada
+          </p>
+        </div>
+      </div>
+
+      {uploadProgress && (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 text-blue-700 px-4 py-3 rounded-xl font-medium animate-fade-in flex items-center gap-2">
+          <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {uploadProgress}
+        </div>
+      )}
 
       {error && (
         <div className="bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-300 text-red-700 px-4 py-3 rounded-xl font-medium animate-fade-in">

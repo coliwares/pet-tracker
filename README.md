@@ -27,7 +27,9 @@
 
 1. Crear un proyecto en [supabase.com](https://supabase.com)
 
-2. Ir a **SQL Editor** y ejecutar el script de base de datos:
+2. **Configurar Base de Datos:**
+   
+   Ir a **SQL Editor** y ejecutar el script:
    ```bash
    # Copia el contenido de supabase-setup.sql
    # y ejecútalo en el SQL Editor de Supabase
@@ -39,7 +41,18 @@
    - ✅ Policies para aislamiento por usuario
    - ✅ Índices para rendimiento
 
-3. Ir a **Settings → API** y copiar tus credenciales:
+3. **Configurar Storage (para fotos):**
+   
+   Ver guía completa en: [STORAGE_SETUP.md](STORAGE_SETUP.md)
+   
+   Resumen:
+   - Crear bucket `pet-photos` (privado)
+   - Configurar 4 policies de seguridad
+   - Límite: 5MB por archivo, formatos: JPG, PNG, WebP
+
+4. **Obtener Credenciales:**
+   
+   Ir a **Settings → API** y copiar:
    - `Project URL`
    - `anon/public key`
 
@@ -88,6 +101,9 @@ Ver: [RATE_LIMIT_FIX.md](RATE_LIMIT_FIX.md) para más detalles
 - ✅ CRUD de eventos médicos (vacunas, visitas, medicinas, otros)
 - ✅ Timeline visual ordenada por fecha
 - ✅ Cálculo automático de edad de mascotas
+- 📸 Upload de fotos de mascotas
+- 📄 Upload de licencias de registro municipal
+- 🗜️ Compresión automática de imágenes
 
 ### Seguridad
 - 🛡️ Rate limiting (3 intentos/min signup, 5 intentos/min login)

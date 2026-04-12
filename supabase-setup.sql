@@ -11,6 +11,7 @@ CREATE TABLE pets (
   birth_date DATE,
   weight DECIMAL(5,2),
   photo_url TEXT,
+  license_url TEXT,
   notes TEXT,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -89,4 +90,48 @@ CREATE POLICY "Users can delete pet events"
     pet_id IN (
       SELECT id FROM pets WHERE user_id = auth.uid()
     )
+  );
+
+-- ============================================
+-- STORAGE CONFIGURATION
+-- ============================================
+-- IMPORTANTE: Los buckets de Storage se crean desde el Dashboard de Supabase
+-- Ve a: Storage → Create bucket → Nombre: "pet-photos"
+-- Configuración:
+--   - Public bucket: NO (privado)
+--   - File size limit: 5MB
+--   - Allowed MIME types: image/jpeg, image/png, image/webp
+
+-- Después de crear el bucket, ejecuta estas policies:
+
+-- Policy: Usuarios pueden subir sus propias fotos
+CREATE POLICY "Users can upload own pet photos"
+  ON storage.objects FOR INSERT
+  WITH CHECK (
+    bucket_id = 'pet-photos'
+    AND auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- Policy: Usuarios pueden ver sus propias fotos
+CREATE POLICY "Users can view own pet photos"
+  ON storage.objects FOR SELECT
+  USING (
+    bucket_id = 'pet-photos'
+    AND auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- Policy: Usuarios pueden actualizar sus propias fotos
+CREATE POLICY "Users can update own pet photos"
+  ON storage.objects FOR UPDATE
+  USING (
+    bucket_id = 'pet-photos'
+    AND auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- Policy: Usuarios pueden eliminar sus propias fotos
+CREATE POLICY "Users can delete own pet photos"
+  ON storage.objects FOR DELETE
+  USING (
+    bucket_id = 'pet-photos'
+    AND auth.uid()::text = (storage.foldername(name))[1]
   );
