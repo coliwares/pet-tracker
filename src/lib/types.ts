@@ -1,0 +1,46 @@
+export type User = {
+  id: string;
+  email: string;
+  created_at: string;
+};
+
+export type Species = 'Perro' | 'Gato' | 'Conejo' | 'Ave' | 'Otro';
+
+export type Pet = {
+  id: string;
+  user_id: string;
+  name: string;
+  species: Species;
+  breed: string | null;
+  birth_date: string | null;
+  weight: number | null;
+  photo_url: string | null;
+  notes: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type EventType = 'vacuna' | 'visita' | 'medicina' | 'otro';
+
+export type Event = {
+  id: string;
+  pet_id: string;
+  type: EventType;
+  title: string;
+  description: string | null;
+  event_date: string;
+  next_due_date: string | null;
+  notes: string | null;
+  file_url: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AuthUser = {
+  id: string;
+  email: string | undefined;
+  user_metadata: Record<string, any>;
+  aud: string;
+  created_at: string;
+};
