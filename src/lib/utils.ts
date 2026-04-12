@@ -5,7 +5,7 @@ import { es } from 'date-fns/locale';
  * Parsea una fecha en formato YYYY-MM-DD como fecha local (sin conversión UTC)
  * Soluciona el problema de zona horaria donde "2026-04-10" se mostraba como "2026-04-09"
  */
-export function parseLocalDate(dateString: string): Date {
+export function parseLocalDate(dateString: string | Date): Date {
   if (!dateString) return new Date();
 
   // Si ya es una fecha válida, retornarla
