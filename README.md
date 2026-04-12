@@ -1,13 +1,18 @@
 # 🐾 Carnet Veterinario Digital
 
-Aplicación web para gestionar el historial médico, vacunas y visitas veterinarias de tus mascotas.
+> Aplicación web moderna para gestionar el historial médico, vacunas y visitas veterinarias de tus mascotas. Diseñada con seguridad y UX en mente.
+
+---
 
 ## 🚀 Stack Tecnológico
 
-- **Frontend:** Next.js 16 + React 19 + TypeScript
-- **Styling:** Tailwind CSS v4
-- **Backend:** Supabase (Auth + PostgreSQL + Storage)
-- **Hosting:** Vercel
+| Categoría | Tecnología |
+|-----------|-----------|
+| **Frontend** | Next.js 16 + React 19 + TypeScript |
+| **Styling** | Tailwind CSS v4 |
+| **Backend** | Supabase (Auth + PostgreSQL) |
+| **Seguridad** | RLS + Rate Limiting + Honeypot |
+| **Hosting** | Vercel (recomendado) |
 
 ## 📋 Prerequisites
 
@@ -21,103 +26,22 @@ Aplicación web para gestionar el historial médico, vacunas y visitas veterinar
 ### 1. Configurar Supabase
 
 1. Crear un proyecto en [supabase.com](https://supabase.com)
-2. Ir a **SQL Editor** y ejecutar este script para crear las tablas:
 
-```sql
--- Tabla pets
-CREATE TABLE pets (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
-  species TEXT NOT NULL,
-  breed TEXT,
-  birth_date DATE,
-  weight DECIMAL(5,2),
-  photo_url TEXT,
-  notes TEXT,
-  is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+2. Ir a **SQL Editor** y ejecutar el script de base de datos:
+   ```bash
+   # Copia el contenido de supabase-setup.sql
+   # y ejecútalo en el SQL Editor de Supabase
+   ```
+   
+   El script crea:
+   - ✅ Tablas `pets` y `events`
+   - ✅ Row Level Security (RLS) habilitado
+   - ✅ Policies para aislamiento por usuario
+   - ✅ Índices para rendimiento
 
-CREATE INDEX idx_pets_user_id ON pets(user_id);
-
--- Tabla events
-CREATE TABLE events (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  pet_id UUID NOT NULL REFERENCES pets(id) ON DELETE CASCADE,
-  type TEXT NOT NULL,
-  title TEXT NOT NULL,
-  description TEXT,
-  event_date DATE NOT NULL,
-  next_due_date DATE,
-  notes TEXT,
-  file_url TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_events_pet_id ON events(pet_id);
-CREATE INDEX idx_events_event_date ON events(event_date DESC);
-
--- Habilitar RLS (Row Level Security)
-ALTER TABLE pets ENABLE ROW LEVEL SECURITY;
-ALTER TABLE events ENABLE ROW LEVEL SECURITY;
-
--- Policies para pets
-CREATE POLICY "Users can view own pets"
-  ON pets FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert own pets"
-  ON pets FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update own pets"
-  ON pets FOR UPDATE
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete own pets"
-  ON pets FOR DELETE
-  USING (auth.uid() = user_id);
-
--- Policies para events
-CREATE POLICY "Users can view pet events"
-  ON events FOR SELECT
-  USING (
-    pet_id IN (
-      SELECT id FROM pets WHERE user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can insert pet events"
-  ON events FOR INSERT
-  WITH CHECK (
-    pet_id IN (
-      SELECT id FROM pets WHERE user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can update pet events"
-  ON events FOR UPDATE
-  USING (
-    pet_id IN (
-      SELECT id FROM pets WHERE user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can delete pet events"
-  ON events FOR DELETE
-  USING (
-    pet_id IN (
-      SELECT id FROM pets WHERE user_id = auth.uid()
-    )
-  );
-```
-
-3. Ir a **Settings → API** y copiar:
-   - `SUPABASE_URL`
-   - `SUPABASE_ANON_KEY`
+3. Ir a **Settings → API** y copiar tus credenciales:
+   - `Project URL`
+   - `anon/public key`
 
 ### 2. Configurar el proyecto local
 
@@ -125,13 +49,18 @@ CREATE POLICY "Users can delete pet events"
 # Instalar dependencias
 npm install
 
-# Crear archivo .env.local
-cp .env.example .env.local
-
-# Editar .env.local con tus credenciales de Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
+# Crear archivo .env.local en la raíz del proyecto
+touch .env.local
 ```
+
+Editar `.env.local` con tus credenciales de Supabase:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=tu_project_url_aqui
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key_aqui
+```
+
+⚠️ **Importante:** Nunca subas `.env.local` a GitHub (ya está en `.gitignore`)
 
 ### 3. Ejecutar en desarrollo
 
@@ -141,22 +70,81 @@ npm run dev
 
 Abrir [http://localhost:3000](http://localhost:3000)
 
-## 📱 Funcionalidades MVP
+### 4. Helpers de Desarrollo
 
-- ✅ Autenticación (signup/login/logout)
-- ✅ CRUD de mascotas
-- ✅ CRUD de eventos médicos (vacunas, visitas, medicinas)
-- ✅ Timeline visual de eventos
-- ✅ Responsive design (mobile-first)
+En modo desarrollo, el proyecto incluye utilidades para facilitar el testing:
+
+- **Auto-generación de emails únicos:** Evita rate limits de Supabase
+- **Truco Gmail +alias:** `test+1@gmail.com`, `test+2@gmail.com` (todos van al mismo inbox)
+- **Logs de desarrollo:** Información útil en consola
+
+Ver: [RATE_LIMIT_FIX.md](RATE_LIMIT_FIX.md) para más detalles
+
+## 📱 Funcionalidades
+
+### Gestión
+- ✅ Autenticación completa (signup/login/logout)
+- ✅ CRUD de mascotas (crear, editar, eliminar, listar)
+- ✅ CRUD de eventos médicos (vacunas, visitas, medicinas, otros)
+- ✅ Timeline visual ordenada por fecha
+- ✅ Cálculo automático de edad de mascotas
+
+### Seguridad
+- 🛡️ Rate limiting (3 intentos/min signup, 5 intentos/min login)
+- 🛡️ Honeypot anti-bot
+- 🛡️ Row Level Security (RLS) en Supabase
+- 🛡️ Aislamiento total por usuario
+- 🔐 Variables de entorno protegidas
+
+### Diseño
+- 🎨 Diseño moderno con gradientes
+- ✨ Animaciones suaves
+- 📱 Responsive design (mobile-first)
+- 😊 Interfaz mejorada con emojis
+- 💡 Hints contextuales en formularios
 
 ## 🚢 Deploy en Vercel
 
-1. Push tu código a GitHub
-2. Conectar el repo en [vercel.com](https://vercel.com)
-3. Agregar las variables de entorno:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-4. Deploy automático en cada push a `main`
+### Antes de hacer deploy:
+
+⚠️ **Verificar que `.env.local` NO esté en el repositorio:**
+
+```bash
+# Verificar archivos a commitear
+git status
+
+# ❌ Si ves .env.local, DETENTE
+# ✅ Si solo ves archivos de código, continúa
+```
+
+### Pasos para deploy:
+
+1. **Push a GitHub** (ver sección "Subir a GitHub" abajo)
+2. **Conectar repo** en [vercel.com](https://vercel.com)
+3. **Agregar variables de entorno** en Vercel Dashboard:
+   - `NEXT_PUBLIC_SUPABASE_URL` → Tu Project URL
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` → Tu anon key
+4. **Deploy** → Automático en cada push a `main`
+
+### Subir a GitHub (primera vez):
+
+```bash
+# 1. Agregar archivos
+git add .
+
+# 2. Verificar (NO debe aparecer .env.local)
+git status
+
+# 3. Commit
+git commit -m "feat: carnet veterinario MVP completo"
+
+# 4. Crear repo en GitHub y conectar
+git remote add origin https://github.com/TU_USUARIO/pet-carnet.git
+
+# 5. Push
+git branch -M main
+git push -u origin main
+```
 
 ## 📂 Estructura del Proyecto
 
@@ -188,9 +176,37 @@ pet-carnet/
 
 ## 🔐 Seguridad
 
-- Row Level Security (RLS) habilitado en Supabase
-- Usuarios solo pueden ver/editar sus propias mascotas
-- Variables de entorno no commiteadas (.env.local en .gitignore)
+- **Row Level Security (RLS):** Aislamiento total a nivel de base de datos
+- **Rate Limiting:** Protección contra ataques de fuerza bruta
+- **Honeypot:** Detección de bots automatizados
+- **Variables de entorno:** Credenciales protegidas (nunca en el código)
+- **Validaciones:** Email y contraseñas validadas en frontend y backend
+
+Ver más detalles en: [SECURITY_IMPROVEMENTS.md](SECURITY_IMPROVEMENTS.md)
+
+## 📚 Documentación
+
+- **[GETTING_STARTED.md](GETTING_STARTED.md)** - Guía de inicio rápido
+- **[TESTING_GUIDE.md](TESTING_GUIDE.md)** - 56 casos de prueba
+- **[SECURITY_IMPROVEMENTS.md](SECURITY_IMPROVEMENTS.md)** - Medidas de seguridad
+- **[RATE_LIMIT_FIX.md](RATE_LIMIT_FIX.md)** - Solución a rate limits en testing
+- **[DESIGN_UPDATE.md](DESIGN_UPDATE.md)** - Guía de diseño visual
+- **[FORMS_UPDATE.md](FORMS_UPDATE.md)** - Mejoras en formularios
+
+## 🧪 Testing
+
+```bash
+# Ver guía completa de testing
+cat TESTING_GUIDE.md
+
+# El proyecto incluye 56 casos de prueba que cubren:
+# - Autenticación (11 tests)
+# - CRUD Mascotas (10 tests)
+# - CRUD Eventos (10 tests)
+# - UI/UX (10 tests)
+# - Seguridad (7 tests)
+# - Edge Cases (8 tests)
+```
 
 ## 📝 Licencia
 
