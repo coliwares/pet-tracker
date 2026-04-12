@@ -1,8 +1,34 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/Button';
+import { Loading } from '@/components/ui/Loading';
 import { PawPrint, Heart, Shield, Smartphone } from 'lucide-react';
 
 export default function Home() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  // Si el usuario está logueado, redirigir al dashboard
+  useEffect(() => {
+    if (!loading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, loading, router]);
+
+  // Mostrar loading mientras verifica autenticación
+  if (loading) {
+    return <Loading text="Cargando..." />;
+  }
+
+  // Si ya está logueado, no mostrar nada (va a redirigir)
+  if (user) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       {/* Hero Section */}
@@ -37,6 +63,50 @@ export default function Home() {
                 Ingresar
               </Button>
             </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Demo Credentials Banner */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <div className="bg-gradient-to-r from-emerald-50 via-green-50 to-teal-50 border-2 border-emerald-300 rounded-2xl p-8 shadow-lg animate-fade-in">
+          <div className="text-center">
+            <div className="inline-flex items-center justify-center p-3 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl mb-4 shadow-lg">
+              <Shield className="h-8 w-8 text-white" />
+            </div>
+            <h3 className="text-2xl font-extrabold text-gray-900 mb-3">
+              🎯 Prueba la Demo
+            </h3>
+            <p className="text-gray-700 mb-6 text-lg">
+              Mientras el registro está deshabilitado, usa estas credenciales para explorar la plataforma:
+            </p>
+            <div className="max-w-md mx-auto bg-white rounded-xl border-2 border-emerald-200 p-6 shadow-md">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="text-sm font-semibold text-gray-600">📧 Usuario:</span>
+                  <code className="text-base font-mono font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded border border-emerald-200">
+                    test@pettrack.cl
+                  </code>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="text-sm font-semibold text-gray-600">🔒 Contraseña:</span>
+                  <code className="text-base font-mono font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded border border-emerald-200">
+                    pettrack
+                  </code>
+                </div>
+              </div>
+              <div className="mt-6 pt-4 border-t-2 border-gray-100">
+                <Link href="/login?demo=true">
+                  <Button className="w-full text-base py-3">
+                    <span className="mr-2">✨</span>
+                    Probar ahora
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <p className="text-sm text-gray-600 mt-6 italic">
+              💡 Esta cuenta demo contiene datos de ejemplo para que explores todas las funcionalidades
+            </p>
           </div>
         </div>
       </div>

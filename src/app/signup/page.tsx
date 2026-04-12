@@ -35,7 +35,7 @@ export default function SignupPage() {
 
         <div className="text-center mt-6 space-y-2">
           <p className="text-sm text-amber-700 font-medium">
-            ⏰ Registro temporal deshabilitado
+            ⏰ Registro temporalmente deshabilitado
           </p>
           <p className="text-xs text-gray-500">
             Si ya tienes cuenta, puedes{' '}
