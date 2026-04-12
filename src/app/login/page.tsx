@@ -4,6 +4,8 @@ import { LoginForm } from '@/components/auth/LoginForm';
 import { Container } from '@/components/ui/Container';
 import { LoginPageContent } from '@/components/auth/LoginPageContent';
 
+export const dynamic = 'force-dynamic';
+
 export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center py-12 px-4">
@@ -22,7 +24,15 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <Suspense fallback={<div className="bg-white p-8 rounded-2xl shadow-card border-2 border-gray-100"><LoginForm /></div>}>
+        <Suspense fallback={
+          <div className="bg-white p-8 rounded-2xl shadow-card border-2 border-gray-100 animate-pulse">
+            <div className="space-y-6">
+              <div className="h-20 bg-gray-200 rounded-lg"></div>
+              <div className="h-20 bg-gray-200 rounded-lg"></div>
+              <div className="h-14 bg-gray-200 rounded-lg"></div>
+            </div>
+          </div>
+        }>
           <LoginPageContent />
         </Suspense>
 

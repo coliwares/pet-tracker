@@ -26,7 +26,7 @@ export function LoginPageContent() {
       )}
 
       <div className="bg-white p-8 rounded-2xl shadow-card border-2 border-gray-100">
-        <LoginForm />
+        <LoginForm isDemo={isDemo} />
       </div>
     </>
   );

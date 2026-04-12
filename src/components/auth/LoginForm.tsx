@@ -1,16 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { signIn } from '@/lib/supabase';
 import { validateEmail, validatePassword } from '@/lib/utils';
 import { useRateLimiter } from '@/hooks/useRateLimiter';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 
-export function LoginForm() {
+interface LoginFormProps {
+  isDemo?: boolean;
+}
+
+export function LoginForm({ isDemo = false }: LoginFormProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -24,12 +27,11 @@ export function LoginForm() {
 
   // Autocompletar credenciales demo si viene de la landing
   useEffect(() => {
-    const isDemo = searchParams.get('demo');
-    if (isDemo === 'true') {
+    if (isDemo) {
       setEmail('test@pettrack.cl');
       setPassword('pettrack');
     }
-  }, [searchParams]);
+  }, [isDemo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
