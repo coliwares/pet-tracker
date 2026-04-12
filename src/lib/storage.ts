@@ -117,6 +117,40 @@ export async function deletePetPhoto(url: string): Promise<boolean> {
 }
 
 /**
+ * Obtiene una URL firmada para un archivo existente
+ * Útil cuando el bucket es privado y necesitas mostrar imágenes
+ *
+ * @param filePath - Path del archivo en Storage (ejemplo: "user-id/pet-id-photo-123.jpg")
+ * @returns URL firmada válida por 1 año, o null si falla
+ */
+export async function getSignedUrl(filePath: string): Promise<string | null> {
+  try {
+    if (!filePath) return null;
+
+    // Si filePath es una URL completa, extraer solo el path
+    let path = filePath;
+    if (filePath.includes('/storage/v1/object/')) {
+      const parts = filePath.split(`/${BUCKET_NAME}/`);
+      path = parts[1] || filePath;
+    }
+
+    const { data, error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .createSignedUrl(path, 31536000); // 1 año
+
+    if (error || !data) {
+      console.error('Error getting signed URL:', error);
+      return null;
+    }
+
+    return data.signedUrl;
+  } catch (err) {
+    console.error('Error in getSignedUrl:', err);
+    return null;
+  }
+}
+
+/**
  * Comprime una imagen antes de subirla (opcional)
  * Útil para reducir tamaño de archivos grandes
  */

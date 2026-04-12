@@ -38,6 +38,17 @@ export default function PetDetailPage() {
       try {
         const data = await getPet(petId);
         setPet(data);
+
+        // Cargar signed URLs para las imágenes
+        if (data.photo_url) {
+          const signedPhotoUrl = await getSignedUrl(data.photo_url);
+          setPhotoUrl(signedPhotoUrl);
+        }
+
+        if (data.license_url) {
+          const signedLicenseUrl = await getSignedUrl(data.license_url);
+          setLicenseUrl(signedLicenseUrl);
+        }
       } catch (err) {
         console.error('Error fetching pet:', err);
       } finally {
@@ -91,9 +102,9 @@ export default function PetDetailPage() {
           <div className="flex-shrink-0 space-y-4">
             {/* Foto de mascota */}
             <div>
-              {pet.photo_url ? (
+              {photoUrl ? (
                 <img
-                  src={pet.photo_url}
+                  src={photoUrl}
                   alt={pet.name}
                   className="w-40 h-40 rounded-3xl object-cover ring-4 ring-blue-100 shadow-xl"
                 />
@@ -106,16 +117,16 @@ export default function PetDetailPage() {
             </div>
 
             {/* Licencia de registro */}
-            {pet.license_url && (
+            {licenseUrl && (
               <div>
                 <a
-                  href={pet.license_url}
+                  href={licenseUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block group"
                 >
                   <img
-                    src={pet.license_url}
+                    src={licenseUrl}
                     alt="Licencia de registro"
                     className="w-40 h-40 rounded-3xl object-cover ring-4 ring-purple-100 shadow-xl group-hover:ring-purple-300 transition-all"
                   />
