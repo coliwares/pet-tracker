@@ -38,9 +38,28 @@ CREATE TABLE events (
 CREATE INDEX idx_events_pet_id ON events(pet_id);
 CREATE INDEX idx_events_event_date ON events(event_date DESC);
 
+-- Tabla feedback
+CREATE TABLE feedback (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_email TEXT NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('bug', 'mejora')),
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'nuevo' CHECK (status IN ('nuevo', 'en_revision', 'resuelto')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_feedback_user_id ON feedback(user_id);
+CREATE INDEX idx_feedback_status ON feedback(status);
+CREATE INDEX idx_feedback_type ON feedback(type);
+CREATE INDEX idx_feedback_created_at ON feedback(created_at DESC);
+
 -- Habilitar RLS (Row Level Security)
 ALTER TABLE pets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;
 
 -- Policies para pets
 CREATE POLICY "Users can view own pets"
@@ -91,6 +110,20 @@ CREATE POLICY "Users can delete pet events"
       SELECT id FROM pets WHERE user_id = auth.uid()
     )
   );
+
+-- Policies para feedback
+CREATE POLICY "Users can view own feedback"
+  ON feedback FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own feedback"
+  ON feedback FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+-- Nota:
+-- El panel administrativo global de feedback usa SUPABASE_SERVICE_ROLE_KEY
+-- desde el backend de Next.js para consultar todos los reportes y actualizar
+-- su estado sin exponer privilegios elevados en el cliente.
 
 -- ============================================
 -- STORAGE CONFIGURATION

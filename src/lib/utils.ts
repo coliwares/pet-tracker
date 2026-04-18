@@ -22,6 +22,10 @@ export function formatDate(dateString: string): string {
   return format(parseLocalDate(dateString), 'd MMM yyyy', { locale: es });
 }
 
+export function formatDateTime(dateString: string): string {
+  return format(new Date(dateString), "d MMM yyyy, HH:mm", { locale: es });
+}
+
 export function formatDateMonthYear(dateString: string): string {
   return format(parseLocalDate(dateString), 'MMMM yyyy', { locale: es });
 }

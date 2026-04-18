@@ -36,7 +36,7 @@
    ```
    
    El script crea:
-   - ✅ Tablas `pets` y `events`
+   - ✅ Tablas `pets`, `events` y `feedback`
    - ✅ Row Level Security (RLS) habilitado
    - ✅ Policies para aislamiento por usuario
    - ✅ Índices para rendimiento
@@ -64,6 +64,7 @@ npm install
 
 # Crear archivo .env.local en la raíz del proyecto
 touch .env.local
+ni .env.local -ItemType File
 ```
 
 Editar `.env.local` con tus credenciales de Supabase:
@@ -71,9 +72,13 @@ Editar `.env.local` con tus credenciales de Supabase:
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=tu_project_url_aqui
 NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key_aqui
+SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key_aqui
+FEEDBACK_ADMIN_EMAIL=admin@tu-dominio.com
 ```
 
 ⚠️ **Importante:** Nunca subas `.env.local` a GitHub (ya está en `.gitignore`)
+
+Si ya tenías una base creada antes de este cambio, ejecuta nuevamente la parte de `feedback` del archivo `supabase-setup.sql` para crear la nueva tabla y sus policies.
 
 ### 3. Ejecutar en desarrollo
 
@@ -99,6 +104,8 @@ Ver: [RATE_LIMIT_FIX.md](RATE_LIMIT_FIX.md) para más detalles
 - ✅ Autenticación completa (signup/login/logout)
 - ✅ CRUD de mascotas (crear, editar, eliminar, listar)
 - ✅ CRUD de eventos médicos (vacunas, visitas, medicinas, otros)
+- ✅ Feedback de usuarios para bugs y mejoras
+- ✅ Panel administrativo global para gestionar feedback
 - ✅ Timeline visual ordenada por fecha
 - ✅ Cálculo automático de edad de mascotas
 - 📸 Upload de fotos de mascotas
@@ -140,6 +147,8 @@ git status
 3. **Agregar variables de entorno** en Vercel Dashboard:
    - `NEXT_PUBLIC_SUPABASE_URL` → Tu Project URL
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY` → Tu anon key
+   - `SUPABASE_SERVICE_ROLE_KEY` → Tu service role key
+   - `FEEDBACK_ADMIN_EMAIL` → Email de la cuenta administradora de feedback
 4. **Deploy** → Automático en cada push a `main`
 
 ### Subir a GitHub (primera vez):

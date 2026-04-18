@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { Pet, Event } from './types';
+import { Pet, Event, Feedback, FeedbackStatus } from './types';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -125,6 +125,106 @@ export async function deleteEvent(eventId: string) {
     .delete()
     .eq('id', eventId);
   if (error) throw error;
+}
+
+export async function getFeedback(userId: string) {
+  const { data, error } = await supabase
+    .from('feedback')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as Feedback[];
+}
+
+export async function createFeedback(
+  feedback: Omit<Feedback, 'id' | 'status' | 'created_at' | 'updated_at'>
+) {
+  const { data, error } = await supabase
+    .from('feedback')
+    .insert([{ ...feedback, status: 'nuevo' }])
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Feedback;
+}
+
+async function getAccessToken() {
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw error;
+
+  const token = data.session?.access_token;
+  if (!token) {
+    throw new Error('Sesión no disponible');
+  }
+
+  return token;
+}
+
+export async function getAllFeedback(filters?: {
+  type?: string;
+  status?: string;
+}) {
+  const token = await getAccessToken();
+  const params = new URLSearchParams();
+
+  if (filters?.type && filters.type !== 'all') {
+    params.set('type', filters.type);
+  }
+
+  if (filters?.status && filters.status !== 'all') {
+    params.set('status', filters.status);
+  }
+
+  const query = params.toString();
+  const response = await fetch(`/api/feedback/admin${query ? `?${query}` : ''}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(payload?.error ?? 'No se pudo obtener el feedback global');
+  }
+
+  const payload = (await response.json()) as { feedback: Feedback[] };
+  return payload.feedback;
+}
+
+export async function updateFeedbackStatus(feedbackId: string, status: FeedbackStatus) {
+  const token = await getAccessToken();
+  const response = await fetch('/api/feedback/admin', {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ feedbackId, status }),
+  });
+
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(payload?.error ?? 'No se pudo actualizar el estado');
+  }
+
+  const payload = (await response.json()) as { feedback: Feedback };
+  return payload.feedback;
+}
+
+export async function getFeedbackAdminStatus() {
+  const token = await getAccessToken();
+  const response = await fetch('/api/feedback/admin/status', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    return { isAdmin: false };
+  }
+
+  return (await response.json()) as { isAdmin: boolean };
 }
 
 // Storage

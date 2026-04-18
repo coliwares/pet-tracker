@@ -23,5 +23,31 @@ export const EVENT_TYPE_ICON_COLORS = {
   otro: 'text-gray-600 bg-gray-100',
 } as const;
 
+export const FEEDBACK_TYPES = ['bug', 'mejora'] as const;
+
+export const FEEDBACK_TYPE_LABELS = {
+  bug: 'Bug',
+  mejora: 'Mejora',
+} as const;
+
+export const FEEDBACK_TYPE_COLORS = {
+  bug: 'bg-gradient-to-r from-rose-50 to-red-50 text-rose-700 border-2 border-rose-200',
+  mejora: 'bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 border-2 border-blue-200',
+} as const;
+
+export const FEEDBACK_STATUSES = ['nuevo', 'en_revision', 'resuelto'] as const;
+
+export const FEEDBACK_STATUS_LABELS = {
+  nuevo: 'Nuevo',
+  en_revision: 'En revisión',
+  resuelto: 'Resuelto',
+} as const;
+
+export const FEEDBACK_STATUS_COLORS = {
+  nuevo: 'bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-700 border-2 border-amber-200',
+  en_revision: 'bg-gradient-to-r from-violet-50 to-fuchsia-50 text-violet-700 border-2 border-violet-200',
+  resuelto: 'bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border-2 border-emerald-200',
+} as const;
+
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 export const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];

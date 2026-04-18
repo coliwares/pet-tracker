@@ -38,6 +38,22 @@ export type Event = {
   updated_at: string;
 };
 
+export type FeedbackType = 'bug' | 'mejora';
+
+export type FeedbackStatus = 'nuevo' | 'en_revision' | 'resuelto';
+
+export type Feedback = {
+  id: string;
+  user_id: string;
+  user_email: string;
+  type: FeedbackType;
+  title: string;
+  message: string;
+  status: FeedbackStatus;
+  created_at: string;
+  updated_at: string;
+};
+
 export type AuthUser = {
   id: string;
   email: string | undefined;
