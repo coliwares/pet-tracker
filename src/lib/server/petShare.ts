@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { addHours } from 'date-fns';
-import { createHash, randomBytes } from 'crypto';
+import { createHash, createHmac } from 'crypto';
 import { Event, Pet } from '@/lib/types';
 import { getSupabaseAdminClient } from '@/lib/server/supabaseAdmin';
 
@@ -21,6 +21,10 @@ export type SharedPetRecord = {
   expiresAt: string;
 };
 
+function getShareLinkSecret() {
+  return process.env.SHARE_LINK_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || 'pet-share-secret';
+}
+
 function getShareLinkTtlHours() {
   const rawValue = process.env.SHARE_LINK_TTL_HOURS;
   const parsedValue = rawValue ? Number(rawValue) : NaN;
@@ -32,8 +36,9 @@ function getShareLinkTtlHours() {
   return 24;
 }
 
-export function createShareToken() {
-  return randomBytes(32).toString('hex');
+export function createShareToken(linkId: string) {
+  const signature = createHmac('sha256', getShareLinkSecret()).update(linkId).digest('hex');
+  return `${linkId}.${signature}`;
 }
 
 export function hashShareToken(token: string) {
@@ -59,30 +64,52 @@ export async function createPetShareLink(ownerUserId: string, petId: string) {
     throw new Error('Forbidden');
   }
 
-  const { error: revokeError } = await supabase
+  const { data: existingShareLink, error: existingShareLinkError } = await supabase
     .from('pet_share_links')
-    .update({ revoked_at: nowIso })
+    .select('*')
     .eq('pet_id', petId)
     .eq('owner_user_id', ownerUserId)
     .is('revoked_at', null)
-    .gt('expires_at', nowIso);
+    .gt('expires_at', nowIso)
+    .order('created_at', { ascending: false })
+    .maybeSingle<ShareLinkRecord>();
 
-  if (revokeError) {
-    throw revokeError;
+  if (existingShareLinkError) {
+    throw existingShareLinkError;
   }
 
-  const token = createShareToken();
+  if (existingShareLink) {
+    return {
+      token: createShareToken(existingShareLink.id),
+      expiresAt: existingShareLink.expires_at,
+    };
+  }
+
   const expiresAt = addHours(new Date(), getShareLinkTtlHours()).toISOString();
 
-  const { error: insertError } = await supabase.from('pet_share_links').insert({
-    pet_id: petId,
-    owner_user_id: ownerUserId,
-    token_hash: hashShareToken(token),
-    expires_at: expiresAt,
-  });
+  const { data: insertedShareLink, error: insertError } = await supabase
+    .from('pet_share_links')
+    .insert({
+      pet_id: petId,
+      owner_user_id: ownerUserId,
+      token_hash: '',
+      expires_at: expiresAt,
+    })
+    .select('*')
+    .single<ShareLinkRecord>();
 
   if (insertError) {
     throw insertError;
+  }
+
+  const token = createShareToken(insertedShareLink.id);
+  const { error: updateError } = await supabase
+    .from('pet_share_links')
+    .update({ token_hash: hashShareToken(token) })
+    .eq('id', insertedShareLink.id);
+
+  if (updateError) {
+    throw updateError;
   }
 
   return {
@@ -94,10 +121,16 @@ export async function createPetShareLink(ownerUserId: string, petId: string) {
 export async function getSharedPetByToken(token: string): Promise<SharedPetRecord | null> {
   const supabase = getSupabaseAdminClient();
   const nowIso = new Date().toISOString();
+  const [linkId, signature] = token.split('.');
+
+  if (!linkId || !signature || createShareToken(linkId) !== token) {
+    return null;
+  }
 
   const { data: shareLink, error: shareLinkError } = await supabase
     .from('pet_share_links')
     .select('*')
+    .eq('id', linkId)
     .eq('token_hash', hashShareToken(token))
     .is('revoked_at', null)
     .gt('expires_at', nowIso)
