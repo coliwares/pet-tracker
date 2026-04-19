@@ -9,6 +9,31 @@ export const EVENT_TYPE_LABELS = {
   otro: 'Otro',
 } as const;
 
+export const EVENT_STANDARD_TITLES = {
+  vacuna: [
+    'Vacuna antirrabica',
+    'Vacuna multiple',
+    'Vacuna triple felina',
+    'Vacuna leucemia felina',
+    'Desparasitacion',
+  ],
+  visita: [
+    'Control general',
+    'Consulta veterinaria',
+    'Chequeo anual',
+    'Urgencia',
+    'Control postoperatorio',
+  ],
+  medicina: [
+    'Inicio de tratamiento',
+    'Control de tratamiento',
+    'Antibiotico',
+    'Antiinflamatorio',
+    'Vitaminas o suplemento',
+  ],
+  otro: [],
+} as const;
+
 export const EVENT_TYPE_COLORS = {
   vacuna: 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-2 border-blue-200',
   visita: 'bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border-2 border-emerald-200',

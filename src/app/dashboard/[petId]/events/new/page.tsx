@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/lib/supabase';
+import { createEvent } from '@/lib/supabase';
 import { Container } from '@/components/ui/Container';
 import { Loading } from '@/components/ui/Loading';
 import { EventForm } from '@/components/event/EventForm';
@@ -33,13 +33,7 @@ export default function NewEventPage() {
   }
 
   const handleSubmit = async (data: Partial<Event>) => {
-    const { data: event, error } = await supabase
-      .from('events')
-      .insert([data])
-      .select()
-      .single();
-
-    if (error) throw error;
+    const event = await createEvent(data as Omit<Event, 'id' | 'created_at' | 'updated_at'>);
 
     analytics.createEvent(event.type, Boolean(event.next_due_date));
     router.push(`/dashboard/${petId}`);

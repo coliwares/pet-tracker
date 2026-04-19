@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Event, EventType } from '@/lib/types';
-import { EVENT_TYPES, EVENT_TYPE_LABELS } from '@/lib/constants';
+import { EVENT_STANDARD_TITLES, EVENT_TYPES, EVENT_TYPE_LABELS } from '@/lib/constants';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 
@@ -12,6 +12,15 @@ interface EventFormProps {
   onSubmit: (data: Partial<Event>) => Promise<void>;
   submitLabel?: string;
 }
+
+const CUSTOM_TITLE_VALUE = '__custom__';
+
+const eventIcons: Record<EventType, string> = {
+  vacuna: '💉',
+  visita: '🏥',
+  medicina: '💊',
+  otro: '📋',
+};
 
 export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: EventFormProps) {
   const [type, setType] = useState<EventType>(event?.type || 'vacuna');
@@ -23,12 +32,63 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const standardTitles = useMemo<readonly string[]>(
+    () => EVENT_STANDARD_TITLES[type] as readonly string[],
+    [type]
+  );
+  const [selectedTitle, setSelectedTitle] = useState('');
+
+  useEffect(() => {
+    const nextSelection =
+      type === 'otro' || (title && !standardTitles.includes(title))
+        ? CUSTOM_TITLE_VALUE
+        : title || '';
+
+    setSelectedTitle(nextSelection);
+  }, [standardTitles, title, type]);
+
+  const showCustomTitleInput = type === 'otro' || selectedTitle === CUSTOM_TITLE_VALUE;
+
+  const handleTypeChange = (nextType: EventType) => {
+    setType(nextType);
+
+    if (nextType === 'otro') {
+      setSelectedTitle(CUSTOM_TITLE_VALUE);
+      if (!event || event.type !== 'otro') {
+        setTitle('');
+      }
+      return;
+    }
+
+    const nextTitles = EVENT_STANDARD_TITLES[nextType] as readonly string[];
+    if (title && nextTitles.includes(title)) {
+      setSelectedTitle(title);
+      return;
+    }
+
+    setSelectedTitle('');
+    if (!event || event.type !== nextType) {
+      setTitle('');
+    }
+  };
+
+  const handleTitleOptionChange = (value: string) => {
+    setSelectedTitle(value);
+
+    if (value === CUSTOM_TITLE_VALUE) {
+      setTitle('');
+      return;
+    }
+
+    setTitle(value);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     if (!title.trim()) {
-      setError('El título es obligatorio');
+      setError('El titulo es obligatorio');
       return;
     }
 
@@ -55,13 +115,6 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
     }
   };
 
-  const eventIcons = {
-    vacuna: '💉',
-    visita: '🏥',
-    medicina: '💊',
-    otro: '📋',
-  };
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-100 rounded-2xl p-4 mb-6">
@@ -72,46 +125,72 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
 
       <div className="space-y-2">
         <label className="block text-sm font-semibold text-gray-700 mb-2">
-          📌 Tipo de evento *
+          Tipo de evento *
         </label>
         <select
           value={type}
-          onChange={(e) => setType(e.target.value as EventType)}
+          onChange={(e) => handleTypeChange(e.target.value as EventType)}
           className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 text-base font-medium bg-white hover:border-gray-300"
           required
         >
-          {EVENT_TYPES.map((t) => (
-            <option key={t} value={t}>
-              {eventIcons[t]} {EVENT_TYPE_LABELS[t]}
+          {EVENT_TYPES.map((eventType) => (
+            <option key={eventType} value={eventType}>
+              {eventIcons[eventType]} {EVENT_TYPE_LABELS[eventType]}
             </option>
           ))}
         </select>
       </div>
 
-      <div className="space-y-1">
-        <Input
-          label="✏️ Título *"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Ej: Vacuna antirrábica, Consulta de rutina"
-          required
-        />
+      <div className="space-y-2">
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
+          Titulo *
+        </label>
+        {type === 'otro' ? (
+          <p className="text-xs text-gray-500 ml-1">
+            Este tipo de evento usa un titulo personalizado.
+          </p>
+        ) : (
+          <select
+            value={selectedTitle}
+            onChange={(e) => handleTitleOptionChange(e.target.value)}
+            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 text-base font-medium bg-white hover:border-gray-300"
+            required
+          >
+            <option value="" disabled>
+              Selecciona un titulo
+            </option>
+            {standardTitles.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+            <option value={CUSTOM_TITLE_VALUE}>Otro</option>
+          </select>
+        )}
+        {showCustomTitleInput && (
+          <Input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Escribe el titulo del evento"
+            required
+          />
+        )}
       </div>
 
       <div className="space-y-1">
         <Input
           type="date"
-          label="📅 Fecha del evento *"
+          label="Fecha del evento *"
           value={eventDate}
           onChange={(e) => setEventDate(e.target.value)}
           required
         />
-        <p className="text-xs text-gray-500 ml-1">¿Cuándo ocurrió o está programado?</p>
+        <p className="text-xs text-gray-500 ml-1">Cuando ocurrio o esta programado.</p>
       </div>
 
       <div className="space-y-2">
         <label className="block text-sm font-semibold text-gray-700 mb-2">
-          📝 Descripción
+          Descripcion
         </label>
         <textarea
           value={description}
@@ -120,22 +199,22 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
           rows={3}
           className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 text-base bg-white hover:border-gray-300 resize-none"
         />
-        <p className="text-xs text-gray-500 ml-1">Opcional - Agrega detalles que consideres importantes</p>
+        <p className="text-xs text-gray-500 ml-1">Opcional. Agrega detalles importantes.</p>
       </div>
 
       <div className="space-y-1">
         <Input
           type="date"
-          label="⏰ Próxima dosis / revisión"
+          label="Proxima dosis / revision"
           value={nextDueDate}
           onChange={(e) => setNextDueDate(e.target.value)}
         />
-        <p className="text-xs text-gray-500 ml-1">Opcional - Para recordatorios futuros</p>
+        <p className="text-xs text-gray-500 ml-1">Opcional. Sirve para recordatorios futuros.</p>
       </div>
 
       <div className="space-y-2">
         <label className="block text-sm font-semibold text-gray-700 mb-2">
-          💬 Notas adicionales
+          Notas adicionales
         </label>
         <textarea
           value={notes}
@@ -148,7 +227,7 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
 
       {error && (
         <div className="bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-300 text-red-700 px-4 py-3 rounded-xl font-medium animate-fade-in">
-          ⚠️ {error}
+          {error}
         </div>
       )}
 
@@ -162,7 +241,7 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
             Guardando...
           </span>
         ) : (
-          <span>✨ {submitLabel}</span>
+          <span>{submitLabel}</span>
         )}
       </Button>
     </form>

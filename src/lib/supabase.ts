@@ -98,6 +98,32 @@ export async function getEvents(petId: string) {
   return data;
 }
 
+async function archivePreviousVaccineEvents(event: Event) {
+  if (event.type !== 'vacuna') {
+    return;
+  }
+
+  const normalizedTitle = event.title.trim();
+  if (!normalizedTitle) {
+    return;
+  }
+
+  const { error } = await supabase
+    .from('events')
+    .update({
+      next_due_date: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('pet_id', event.pet_id)
+    .eq('type', 'vacuna')
+    .ilike('title', normalizedTitle)
+    .lte('event_date', event.event_date)
+    .not('next_due_date', 'is', null)
+    .neq('id', event.id);
+
+  if (error) throw error;
+}
+
 export async function createEvent(event: Omit<Event, 'id' | 'created_at' | 'updated_at'>) {
   const { data, error } = await supabase
     .from('events')
@@ -105,6 +131,8 @@ export async function createEvent(event: Omit<Event, 'id' | 'created_at' | 'upda
     .select()
     .single();
   if (error) throw error;
+
+  await archivePreviousVaccineEvents(data);
   return data;
 }
 
