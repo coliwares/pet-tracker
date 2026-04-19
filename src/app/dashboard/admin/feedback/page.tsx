@@ -8,7 +8,7 @@ import { Container } from '@/components/ui/Container';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Loading } from '@/components/ui/Loading';
 import { Toast } from '@/components/ui/Toast';
-import { FeedbackAdminTable } from '@/components/feedback/FeedbackAdminTable';
+import { FeedbackAdminBoard } from '@/components/feedback/FeedbackAdminBoard';
 import {
   FEEDBACK_STATUSES,
   FEEDBACK_STATUS_LABELS,
@@ -131,7 +131,7 @@ export default function AdminFeedbackPage() {
             />
           </div>
         ) : (
-          <FeedbackAdminTable feedback={feedback} onStatusChange={handleStatusChange} />
+          <FeedbackAdminBoard feedback={feedback} onStatusChange={handleStatusChange} />
         )}
       </Container>
 
