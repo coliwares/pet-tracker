@@ -5,7 +5,7 @@ import { Pet, Species } from '@/lib/types';
 import { SPECIES } from '@/lib/constants';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { uploadPetPhoto, validateFile, compressImage } from '@/lib/storage';
+import { uploadPetPhoto, deletePetPhoto, validateFile, compressImage } from '@/lib/storage';
 import { useAuth } from '@/hooks/useAuth';
 
 interface PetFormProps {
@@ -82,6 +82,8 @@ export function PetForm({ pet, onSubmit, submitLabel = 'Guardar' }: PetFormProps
       setLoading(true);
 
       // URLs de archivos
+      const previousPhotoUrl = pet?.photo_url || null;
+      const previousLicenseUrl = pet?.license_url || null;
       let photoUrl = pet?.photo_url || null;
       let licenseUrl = pet?.license_url || null;
 
@@ -131,6 +133,22 @@ export function PetForm({ pet, onSubmit, submitLabel = 'Guardar' }: PetFormProps
         license_url: licenseUrl,
         notes: notes.trim() || null,
       });
+
+      if (photoFile && previousPhotoUrl && previousPhotoUrl !== photoUrl) {
+        setUploadProgress('Limpiando foto anterior...');
+        const deleted = await deletePetPhoto(previousPhotoUrl);
+        if (!deleted) {
+          console.warn('No se pudo eliminar la foto anterior de la mascota');
+        }
+      }
+
+      if (licenseFile && previousLicenseUrl && previousLicenseUrl !== licenseUrl) {
+        setUploadProgress('Limpiando licencia anterior...');
+        const deleted = await deletePetPhoto(previousLicenseUrl);
+        if (!deleted) {
+          console.warn('No se pudo eliminar la licencia anterior de la mascota');
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar');
     } finally {

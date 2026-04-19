@@ -46,7 +46,7 @@
    Ver guía completa en: [STORAGE_SETUP.md](STORAGE_SETUP.md)
    
    Resumen:
-   - Crear bucket `pet-photos` (privado)
+   - Crear bucket `pet-photos` (publico)
    - Configurar 4 policies de seguridad
    - Límite: 5MB por archivo, formatos: JPG, PNG, WebP
 

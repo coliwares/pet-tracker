@@ -1,60 +1,47 @@
-# 📦 Configuración de Supabase Storage
+# Configuracion de Supabase Storage
 
-Este documento explica cómo configurar Supabase Storage para subir fotos de mascotas y licencias de registro.
+Esta guia explica como configurar Supabase Storage para subir fotos de mascotas y licencias de registro.
 
 ---
 
-## 🎯 Objetivo
+## Objetivo
 
 Permitir a los usuarios:
-- 📸 Subir foto de su mascota
-- 📄 Subir foto de la licencia municipal de registro
-- 🔒 Mantener archivos privados (solo accesibles por el dueño)
+- Subir foto de su mascota
+- Subir foto de la licencia municipal de registro
+- Mostrar imagenes directamente desde URLs publicas del bucket
 
 ---
 
-## 📋 Pasos de Configuración
+## Pasos de Configuracion
 
-### **1. Crear el Bucket en Supabase**
+### 1. Crear el bucket en Supabase
 
-1. Ve a tu proyecto en [Supabase Dashboard](https://app.supabase.com)
+1. Ve a tu proyecto en Supabase Dashboard.
+2. En la barra lateral, entra a `Storage`.
+3. Crea un bucket nuevo.
+4. Usa esta configuracion:
 
-2. En la barra lateral, click en **Storage**
+```txt
+Nombre: pet-photos
 
-3. Click en **"Create a new bucket"** (o "New Bucket")
+Configuracion:
+- Public bucket: SI
+- File size limit: 5 MB
+- Allowed MIME types: image/jpeg, image/png, image/webp
+```
 
-4. **Configuración del bucket:**
-   ```
-   Nombre: pet-photos
-   
-   Configuración:
-   - ✅ Public bucket: NO (debe ser privado)
-   - ✅ File size limit: 5 MB
-   - ✅ Allowed MIME types: image/jpeg, image/png, image/webp
-   ```
+5. Guarda el bucket.
 
-5. Click **"Create bucket"**
+### 2. Configurar policies
 
----
+Aunque el bucket sea publico para servir imagenes por URL, conviene mantener policies para que cada usuario solo pueda subir, actualizar o eliminar sus propios archivos.
 
-### **2. Configurar Policies de Seguridad**
+Ve a `Storage > pet-photos > Policies` y crea estas 4 policies:
 
-Después de crear el bucket, necesitas configurar las policies para que cada usuario solo pueda acceder a sus propios archivos.
-
-1. En **Storage**, click en el bucket **"pet-photos"**
-
-2. Ve a la pestaña **"Policies"**
-
-3. Click en **"New Policy"**
-
-4. Crea las siguientes **4 policies**:
-
-#### **Policy 1: Subir archivos (INSERT)**
+#### Policy 1: Insert
 
 ```sql
--- Nombre: Users can upload own pet photos
--- Operation: INSERT
-
 CREATE POLICY "Users can upload own pet photos"
   ON storage.objects FOR INSERT
   WITH CHECK (
@@ -63,12 +50,9 @@ CREATE POLICY "Users can upload own pet photos"
   );
 ```
 
-#### **Policy 2: Ver archivos (SELECT)**
+#### Policy 2: Select
 
 ```sql
--- Nombre: Users can view own pet photos
--- Operation: SELECT
-
 CREATE POLICY "Users can view own pet photos"
   ON storage.objects FOR SELECT
   USING (
@@ -77,12 +61,9 @@ CREATE POLICY "Users can view own pet photos"
   );
 ```
 
-#### **Policy 3: Actualizar archivos (UPDATE)**
+#### Policy 3: Update
 
 ```sql
--- Nombre: Users can update own pet photos
--- Operation: UPDATE
-
 CREATE POLICY "Users can update own pet photos"
   ON storage.objects FOR UPDATE
   USING (
@@ -91,12 +72,9 @@ CREATE POLICY "Users can update own pet photos"
   );
 ```
 
-#### **Policy 4: Eliminar archivos (DELETE)**
+#### Policy 4: Delete
 
 ```sql
--- Nombre: Users can delete own pet photos
--- Operation: DELETE
-
 CREATE POLICY "Users can delete own pet photos"
   ON storage.objects FOR DELETE
   USING (
@@ -105,144 +83,146 @@ CREATE POLICY "Users can delete own pet photos"
   );
 ```
 
----
-
-### **3. Actualizar Base de Datos**
+### 3. Actualizar Base de Datos
 
 Si ya tienes la tabla `pets` creada, agrega el campo `license_url`:
 
 ```sql
--- Ejecutar en SQL Editor de Supabase
-
 ALTER TABLE pets ADD COLUMN license_url TEXT;
 ```
 
-Si estás creando la base de datos desde cero, ejecuta el script completo en `supabase-setup.sql` que ya incluye este campo.
+Si estas creando la base desde cero, `supabase-setup.sql` ya incluye este campo.
 
 ---
 
-## 🔍 Verificar Configuración
+## Verificar Configuracion
 
-### **Verificar que el bucket existe:**
+### Verificar el bucket
 
-1. Ve a **Storage** en Supabase Dashboard
-2. Deberías ver el bucket **"pet-photos"**
-3. Verifica que está marcado como **Private** (🔒)
+1. Ve a `Storage`.
+2. Confirma que existe `pet-photos`.
+3. Verifica que este marcado como `Public`.
 
-### **Verificar policies:**
+### Verificar policies
 
-1. Click en **"pet-photos"** → **Policies**
-2. Deberías ver **4 policies** activas:
-   - ✅ Users can upload own pet photos (INSERT)
-   - ✅ Users can view own pet photos (SELECT)
-   - ✅ Users can update own pet photos (UPDATE)
-   - ✅ Users can delete own pet photos (DELETE)
-
----
-
-## 🧪 Probar el Upload
-
-### **Desde la app:**
-
-1. Inicia sesión en tu app
-2. Ve a **Dashboard** → **Nueva Mascota**
-3. Llena los datos básicos
-4. Click en **"Elegir archivo"** en la sección de fotos
-5. Selecciona una imagen (JPG, PNG o WebP, máx 5MB)
-6. Click en **"Crear Mascota"**
-7. Deberías ver:
-   - ✅ "Subiendo foto de mascota..."
-   - ✅ "Guardando información..."
-   - ✅ Redirige al detalle de la mascota
-   - ✅ La foto se muestra correctamente
-
-### **Verificar en Supabase:**
-
-1. Ve a **Storage** → **pet-photos**
-2. Deberías ver una carpeta con tu `user_id`
-3. Dentro, los archivos con formato: `petId-photo-timestamp.jpg`
+En `Storage > pet-photos > Policies` deberias ver estas 4 policies:
+- `Users can upload own pet photos`
+- `Users can view own pet photos`
+- `Users can update own pet photos`
+- `Users can delete own pet photos`
 
 ---
 
-## 📁 Estructura de Archivos
+## Probar el Upload
 
-Los archivos se organizan así:
+### Desde la app
 
-```
+1. Inicia sesion.
+2. Ve a `Dashboard > Nueva Mascota`.
+3. Completa los datos basicos.
+4. Selecciona una imagen.
+5. Guarda la mascota.
+
+Deberias ver:
+- `Subiendo foto de mascota...`
+- `Guardando informacion...`
+- Redireccion al detalle de la mascota
+- La foto visible en card y detalle
+
+### En Supabase
+
+1. Ve a `Storage > pet-photos`.
+2. Deberias ver una carpeta con tu `user_id`.
+3. Dentro, archivos con formato tipo `petId-photo-timestamp.jpg`.
+
+---
+
+## Estructura de Archivos
+
+```txt
 pet-photos/
-├── {user_id_1}/
-│   ├── {petId_1}-photo-1234567890.jpg
-│   ├── {petId_1}-license-1234567891.jpg
-│   ├── {petId_2}-photo-1234567892.jpg
-│   └── {petId_2}-license-1234567893.jpg
-├── {user_id_2}/
-│   ├── {petId_3}-photo-1234567894.jpg
-│   └── {petId_3}-license-1234567895.jpg
+|- {user_id_1}/
+|  |- {petId_1}-photo-1234567890.jpg
+|  |- {petId_1}-license-1234567891.jpg
+|  |- {petId_2}-photo-1234567892.jpg
+|  \- {petId_2}-license-1234567893.jpg
+\- {user_id_2}/
+   |- {petId_3}-photo-1234567894.jpg
+   \- {petId_3}-license-1234567895.jpg
 ```
 
-**Ventajas:**
-- 🔒 Aislamiento por usuario (cada carpeta = un usuario)
-- 🗂️ Fácil de organizar
-- 🔍 Fácil de buscar (por petId)
-- 🛡️ Policies automáticas (basadas en carpeta = user_id)
+Ventajas:
+- Las imagenes se renderizan directo con la URL guardada
+- Aislamiento por usuario mediante carpetas
+- Facil de organizar
+- Facil de buscar por `petId`
+- Policies basadas en carpeta = `user_id`
 
 ---
 
-## 🚨 Troubleshooting
+## Troubleshooting
 
-### **Error: "Bucket does not exist"**
-- **Causa:** No creaste el bucket en Supabase
-- **Solución:** Ve a Storage → Create bucket → Nombre: "pet-photos"
+### Error: `Bucket does not exist`
 
-### **Error: "new row violates row-level security policy"**
-- **Causa:** Falta alguna policy
-- **Solución:** Verifica que las 4 policies estén creadas y activas
+Causa: el bucket no fue creado.
 
-### **Error: "File size exceeds maximum"**
-- **Causa:** Archivo mayor a 5MB
-- **Solución:** La app comprime automáticamente, pero si sigue fallando:
-  - Reducir MAX_FILE_SIZE en `src/lib/storage.ts`
-  - O comprimir manualmente antes de subir
+Solucion: crea `pet-photos` en `Storage`.
 
-### **Error: "Invalid file type"**
-- **Causa:** Formato no permitido
-- **Solución:** Solo JPG, PNG o WebP están permitidos
+### Error: `new row violates row-level security policy`
 
-### **La imagen no se muestra después de subir**
-- **Causa:** URL no se guardó correctamente
-- **Solución:** 
-  1. Verifica en Supabase Table Editor → pets → photo_url (debería tener una URL)
-  2. Copia la URL y pégala en el navegador
-  3. Si funciona → problema en el frontend
-  4. Si no funciona → problema en Storage
+Causa: falta alguna policy.
+
+Solucion: revisa que las 4 policies esten creadas y activas.
+
+### Error: `File size exceeds maximum`
+
+Causa: archivo mayor a 5MB.
+
+Solucion:
+- la app ya comprime automaticamente
+- si aun falla, reduce el archivo antes de subirlo
+
+### Error: `Invalid file type`
+
+Causa: formato no permitido.
+
+Solucion: usar solo JPG, PNG o WebP.
+
+### La imagen no se muestra despues de subir
+
+1. Revisa en la tabla `pets` que `photo_url` tenga una URL.
+2. Abre esa URL en el navegador.
+3. Si no carga, revisa el bucket y la URL generada.
+4. Si carga, el problema esta en el frontend.
 
 ---
 
-## 🔧 Mantenimiento
+## Mantenimiento
 
-### **Limpiar archivos huérfanos**
+### Limpiar archivos huerfanos
 
-Si eliminas mascotas, los archivos quedan en Storage. Para limpiar:
+Si eliminas mascotas, los archivos pueden quedar en Storage. Puedes revisarlos con algo como:
 
 ```sql
--- Ver archivos que no tienen mascota asociada
-SELECT * FROM storage.objects 
+SELECT *
+FROM storage.objects
 WHERE bucket_id = 'pet-photos'
 AND NOT EXISTS (
-  SELECT 1 FROM pets 
+  SELECT 1
+  FROM pets
   WHERE photo_url LIKE '%' || name || '%'
 );
-
--- Eliminar manualmente desde Storage Dashboard
 ```
 
-### **Ver tamaño total usado**
+Luego puedes eliminarlos manualmente desde Storage.
+
+### Ver uso total
 
 ```sql
-SELECT 
+SELECT
   bucket_id,
-  COUNT(*) as total_files,
-  SUM(metadata->>'size')::bigint / 1024 / 1024 as total_mb
+  COUNT(*) AS total_files,
+  SUM(metadata->>'size')::bigint / 1024 / 1024 AS total_mb
 FROM storage.objects
 WHERE bucket_id = 'pet-photos'
 GROUP BY bucket_id;
@@ -250,30 +230,28 @@ GROUP BY bucket_id;
 
 ---
 
-## 📊 Límites del Plan Free
+## Limites del Plan Free
 
-| Recurso | Límite Free | Recomendación |
-|---------|-------------|---------------|
-| **Storage** | 1 GB | Comprimir imágenes (✅ implementado) |
-| **Bandwidth** | 2 GB/mes | Usar CDN si escala |
-| **Archivos** | Ilimitados | Limpiar huérfanos periódicamente |
+| Recurso | Limite Free | Recomendacion |
+|---|---:|---|
+| Storage | 1 GB | Comprimir imagenes |
+| Bandwidth | 2 GB/mes | Usar CDN si escala |
+| Archivos | Ilimitados | Limpiar huerfanos periodicamente |
 
 ---
 
-## ✅ Checklist de Configuración
+## Checklist
 
-Antes de hacer deploy, verifica:
-
-- [ ] Bucket "pet-photos" creado
-- [ ] Bucket configurado como **Private**
+- [ ] Bucket `pet-photos` creado
+- [ ] Bucket configurado como `Public`
 - [ ] 4 policies creadas y activas
 - [ ] Campo `license_url` agregado a tabla `pets`
 - [ ] Probado upload de foto desde la app
 - [ ] Probado upload de licencia desde la app
 - [ ] Verificado que los archivos se guardan correctamente
-- [ ] Verificado que las imágenes se muestran en el detalle
+- [ ] Verificado que las imagenes se muestran en card y detalle
 
 ---
 
-**Última actualización:** 2026-04-12  
-**Versión:** 1.0.0
+Ultima actualizacion: 2026-04-19
+Version: 1.1.0

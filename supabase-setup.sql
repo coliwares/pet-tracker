@@ -131,7 +131,7 @@ CREATE POLICY "Users can insert own feedback"
 -- IMPORTANTE: Los buckets de Storage se crean desde el Dashboard de Supabase
 -- Ve a: Storage → Create bucket → Nombre: "pet-photos"
 -- Configuración:
---   - Public bucket: NO (privado)
+--   - Public bucket: YES (publico)
 --   - File size limit: 5MB
 --   - Allowed MIME types: image/jpeg, image/png, image/webp
 
