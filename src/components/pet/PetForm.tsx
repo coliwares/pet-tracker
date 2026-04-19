@@ -8,13 +8,19 @@ import { Button } from '@/components/ui/Button';
 import { uploadPetPhoto, deletePetPhoto, validateFile, compressImage } from '@/lib/storage';
 import { useAuth } from '@/hooks/useAuth';
 
+export interface PetFormSubmitOptions {
+  mode: 'create' | 'update';
+  petId?: string;
+}
+
 interface PetFormProps {
   pet?: Pet;
-  onSubmit: (data: Partial<Pet>) => Promise<void>;
+  onSubmit: (data: Partial<Pet>, options: PetFormSubmitOptions) => Promise<Pet>;
+  onSuccess?: (pet: Pet) => void | Promise<void>;
   submitLabel?: string;
 }
 
-export function PetForm({ pet, onSubmit, submitLabel = 'Guardar' }: PetFormProps) {
+export function PetForm({ pet, onSubmit, onSuccess, submitLabel = 'Guardar' }: PetFormProps) {
   const { user } = useAuth();
   const [name, setName] = useState(pet?.name || '');
   const [species, setSpecies] = useState<Species>(pet?.species || 'Perro');
@@ -78,14 +84,84 @@ export function PetForm({ pet, onSubmit, submitLabel = 'Guardar' }: PetFormProps
       return;
     }
 
+    const previousPhotoUrl = pet?.photo_url || null;
+    const previousLicenseUrl = pet?.license_url || null;
+    let photoUrl = pet?.photo_url || null;
+    let licenseUrl = pet?.license_url || null;
+    const uploadedUrlsToCleanup: string[] = [];
+
     try {
       setLoading(true);
+      let savedPet: Pet;
+      const basePetData = {
+        name: name.trim(),
+        species,
+        breed: breed.trim() || null,
+        birth_date: birthDate || null,
+        weight: weight ? parseFloat(weight) : null,
+        notes: notes.trim() || null,
+      };
 
-      // URLs de archivos
-      const previousPhotoUrl = pet?.photo_url || null;
-      const previousLicenseUrl = pet?.license_url || null;
-      let photoUrl = pet?.photo_url || null;
-      let licenseUrl = pet?.license_url || null;
+      if (!pet) {
+        setUploadProgress(photoFile || licenseFile ? 'Creando mascota...' : 'Guardando información...');
+
+        savedPet = await onSubmit(
+          {
+            ...basePetData,
+            photo_url: null,
+            license_url: null,
+          },
+          { mode: 'create' }
+        );
+
+        if (photoFile) {
+          setUploadProgress('Subiendo foto de mascota...');
+          const compressed = await compressImage(photoFile, 1200);
+          const uploadedUrl = await uploadPetPhoto(
+            compressed,
+            user.id,
+            savedPet.id,
+            'photo'
+          );
+          if (uploadedUrl) {
+            photoUrl = uploadedUrl;
+            uploadedUrlsToCleanup.push(uploadedUrl);
+          } else {
+            throw new Error('Error al subir foto de mascota');
+          }
+        }
+
+        if (licenseFile) {
+          setUploadProgress('Subiendo licencia de registro...');
+          const compressed = await compressImage(licenseFile, 1200);
+          const uploadedUrl = await uploadPetPhoto(
+            compressed,
+            user.id,
+            savedPet.id,
+            'license'
+          );
+          if (uploadedUrl) {
+            licenseUrl = uploadedUrl;
+            uploadedUrlsToCleanup.push(uploadedUrl);
+          } else {
+            throw new Error('Error al subir licencia');
+          }
+        }
+
+        if (photoUrl || licenseUrl) {
+          setUploadProgress('Guardando información...');
+          savedPet = await onSubmit(
+            {
+              photo_url: photoUrl,
+              license_url: licenseUrl,
+            },
+            { mode: 'update', petId: savedPet.id }
+          );
+        }
+
+        await onSuccess?.(savedPet);
+        return;
+      }
 
       // Subir foto de mascota si se seleccionó
       if (photoFile) {
@@ -99,6 +175,7 @@ export function PetForm({ pet, onSubmit, submitLabel = 'Guardar' }: PetFormProps
         );
         if (uploadedUrl) {
           photoUrl = uploadedUrl;
+          uploadedUrlsToCleanup.push(uploadedUrl);
         } else {
           throw new Error('Error al subir foto de mascota');
         }
@@ -116,6 +193,7 @@ export function PetForm({ pet, onSubmit, submitLabel = 'Guardar' }: PetFormProps
         );
         if (uploadedUrl) {
           licenseUrl = uploadedUrl;
+          uploadedUrlsToCleanup.push(uploadedUrl);
         } else {
           throw new Error('Error al subir licencia');
         }
@@ -123,16 +201,15 @@ export function PetForm({ pet, onSubmit, submitLabel = 'Guardar' }: PetFormProps
 
       setUploadProgress('Guardando información...');
 
-      await onSubmit({
-        name: name.trim(),
-        species,
-        breed: breed.trim() || null,
-        birth_date: birthDate || null,
-        weight: weight ? parseFloat(weight) : null,
+      const updatedPet = await onSubmit({
+        ...basePetData,
         photo_url: photoUrl,
         license_url: licenseUrl,
-        notes: notes.trim() || null,
+      }, {
+        mode: 'update',
+        petId: pet.id,
       });
+      await onSuccess?.(updatedPet);
 
       if (photoFile && previousPhotoUrl && previousPhotoUrl !== photoUrl) {
         setUploadProgress('Limpiando foto anterior...');
@@ -150,6 +227,13 @@ export function PetForm({ pet, onSubmit, submitLabel = 'Guardar' }: PetFormProps
         }
       }
     } catch (err) {
+      await Promise.all(
+        uploadedUrlsToCleanup.map(async (url) => {
+          if (url !== previousPhotoUrl && url !== previousLicenseUrl) {
+            await deletePetPhoto(url);
+          }
+        })
+      );
       setError(err instanceof Error ? err.message : 'Error al guardar');
     } finally {
       setLoading(false);

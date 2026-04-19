@@ -3,10 +3,11 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/lib/supabase';
+import { createPet, updatePet } from '@/lib/supabase';
+import { Pet } from '@/lib/types';
 import { Container } from '@/components/ui/Container';
 import { Loading } from '@/components/ui/Loading';
-import { PetForm } from '@/components/pet/PetForm';
+import { PetForm, PetFormSubmitOptions } from '@/components/pet/PetForm';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
@@ -28,16 +29,27 @@ export default function NewPetPage() {
     return null;
   }
 
-  const handleSubmit = async (data: any) => {
-    const { data: pet, error } = await supabase
-      .from('pets')
-      .insert([{ ...data, user_id: user.id, is_active: true }])
-      .select()
-      .single();
+  const handleSubmit = async (data: Partial<Pet>, options: PetFormSubmitOptions) => {
+    if (options.mode === 'create') {
+      return createPet({
+        name: data.name ?? '',
+        species: data.species ?? 'Perro',
+        breed: data.breed ?? null,
+        birth_date: data.birth_date ?? null,
+        weight: data.weight ?? null,
+        photo_url: data.photo_url ?? null,
+        license_url: data.license_url ?? null,
+        notes: data.notes ?? null,
+        user_id: user.id,
+        is_active: true,
+      });
+    }
 
-    if (error) throw error;
+    if (!options.petId) {
+      throw new Error('No se encontró la mascota para actualizar');
+    }
 
-    router.push(`/dashboard/${pet.id}`);
+    return updatePet(options.petId, data);
   };
 
   return (
@@ -67,7 +79,11 @@ export default function NewPetPage() {
           </div>
 
           <div className="bg-white p-8 md:p-10 rounded-2xl shadow-card border-2 border-gray-100">
-            <PetForm onSubmit={handleSubmit} submitLabel="Crear Mascota" />
+            <PetForm
+              onSubmit={handleSubmit}
+              onSuccess={(pet) => router.push(`/dashboard/${pet.id}`)}
+              submitLabel="Crear Mascota"
+            />
           </div>
         </div>
       </Container>
