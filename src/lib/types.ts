@@ -61,3 +61,8 @@ export type AuthUser = {
   aud: string;
   created_at: string;
 };
+
+export type PetShareLinkResponse = {
+  shareUrl: string;
+  expiresAt: string;
+};

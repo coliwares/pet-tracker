@@ -7,8 +7,8 @@ import { differenceInCalendarDays } from 'date-fns';
 import { useAuth } from '@/hooks/useAuth';
 import { useEvents } from '@/hooks/useEvents';
 import { Event, Pet } from '@/lib/types';
-import { deletePet, getPet } from '@/lib/supabase';
-import { calculateAge, formatDate, parseLocalDate } from '@/lib/utils';
+import { createPetShareLink, deletePet, getPet } from '@/lib/supabase';
+import { calculateAge, formatDate, formatDateTime, parseLocalDate } from '@/lib/utils';
 import { Container } from '@/components/ui/Container';
 import { Button } from '@/components/ui/Button';
 import { Loading } from '@/components/ui/Loading';
@@ -23,6 +23,7 @@ import {
   Plus,
   QrCode,
   Scale,
+  Share2,
   ShieldCheck,
   Stethoscope,
   Trash2,
@@ -77,7 +78,7 @@ function getStatus(events: Event[], nextDueDate: string | null) {
 
   if (!nextDueDate) {
     return {
-      label: 'Sin próximos recordatorios',
+      label: 'Sin proximos recordatorios',
       detail: null as string | null,
       tone: 'text-slate-700',
       badge: 'bg-slate-100 text-slate-700',
@@ -91,7 +92,7 @@ function getStatus(events: Event[], nextDueDate: string | null) {
 
     return {
       label: 'Vencida',
-      detail: `Vencida en ${overdueDays} ${overdueDays === 1 ? 'día' : 'días'}`,
+      detail: `Vencida en ${overdueDays} ${overdueDays === 1 ? 'dia' : 'dias'}`,
       tone: 'text-rose-700',
       badge: 'bg-rose-100 text-rose-700',
     };
@@ -99,7 +100,7 @@ function getStatus(events: Event[], nextDueDate: string | null) {
 
   if (remainingDays <= 14) {
     return {
-      label: 'Atención pronto',
+      label: 'Atencion pronto',
       detail: null,
       tone: 'text-amber-600',
       badge: 'bg-amber-100 text-amber-700',
@@ -107,7 +108,7 @@ function getStatus(events: Event[], nextDueDate: string | null) {
   }
 
   return {
-    label: 'Al día',
+    label: 'Al dia',
     detail: null,
     tone: 'text-emerald-600',
     badge: 'bg-emerald-100 text-emerald-700',
@@ -120,18 +121,18 @@ function getEventHighlight(event: Event) {
 
     if (remainingDays < 0) {
       const overdueDays = Math.abs(remainingDays);
-      return `Vencido hace ${overdueDays} ${overdueDays === 1 ? 'día' : 'días'}`;
+      return `Vencido hace ${overdueDays} ${overdueDays === 1 ? 'dia' : 'dias'}`;
     }
 
     if (remainingDays === 0) {
       return 'Corresponde hoy';
     }
 
-    return `Próximo hito en ${remainingDays} ${remainingDays === 1 ? 'día' : 'días'}`;
+    return `Proximo hito en ${remainingDays} ${remainingDays === 1 ? 'dia' : 'dias'}`;
   }
 
   if (event.type === 'visita') {
-    return 'Resumen clínico listo para compartir';
+    return 'Resumen clinico listo para compartir';
   }
 
   if (event.type === 'medicina') {
@@ -165,6 +166,10 @@ export default function PetDetailPage() {
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
+  const [shareExpiresAt, setShareExpiresAt] = useState<string | null>(null);
+  const [shareLoading, setShareLoading] = useState(true);
+  const [copiedLink, setCopiedLink] = useState(false);
   const petId = params.petId as string;
   const { events, loading: eventsLoading } = useEvents(petId);
 
@@ -172,7 +177,7 @@ export default function PetDetailPage() {
     if (!authLoading && !user) {
       router.push('/login');
     }
-  }, [user, authLoading, router]);
+  }, [authLoading, router, user]);
 
   useEffect(() => {
     const fetchPet = async () => {
@@ -187,24 +192,53 @@ export default function PetDetailPage() {
     };
 
     if (petId) {
-      fetchPet();
+      void fetchPet();
     }
   }, [petId]);
 
+  useEffect(() => {
+    const generateShareLink = async () => {
+      if (!user || !petId) {
+        return;
+      }
+
+      try {
+        setShareLoading(true);
+        const data = await createPetShareLink(petId);
+        setShareUrl(data.shareUrl);
+        setShareExpiresAt(data.expiresAt);
+      } catch (err) {
+        console.error('Error generating pet share link:', err);
+        setShareUrl('');
+        setShareExpiresAt(null);
+      } finally {
+        setShareLoading(false);
+      }
+    };
+
+    if (!authLoading && user && petId) {
+      void generateShareLink();
+    }
+  }, [authLoading, petId, user]);
+
   if (authLoading || loading) {
-    return <Loading text="Cargando información..." />;
+    return <Loading text="Cargando informacion..." />;
   }
 
   if (!user || !pet) {
     return null;
   }
 
+  const sortedEvents = sortByEventDateDesc(events);
   const age = pet.birth_date ? calculateAge(pet.birth_date) : null;
   const latestVisit = getLastVisit(events);
   const upcomingVaccine = getUpcomingVaccine(events);
   const status = getStatus(events, upcomingVaccine?.next_due_date ?? null);
-  const recentHighlights = sortByEventDateDesc(events).slice(0, 3);
+  const recentHighlights = sortedEvents.slice(0, 3);
   const quickAccessLabel = pet.license_url ? 'Licencia lista' : 'Carnet listo';
+  const qrCodeUrl = shareUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=0&data=${encodeURIComponent(shareUrl)}`
+    : '';
 
   const handleDeletePet = async () => {
     try {
@@ -217,6 +251,33 @@ export default function PetDetailPage() {
     } finally {
       setDeleting(false);
       setShowDeleteModal(false);
+    }
+  };
+
+  const handleShare = async () => {
+    if (!shareUrl) {
+      return;
+    }
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Carnet de ${pet.name}`,
+          text: `Revisa el carnet de ${pet.name}`,
+          url: shareUrl,
+        });
+        return;
+      } catch {
+        // Fallback to copy below.
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopiedLink(true);
+      window.setTimeout(() => setCopiedLink(false), 2000);
+    } catch (err) {
+      console.error('Error sharing pet card:', err);
     }
   };
 
@@ -254,7 +315,7 @@ export default function PetDetailPage() {
                       </p>
                       <h1 className="mt-2 text-4xl font-black tracking-tight text-slate-950">
                         {pet.name}
-                        {age !== null ? `, ${age} ${age === 1 ? 'año' : 'años'}` : ''}
+                        {age !== null ? `, ${age} ${age === 1 ? 'ano' : 'anos'}` : ''}
                       </h1>
 
                       <div className="mt-4 flex flex-wrap gap-2">
@@ -310,20 +371,54 @@ export default function PetDetailPage() {
 
               <div className="rounded-[1.75rem] bg-slate-950 p-6 text-white shadow-[0_24px_70px_rgba(15,23,42,0.24)]">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-sky-200">
-                  Acceso rápido
+                  Acceso rapido
                 </p>
 
-                <div className="mt-5 flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-2xl font-black leading-tight">
-                      Abre el historial antes de la consulta y comparte lo importante en segundos.
-                    </p>
-                    <p className="mt-3 text-sm leading-6 text-slate-300">
-                      El carnet concentra vacunas, controles y tratamientos en una sola vista.
-                    </p>
+                <div className="mt-5">
+                  <p className="text-2xl font-black leading-tight">
+                    Abre el historial antes de la consulta y comparte lo importante en segundos.
+                  </p>
+                  <p className="mt-3 text-sm leading-6 text-slate-300">
+                    El carnet concentra vacunas, controles y tratamientos en una sola vista.
+                  </p>
+                </div>
+
+                <div className="mt-6 flex items-center gap-4 rounded-[1.5rem] bg-white/8 p-4">
+                  <div className="flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-[1.35rem] bg-white p-2">
+                    {qrCodeUrl ? (
+                      <img
+                        src={qrCodeUrl}
+                        alt={`QR para compartir el carnet de ${pet.name}`}
+                        className="h-full w-full rounded-lg object-contain"
+                      />
+                    ) : (
+                      <QrCode className="h-10 w-10 text-slate-400" />
+                    )}
                   </div>
-                  <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-[1.4rem] bg-white/10 text-sky-100">
-                    <QrCode className="h-8 w-8" />
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold uppercase tracking-[0.18em] text-sky-100">
+                      QR listo
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-slate-300">
+                      Escanealo desde el telefono para abrir este carnet al instante.
+                    </p>
+                    <p className="mt-2 text-xs font-medium text-sky-200">
+                      {shareExpiresAt
+                        ? `Expira el ${formatDateTime(shareExpiresAt)}`
+                        : shareLoading
+                          ? 'Generando enlace temporal...'
+                          : 'No se pudo generar el enlace temporal'}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleShare}
+                      disabled={!shareUrl || shareLoading}
+                      className="mt-3 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition-colors hover:bg-sky-50 disabled:cursor-not-allowed disabled:bg-slate-200"
+                    >
+                      <Share2 className="h-4 w-4" />
+                      {copiedLink ? 'Link copiado' : 'Compartir carnet'}
+                    </button>
                   </div>
                 </div>
 
@@ -360,13 +455,13 @@ export default function PetDetailPage() {
               <div className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div>
-                    <p className="text-sm text-slate-500">Último control</p>
+                    <p className="text-sm text-slate-500">Ultimo control</p>
                     <p className="mt-2 text-2xl font-black text-slate-950">
                       {latestVisit ? formatDate(latestVisit.event_date) : 'Sin registro'}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-slate-500">Próxima vacuna</p>
+                    <p className="text-sm text-slate-500">Proxima vacuna</p>
                     <p className="mt-2 text-2xl font-black text-slate-950">
                       {upcomingVaccine?.next_due_date ? formatDate(upcomingVaccine.next_due_date) : 'Sin fecha'}
                     </p>
@@ -390,11 +485,11 @@ export default function PetDetailPage() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
-                      Resumen clínico
+                      Resumen clinico
                     </p>
                     <p className="text-lg font-bold text-slate-950">
                       {events.length === 0
-                        ? 'Aún no hay eventos cargados'
+                        ? 'Aun no hay eventos cargados'
                         : `${events.length} ${events.length === 1 ? 'evento registrado' : 'eventos registrados'}`}
                     </p>
                   </div>
@@ -402,13 +497,13 @@ export default function PetDetailPage() {
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-sm text-slate-500">Última actualización</p>
+                    <p className="text-sm text-slate-500">Ultima actualizacion</p>
                     <p className="mt-1 font-semibold text-slate-900">
-                      {events[0] ? formatDate(events[0].event_date) : 'Pendiente'}
+                      {sortedEvents[0] ? formatDate(sortedEvents[0].event_date) : 'Pendiente'}
                     </p>
                   </div>
                   <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-sm text-slate-500">Próximo hito</p>
+                    <p className="text-sm text-slate-500">Proximo hito</p>
                     <p className="mt-1 font-semibold text-slate-900">
                       {upcomingVaccine ? upcomingVaccine.title : 'Sin recordatorios activos'}
                     </p>
@@ -454,7 +549,7 @@ export default function PetDetailPage() {
         <section className="mt-8 rounded-[2rem] border border-white/80 bg-white/85 p-8 shadow-[0_24px_70px_rgba(15,23,42,0.06)] backdrop-blur">
           <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h2 className="mb-2 text-3xl font-extrabold text-slate-950">Historial médico</h2>
+              <h2 className="mb-2 text-3xl font-extrabold text-slate-950">Historial medico</h2>
               <p className="text-slate-600">Timeline de vacunas, visitas y tratamientos.</p>
             </div>
             <Link href={`/dashboard/${petId}/events/new`}>
@@ -479,10 +574,10 @@ export default function PetDetailPage() {
           loading={deleting}
         >
           <p className="text-gray-600">
-            ¿Estás seguro de que deseas eliminar a <strong>{pet.name}</strong>?
+            Estas seguro de que deseas eliminar a <strong>{pet.name}</strong>?
           </p>
           <p className="mt-2 text-gray-600">
-            Esta acción eliminará también todos los eventos médicos asociados y no se puede deshacer.
+            Esta accion eliminara tambien todos los eventos medicos asociados y no se puede deshacer.
           </p>
         </Modal>
       </Container>

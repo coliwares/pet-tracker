@@ -1,7 +1,42 @@
 -- Carnet Veterinario Digital - Supabase Setup Script
 -- Ejecutar este script en el SQL Editor de Supabase
 
--- Tabla pets
+--Table for sharing pet profiles via unique links
+create table if not exists pet_share_links (
+  id uuid primary key default gen_random_uuid(),
+  pet_id uuid not null references pets(id) on delete cascade,
+  owner_user_id uuid not null references auth.users(id) on delete cascade,
+  token_hash text not null unique,
+  expires_at timestamptz not null,
+  revoked_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_pet_share_links_pet_id on pet_share_links(pet_id);
+create index if not exists idx_pet_share_links_expires_at on pet_share_links(expires_at);
+
+alter table pet_share_links enable row level security;
+
+create policy "Users can view own share links"
+  on pet_share_links for select
+  using (auth.uid() = owner_user_id);
+
+create policy "Users can create own share links"
+  on pet_share_links for insert
+  with check (
+    auth.uid() = owner_user_id
+    and exists (
+      select 1 from pets
+      where pets.id = pet_id and pets.user_id = auth.uid()
+    )
+  );
+
+create policy "Users can revoke own share links"
+  on pet_share_links for update
+  using (auth.uid() = owner_user_id);
+
+
+-- Table pets
 CREATE TABLE pets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,

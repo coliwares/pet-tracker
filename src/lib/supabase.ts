@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { Pet, Event, Feedback, FeedbackStatus } from './types';
+import { Pet, Event, Feedback, FeedbackStatus, PetShareLinkResponse } from './types';
 import { getEventHistoryGroup } from './utils';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -269,6 +269,23 @@ export async function getFeedbackAdminStatus() {
   }
 
   return (await response.json()) as { isAdmin: boolean };
+}
+
+export async function createPetShareLink(petId: string) {
+  const token = await getAccessToken();
+  const response = await fetch(`/api/pets/${petId}/share`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(payload?.error ?? 'No se pudo generar el enlace compartido');
+  }
+
+  return (await response.json()) as PetShareLinkResponse;
 }
 
 // Storage
