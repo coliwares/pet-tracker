@@ -19,6 +19,7 @@ export type EventDueRule = {
 export type EventCatalogItem = {
   title: string;
   nextDueRule?: EventDueRule;
+  historyGroup?: string;
   species?: Species[];
   maxAgeMonths?: number;
   minAgeMonths?: number;
@@ -29,18 +30,21 @@ export const EVENT_CATALOG: Record<typeof EVENT_TYPES[number], readonly EventCat
     {
       title: 'Vacuna multiple cachorro - 1ra dosis',
       nextDueRule: { amount: 21, unit: 'days' },
+      historyGroup: 'vacuna_multiple_cachorro',
       species: ['Perro'],
       maxAgeMonths: 11,
     },
     {
       title: 'Vacuna multiple cachorro - 2da dosis',
       nextDueRule: { amount: 21, unit: 'days' },
+      historyGroup: 'vacuna_multiple_cachorro',
       species: ['Perro'],
       maxAgeMonths: 11,
     },
     {
       title: 'Vacuna multiple cachorro - 3ra dosis',
       nextDueRule: { amount: 1, unit: 'years' },
+      historyGroup: 'vacuna_multiple_cachorro',
       species: ['Perro'],
       maxAgeMonths: 11,
     },
@@ -59,12 +63,14 @@ export const EVENT_CATALOG: Record<typeof EVENT_TYPES[number], readonly EventCat
     {
       title: 'Vacuna multiple anual',
       nextDueRule: { amount: 1, unit: 'years' },
+      historyGroup: 'vacuna_multiple_anual',
       species: ['Perro'],
       minAgeMonths: 12,
     },
     {
       title: 'Vacuna antirrabica anual',
       nextDueRule: { amount: 1, unit: 'years' },
+      historyGroup: 'vacuna_antirrabica_anual_perro',
       species: ['Perro'],
       minAgeMonths: 12,
     },
@@ -77,24 +83,28 @@ export const EVENT_CATALOG: Record<typeof EVENT_TYPES[number], readonly EventCat
     {
       title: 'Vacuna triple felina gatito - 1ra dosis',
       nextDueRule: { amount: 21, unit: 'days' },
+      historyGroup: 'vacuna_triple_felina_gatito',
       species: ['Gato'],
       maxAgeMonths: 11,
     },
     {
       title: 'Vacuna triple felina gatito - 2da dosis',
       nextDueRule: { amount: 1, unit: 'years' },
+      historyGroup: 'vacuna_triple_felina_gatito',
       species: ['Gato'],
       maxAgeMonths: 11,
     },
     {
       title: 'Vacuna leucemia felina - 1ra dosis',
       nextDueRule: { amount: 21, unit: 'days' },
+      historyGroup: 'vacuna_leucemia_felina',
       species: ['Gato'],
       maxAgeMonths: 11,
     },
     {
       title: 'Vacuna leucemia felina - 2da dosis',
       nextDueRule: { amount: 1, unit: 'years' },
+      historyGroup: 'vacuna_leucemia_felina',
       species: ['Gato'],
       maxAgeMonths: 11,
     },
@@ -107,18 +117,21 @@ export const EVENT_CATALOG: Record<typeof EVENT_TYPES[number], readonly EventCat
     {
       title: 'Vacuna triple felina anual',
       nextDueRule: { amount: 1, unit: 'years' },
+      historyGroup: 'vacuna_triple_felina_anual',
       species: ['Gato'],
       minAgeMonths: 12,
     },
     {
       title: 'Vacuna leucemia felina anual',
       nextDueRule: { amount: 1, unit: 'years' },
+      historyGroup: 'vacuna_leucemia_felina_anual',
       species: ['Gato'],
       minAgeMonths: 12,
     },
     {
       title: 'Vacuna antirrabica anual felina',
       nextDueRule: { amount: 1, unit: 'years' },
+      historyGroup: 'vacuna_antirrabica_anual_gato',
       species: ['Gato'],
       minAgeMonths: 12,
     },

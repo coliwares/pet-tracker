@@ -1,6 +1,6 @@
 import { addDays, addMonths, addYears, differenceInMonths, differenceInYears, format, isPast, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { EventCatalogItem, EventDueRule } from './constants';
+import { EVENT_CATALOG, EventCatalogItem, EventDueRule } from './constants';
 import { Pet } from './types';
 
 /**
@@ -82,6 +82,20 @@ export function getEventCatalogOptions(catalog: readonly EventCatalogItem[], pet
 
     return true;
   });
+}
+
+export function getEventHistoryGroup(title: string): string {
+  const normalizedTitle = title.trim().toLowerCase();
+
+  for (const catalogItems of Object.values(EVENT_CATALOG)) {
+    for (const item of catalogItems) {
+      if (item.title.trim().toLowerCase() === normalizedTitle) {
+        return item.historyGroup ?? normalizedTitle;
+      }
+    }
+  }
+
+  return normalizedTitle;
 }
 
 export function isPastDate(dateString: string): boolean {

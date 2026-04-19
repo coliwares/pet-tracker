@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { Pet, Event, Feedback, FeedbackStatus } from './types';
+import { getEventHistoryGroup } from './utils';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -103,8 +104,28 @@ async function archivePreviousVaccineEvents(event: Event) {
     return;
   }
 
-  const normalizedTitle = event.title.trim();
-  if (!normalizedTitle) {
+  const historyGroup = getEventHistoryGroup(event.title);
+  if (!historyGroup) {
+    return;
+  }
+
+  const { data: previousEvents, error: fetchError } = await supabase
+    .from('events')
+    .select('id, title')
+    .eq('pet_id', event.pet_id)
+    .eq('type', 'vacuna')
+    .lte('event_date', event.event_date)
+    .not('next_due_date', 'is', null)
+    .neq('id', event.id);
+
+  if (fetchError) throw fetchError;
+
+  const eventIdsToArchive =
+    previousEvents
+      ?.filter((previousEvent) => getEventHistoryGroup(previousEvent.title) === historyGroup)
+      .map((previousEvent) => previousEvent.id) ?? [];
+
+  if (eventIdsToArchive.length === 0) {
     return;
   }
 
@@ -114,12 +135,7 @@ async function archivePreviousVaccineEvents(event: Event) {
       next_due_date: null,
       updated_at: new Date().toISOString(),
     })
-    .eq('pet_id', event.pet_id)
-    .eq('type', 'vacuna')
-    .ilike('title', normalizedTitle)
-    .lte('event_date', event.event_date)
-    .not('next_due_date', 'is', null)
-    .neq('id', event.id);
+    .in('id', eventIdsToArchive);
 
   if (error) throw error;
 }
