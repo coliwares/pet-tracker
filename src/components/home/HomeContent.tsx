@@ -18,21 +18,21 @@ import {
 const featureCards = [
   {
     title: 'Historial claro y ordenado',
-    description: 'Vacunas, controles y tratamientos en una linea de tiempo facil de revisar.',
+    description: 'Vacunas, controles y tratamientos en una línea de tiempo fácil de revisar.',
     icon: Heart,
     accent: 'from-rose-500 to-orange-400',
     surface: 'bg-rose-50',
   },
   {
-    title: 'Recordatorios utiles',
-    description: 'Mantente atento a proximas dosis y visitas sin depender de notas sueltas.',
+    title: 'Recordatorios útiles',
+    description: 'Mantente atento a próximas dosis y visitas sin depender de notas sueltas.',
     icon: Clock,
     accent: 'from-amber-500 to-yellow-400',
     surface: 'bg-amber-50',
   },
   {
     title: 'Comparte con tu veterinario',
-    description: 'Prepara el contexto clinico de tu mascota antes de cada consulta.',
+    description: 'Prepara el contexto clínico de tu mascota antes de cada consulta.',
     icon: Share2,
     accent: 'from-emerald-500 to-teal-400',
     surface: 'bg-emerald-50',
@@ -46,14 +46,14 @@ const featureCards = [
   },
   {
     title: 'Disponible en cualquier momento',
-    description: 'Abre el carnet digital desde tu celular cuando mas lo necesitas.',
+    description: 'Abre el carnet digital desde tu celular cuando más lo necesitas.',
     icon: Smartphone,
     accent: 'from-indigo-500 to-blue-400',
     surface: 'bg-indigo-50',
   },
   {
     title: 'Privacidad por defecto',
-    description: 'Tu informacion queda concentrada en un espacio personal y protegido.',
+    description: 'Tu información queda concentrada en un espacio personal y protegido.',
     icon: Shield,
     accent: 'from-slate-700 to-slate-500',
     surface: 'bg-slate-100',
@@ -69,12 +69,12 @@ const trustPoints = [
 const testimonials = [
   {
     quote:
-      'Antes llevaba fotos, papeles y mensajes sueltos. Ahora llego al vet con todo ordenado en el telefono.',
+      'Antes llevaba fotos, papeles y mensajes sueltos. Ahora llego al vet con todo ordenado en el teléfono.',
     author: 'Camila, tutora de Nala',
   },
   {
     quote:
-      'Lo que mas me sirve es tener vacunas y controles en la misma vista. Me ahorra tiempo cada mes.',
+      'Lo que más me sirve es tener vacunas y controles en la misma vista. Me ahorra tiempo cada mes.',
     author: 'Diego, tutor de Moka y Bruno',
   },
 ] as const;
@@ -101,13 +101,13 @@ export function HomeContent() {
               <PawPrint className="h-10 w-10 text-white" />
             </div>
             <p className="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-sky-700">
-              Tu carnet esta listo
+              Tu carnet está listo
             </p>
             <h1 className="text-4xl font-black tracking-tight text-slate-950 md:text-5xl">
               Bienvenido de vuelta a tu panel de mascotas
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-600">
-              Entra a tu dashboard para revisar historiales, agregar eventos medicos y mantener todo al dia.
+              Entra a tu dashboard para revisar historiales, agregar eventos médicos y mantener todo al día.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
               <Link href="/dashboard">
@@ -141,7 +141,7 @@ export function HomeContent() {
               Toda la salud de tu mascota en un solo lugar.
             </h1>
             <p className="mt-7 max-w-xl text-lg leading-8 text-slate-600 sm:text-xl">
-              Organiza vacunas, controles y tratamientos en un carnet digital facil de mostrar cuando lo necesites.
+              Organiza vacunas, controles y tratamientos en un carnet digital fácil de mostrar cuando lo necesites.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-4">
@@ -188,7 +188,7 @@ export function HomeContent() {
                     <p className="text-sm font-semibold uppercase tracking-[0.2em] text-sky-700">
                       Panel de mascota
                     </p>
-                    <h2 className="mt-2 text-2xl font-black text-slate-950">Luna, 4 anos</h2>
+                    <h2 className="mt-2 text-2xl font-black text-slate-950">Luna, 4 años</h2>
                   </div>
                   <div className="rounded-2xl bg-sky-100 px-3 py-2 text-sm font-semibold text-sky-800">
                     Carnet activo
@@ -197,23 +197,23 @@ export function HomeContent() {
 
                 <div className="mt-6 grid gap-4 rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-3">
                   <div>
-                    <p className="text-sm text-slate-500">Ultimo control</p>
+                    <p className="text-sm text-slate-500">Último control</p>
                     <p className="mt-1 text-lg font-bold text-slate-900">12 Abril</p>
                   </div>
                   <div>
-                    <p className="text-sm text-slate-500">Proxima vacuna</p>
+                    <p className="text-sm text-slate-500">Próxima vacuna</p>
                     <p className="mt-1 text-lg font-bold text-slate-900">26 Abril</p>
                   </div>
                   <div>
                     <p className="text-sm text-slate-500">Estado</p>
-                    <p className="mt-1 text-lg font-bold text-emerald-600">Al dia</p>
+                    <p className="mt-1 text-lg font-bold text-emerald-600">Al día</p>
                   </div>
                 </div>
 
                 <div className="mt-5 space-y-3">
                   {[
-                    ['Vacuna antirrabica', 'Proxima dosis en 8 dias'],
-                    ['Control anual', 'Resumen clinico listo para compartir'],
+                    ['Vacuna antirrábica', 'Próxima dosis en 8 días'],
+                    ['Control anual', 'Resumen clínico listo para compartir'],
                     ['Tratamiento digestivo', 'Historial actualizado'],
                   ].map(([title, subtitle]) => (
                     <div
@@ -232,9 +232,9 @@ export function HomeContent() {
                 </div>
 
                 <div className="mt-5 rounded-[1.5rem] bg-slate-950 p-5 text-white">
-                  <p className="text-sm uppercase tracking-[0.22em] text-sky-200">Acceso rapido</p>
+                  <p className="text-sm uppercase tracking-[0.22em] text-sky-200">Acceso rápido</p>
                   <div className="mt-3 flex items-center justify-between gap-4">
-                    <p className="text-lg font-semibold">Abre el historial desde tu telefono antes de la consulta.</p>
+                    <p className="text-lg font-semibold">Abre el historial desde tu teléfono antes de la consulta.</p>
                     <div className="rounded-2xl bg-white/10 px-4 py-3 text-sm font-semibold text-sky-100">
                       QR listo
                     </div>
@@ -251,14 +251,14 @@ export function HomeContent() {
           <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-sky-700">
-                Por que funciona
+                Por qué funciona
               </p>
               <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
                 Menos papeles, menos dudas, mejor seguimiento.
               </h2>
             </div>
             <p className="max-w-xl text-base leading-7 text-slate-600">
-              Disenado para que cualquier tutor encuentre la informacion clave en segundos, incluso desde el celular.
+              Diseñado para que cualquier tutor encuentre la información clave en segundos, incluso desde el celular.
             </p>
           </div>
 
@@ -294,10 +294,10 @@ export function HomeContent() {
               Experiencia real
             </p>
             <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              Preparado para los momentos en que necesitas responder rapido.
+              Preparado para los momentos en que necesitas responder rápido.
             </h2>
             <p className="mt-5 text-lg leading-8 text-slate-600">
-              Cuando estas en una consulta, una urgencia o simplemente planificando la siguiente vacuna, la informacion importante ya esta ordenada.
+              Cuando estás en una consulta, una urgencia o simplemente planificando la siguiente vacuna, la información importante ya está ordenada.
             </p>
           </div>
 
@@ -332,7 +332,7 @@ export function HomeContent() {
                 Siguiente paso
               </p>
               <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">
-                Explora la plataforma hoy y deja el historial de tus mascotas mucho mas ordenado.
+                Explora la plataforma hoy y deja el historial de tus mascotas mucho más ordenado.
               </h2>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-300">
                 La demo te permite recorrer el producto ahora mismo. Si ya tienes acceso, entra con tu cuenta y sigue trabajando.
@@ -361,7 +361,7 @@ export function HomeContent() {
                   <code className="mt-2 block text-base font-semibold">test@pettrack.cl</code>
                 </div>
                 <div className="rounded-2xl bg-white px-4 py-3 text-slate-900">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Contrasena</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Contraseña</p>
                   <code className="mt-2 block text-base font-semibold">pettrack</code>
                 </div>
               </div>

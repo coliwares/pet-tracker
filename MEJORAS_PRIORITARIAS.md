@@ -624,8 +624,8 @@ const handleCreatePet = async () => {
 ### Semana 1
 - [ ] **Landing Page Mejorada**
   - [x] Reemplazar HomeContent.tsx
-  - [ ] Probar en mobile/desktop
-  - [ ] Validar enlaces CTA
+  - [x] Probar en mobile/desktop
+  - [x] Validar enlaces CTA
   
 - [ ] **Notificaciones de Vacunas**
   - [x] Crear UpcomingVaccinesCard.tsx

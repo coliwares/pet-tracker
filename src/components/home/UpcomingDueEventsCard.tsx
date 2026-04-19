@@ -140,7 +140,7 @@ export function UpcomingDueEventsCard({
             {badgeLabel}
           </div>
           <h2 className="mt-4 text-2xl font-black tracking-tight text-slate-950">
-            {title}: {events.length} {events.length === 1 ? singularLabel : pluralLabel} en los proximos 7 dias
+            {title}: {events.length} {events.length === 1 ? singularLabel : pluralLabel} en los próximos 7 días
           </h2>
           <p className="mt-2 text-base leading-7 text-slate-600">
             {description}
@@ -160,10 +160,10 @@ export function UpcomingDueEventsCard({
             diffInDays === 0
               ? 'Hoy'
               : diffInDays === 1
-                ? 'Manana'
+                ? 'Mañana'
                 : isOverdue
-                  ? `${Math.abs(diffInDays)} dias tarde`
-                  : `${diffInDays} dias`;
+                  ? `${Math.abs(diffInDays)} días tarde`
+                  : `${diffInDays} días`;
           const statusPillClass = isOverdue
             ? 'bg-red-50 text-red-700'
             : theme.normalPill;

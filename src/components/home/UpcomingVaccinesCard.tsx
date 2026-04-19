@@ -7,11 +7,11 @@ export function UpcomingVaccinesCard() {
   return (
     <UpcomingDueEventsCard
       type="vacuna"
-      title="Proximas vacunas"
+      title="Próximas vacunas"
       singularLabel="vacuna cercana"
       pluralLabel="vacunas cercanas"
       description="Revisa las mascotas con dosis pendientes para que no se te pase ninguna fecha importante."
-      badgeLabel="Proximas vacunas"
+      badgeLabel="Próximas vacunas"
       icon={Syringe}
       theme={{
         sectionBorder: 'border-amber-200',

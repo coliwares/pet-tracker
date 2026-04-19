@@ -149,7 +149,7 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
     setError('');
 
     if (!title.trim()) {
-      setError('El titulo es obligatorio');
+      setError('El título es obligatorio');
       return;
     }
 
@@ -204,11 +204,11 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
 
       <div className="space-y-2">
         <label className="block text-sm font-semibold text-gray-700 mb-2">
-          Titulo *
+          Título *
         </label>
         {type === 'otro' ? (
           <p className="text-xs text-gray-500 ml-1">
-            Este tipo de evento usa un titulo personalizado.
+            Este tipo de evento usa un título personalizado.
           </p>
         ) : (
           <>
@@ -224,7 +224,7 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
               required
             >
               <option value="" disabled>
-                Selecciona un titulo
+                Selecciona un título
               </option>
               {standardTitles.map((option) => (
                 <option key={option} value={option}>
@@ -239,7 +239,7 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
           <Input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Escribe el titulo del evento"
+            placeholder="Escribe el título del evento"
             required
           />
         )}
@@ -253,12 +253,12 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
           onChange={(e) => setEventDate(e.target.value)}
           required
         />
-        <p className="text-xs text-gray-500 ml-1">Cuando ocurrio o esta programado.</p>
+        <p className="text-xs text-gray-500 ml-1">Cuando ocurrió o está programado.</p>
       </div>
 
       <div className="space-y-2">
         <label className="block text-sm font-semibold text-gray-700 mb-2">
-          Descripcion
+          Descripción
         </label>
         <textarea
           value={description}
@@ -273,7 +273,7 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
       <div className="space-y-1">
         <Input
           type="date"
-          label="Proxima dosis / revision"
+          label="Próxima dosis / revisión"
           value={nextDueDate}
           onChange={(e) => {
             setNextDueDate(e.target.value);
@@ -281,7 +281,7 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
           }}
         />
         <p className="text-xs text-gray-500 ml-1">
-          Opcional. Se completa automaticamente para vacunas y controles estandar, pero puedes ajustarla.
+          Opcional. Se completa automáticamente para vacunas y controles estándar, pero puedes ajustarla.
         </p>
       </div>
 

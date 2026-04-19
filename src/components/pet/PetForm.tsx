@@ -328,7 +328,6 @@ export function PetForm({ pet, onSubmit, onSuccess, submitLabel = 'Guardar' }: P
           📸 Imágenes
         </h3>
 
-        {/* Foto de mascota */}
         <div className="space-y-3">
           <label className="block text-sm font-semibold text-gray-700">
             🐾 Foto de la mascota
@@ -372,7 +371,6 @@ export function PetForm({ pet, onSubmit, onSuccess, submitLabel = 'Guardar' }: P
           </p>
         </div>
 
-        {/* Licencia de registro */}
         <div className="space-y-3">
           <label className="block text-sm font-semibold text-gray-700">
             📄 Licencia de registro municipal

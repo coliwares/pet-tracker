@@ -147,7 +147,7 @@ export function SignupForm() {
       <div className="space-y-1 opacity-50 pointer-events-none">
         <Input
           type="password"
-          label="✅ Confirmar Contraseña"
+          label="✅ Confirmar contraseña"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           placeholder="Repite tu contraseña"

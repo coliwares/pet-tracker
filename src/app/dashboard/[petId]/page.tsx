@@ -86,137 +86,132 @@ export default function PetDetailPage() {
           Volver al dashboard
         </Link>
 
-        {/* Pet Info */}
         <div className="bg-white rounded-2xl border-2 border-gray-100 p-8 mb-8 shadow-card hover:shadow-card-hover transition-shadow">
           <div className="flex items-start gap-6">
-          <div className="flex-shrink-0 space-y-4">
-            {/* Foto de mascota */}
-            <div>
-              <PetPhoto
-                name={pet.name}
-                photoUrl={pet.photo_url}
-                sizeClassName="w-40 h-40 rounded-3xl"
-                imageClassName="object-cover ring-4 ring-blue-100 shadow-xl"
-                fallbackClassName="bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center shadow-xl"
-                iconClassName="w-20 h-20 text-white"
-              />
-              <p className="text-xs text-center text-gray-500 mt-2 font-medium">Foto de {pet.name}</p>
+            <div className="flex-shrink-0 space-y-4">
+              <div>
+                <PetPhoto
+                  name={pet.name}
+                  photoUrl={pet.photo_url}
+                  sizeClassName="w-40 h-40 rounded-3xl"
+                  imageClassName="object-cover ring-4 ring-blue-100 shadow-xl"
+                  fallbackClassName="bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center shadow-xl"
+                  iconClassName="w-20 h-20 text-white"
+                />
+                <p className="text-xs text-center text-gray-500 mt-2 font-medium">Foto de {pet.name}</p>
+              </div>
+
+              {pet.license_url && (
+                <div>
+                  <a
+                    href={pet.license_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block group"
+                  >
+                    <img
+                      src={pet.license_url}
+                      alt="Licencia de registro"
+                      className="w-40 h-40 rounded-3xl object-cover ring-4 ring-purple-100 shadow-xl group-hover:ring-purple-300 transition-all"
+                    />
+                    <p className="text-xs text-center text-purple-700 mt-2 font-semibold group-hover:text-purple-800">
+                      📄 Licencia municipal
+                    </p>
+                  </a>
+                </div>
+              )}
             </div>
 
-            {/* Licencia de registro */}
-            {pet.license_url && (
-              <div>
-                <a
-                  href={pet.license_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block group"
-                >
-                  <img
-                    src={pet.license_url}
-                    alt="Licencia de registro"
-                    className="w-40 h-40 rounded-3xl object-cover ring-4 ring-purple-100 shadow-xl group-hover:ring-purple-300 transition-all"
-                  />
-                  <p className="text-xs text-center text-purple-700 mt-2 font-semibold group-hover:text-purple-800">
-                    📄 Licencia municipal
-                  </p>
-                </a>
-              </div>
-            )}
-          </div>
-
-          <div className="flex-1">
-            <h1 className="text-4xl font-extrabold text-gray-900 mb-4">{pet.name}</h1>
-            <div className="space-y-2 text-gray-700">
-              <div className="flex flex-wrap gap-3 mb-3">
-                <span className="inline-flex items-center px-4 py-2 rounded-xl text-base font-bold bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-2 border-blue-200">
-                  {pet.species}
-                </span>
-                {pet.breed && (
-                  <span className="inline-flex items-center px-4 py-2 rounded-xl text-base font-bold bg-gradient-to-r from-purple-50 to-pink-50 text-purple-700 border-2 border-purple-200">
-                    {pet.breed}
+            <div className="flex-1">
+              <h1 className="text-4xl font-extrabold text-gray-900 mb-4">{pet.name}</h1>
+              <div className="space-y-2 text-gray-700">
+                <div className="flex flex-wrap gap-3 mb-3">
+                  <span className="inline-flex items-center px-4 py-2 rounded-xl text-base font-bold bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-2 border-blue-200">
+                    {pet.species}
                   </span>
+                  {pet.breed && (
+                    <span className="inline-flex items-center px-4 py-2 rounded-xl text-base font-bold bg-gradient-to-r from-purple-50 to-pink-50 text-purple-700 border-2 border-purple-200">
+                      {pet.breed}
+                    </span>
+                  )}
+                </div>
+                {age !== null && (
+                  <p className="text-lg">
+                    <span className="font-bold">📅 Edad:</span> {age}{' '}
+                    {age === 1 ? 'año' : 'años'}
+                  </p>
+                )}
+                {pet.weight && (
+                  <p className="text-lg">
+                    <span className="font-bold">⚖️ Peso:</span> {pet.weight} kg
+                  </p>
                 )}
               </div>
-              {age !== null && (
-                <p className="text-lg">
-                  <span className="font-bold">📅 Edad:</span> {age}{' '}
-                  {age === 1 ? 'año' : 'años'}
-                </p>
+              {pet.notes && (
+                <div className="mt-5 p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-xl">
+                  <p className="text-base text-gray-700 leading-relaxed">
+                    <span className="font-bold">💬 Notas:</span> {pet.notes}
+                  </p>
+                </div>
               )}
-              {pet.weight && (
-                <p className="text-lg">
-                  <span className="font-bold">⚖️ Peso:</span> {pet.weight} kg
-                </p>
-              )}
-            </div>
-            {pet.notes && (
-              <div className="mt-5 p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-xl">
-                <p className="text-base text-gray-700 leading-relaxed">
-                  <span className="font-bold">💬 Notas:</span> {pet.notes}
-                </p>
-              </div>
-            )}
-            <div className="mt-6 flex gap-3">
-              <Link href={`/dashboard/${petId}/edit`}>
-                <Button variant="secondary" size="md">
-                  <Edit className="h-5 w-5 mr-2" />
-                  Editar
+              <div className="mt-6 flex gap-3">
+                <Link href={`/dashboard/${petId}/edit`}>
+                  <Button variant="secondary" size="md">
+                    <Edit className="h-5 w-5 mr-2" />
+                    Editar
+                  </Button>
+                </Link>
+                <Button
+                  variant="danger"
+                  size="md"
+                  onClick={() => setShowDeleteModal(true)}
+                >
+                  <Trash2 className="h-5 w-5 mr-2" />
+                  Eliminar
                 </Button>
-              </Link>
-              <Button
-                variant="danger"
-                size="md"
-                onClick={() => setShowDeleteModal(true)}
-              >
-                <Trash2 className="h-5 w-5 mr-2" />
-                Eliminar
-              </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Timeline */}
-      <div className="bg-white rounded-2xl border-2 border-gray-100 p-8 shadow-card">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h2 className="text-3xl font-extrabold text-gray-900 mb-2">Historial Médico</h2>
-            <p className="text-gray-600">Timeline de eventos y tratamientos</p>
+        <div className="bg-white rounded-2xl border-2 border-gray-100 p-8 shadow-card">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h2 className="text-3xl font-extrabold text-gray-900 mb-2">Historial Médico</h2>
+              <p className="text-gray-600">Timeline de eventos y tratamientos</p>
+            </div>
+            <Link href={`/dashboard/${petId}/events/new`}>
+              <Button size="lg" className="shadow-lg">
+                <Plus className="h-5 w-5 mr-2" />
+                Agregar Evento
+              </Button>
+            </Link>
           </div>
-          <Link href={`/dashboard/${petId}/events/new`}>
-            <Button size="lg" className="shadow-lg">
-              <Plus className="h-5 w-5 mr-2" />
-              Agregar Evento
-            </Button>
-          </Link>
+
+          {eventsLoading ? (
+            <Loading text="Cargando eventos..." />
+          ) : (
+            <Timeline events={events} />
+          )}
         </div>
 
-        {eventsLoading ? (
-          <Loading text="Cargando eventos..." />
-        ) : (
-          <Timeline events={events} />
-        )}
-      </div>
-
-      {/* Delete Modal */}
-      <Modal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        title="Eliminar Mascota"
-        confirmLabel="Eliminar"
-        cancelLabel="Cancelar"
-        confirmVariant="danger"
-        onConfirm={handleDeletePet}
-        loading={deleting}
-      >
-        <p className="text-gray-600">
-          ¿Estás seguro de que deseas eliminar a <strong>{pet.name}</strong>?
-        </p>
-        <p className="text-gray-600 mt-2">
-          Esta acción eliminará también todos los eventos médicos asociados y no se puede deshacer.
-        </p>
-      </Modal>
+        <Modal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          title="Eliminar Mascota"
+          confirmLabel="Eliminar"
+          cancelLabel="Cancelar"
+          confirmVariant="danger"
+          onConfirm={handleDeletePet}
+          loading={deleting}
+        >
+          <p className="text-gray-600">
+            ¿Estás seguro de que deseas eliminar a <strong>{pet.name}</strong>?
+          </p>
+          <p className="text-gray-600 mt-2">
+            Esta acción eliminará también todos los eventos médicos asociados y no se puede deshacer.
+          </p>
+        </Modal>
       </Container>
     </div>
   );

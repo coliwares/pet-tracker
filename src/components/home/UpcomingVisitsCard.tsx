@@ -7,11 +7,11 @@ export function UpcomingVisitsCard() {
   return (
     <UpcomingDueEventsCard
       type="visita"
-      title="Proximos controles"
+      title="Próximos controles"
       singularLabel="control cercano"
       pluralLabel="controles cercanos"
-      description="Revisa los controles veterinarios pendientes para mantener al dia las visitas importantes."
-      badgeLabel="Proximos controles"
+      description="Revisa los controles veterinarios pendientes para mantener al día las visitas importantes."
+      badgeLabel="Próximos controles"
       icon={Calendar}
       theme={{
         sectionBorder: 'border-emerald-200',
