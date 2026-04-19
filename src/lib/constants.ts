@@ -1,3 +1,5 @@
+import { Species } from './types';
+
 export const SPECIES = ['Perro', 'Gato', 'Conejo', 'Ave', 'Otro'] as const;
 
 export const EVENT_TYPES = ['vacuna', 'visita', 'medicina', 'otro'] as const;
@@ -9,27 +11,174 @@ export const EVENT_TYPE_LABELS = {
   otro: 'Otro',
 } as const;
 
-export const EVENT_STANDARD_TITLES = {
+export type EventDueRule = {
+  amount: number;
+  unit: 'days' | 'months' | 'years';
+};
+
+export type EventCatalogItem = {
+  title: string;
+  nextDueRule?: EventDueRule;
+  species?: Species[];
+  maxAgeMonths?: number;
+  minAgeMonths?: number;
+};
+
+export const EVENT_CATALOG: Record<typeof EVENT_TYPES[number], readonly EventCatalogItem[]> = {
   vacuna: [
-    'Vacuna antirrabica',
-    'Vacuna multiple',
-    'Vacuna triple felina',
-    'Vacuna leucemia felina',
-    'Desparasitacion',
+    {
+      title: 'Vacuna multiple cachorro - 1ra dosis',
+      nextDueRule: { amount: 21, unit: 'days' },
+      species: ['Perro'],
+      maxAgeMonths: 11,
+    },
+    {
+      title: 'Vacuna multiple cachorro - 2da dosis',
+      nextDueRule: { amount: 21, unit: 'days' },
+      species: ['Perro'],
+      maxAgeMonths: 11,
+    },
+    {
+      title: 'Vacuna multiple cachorro - 3ra dosis',
+      nextDueRule: { amount: 1, unit: 'years' },
+      species: ['Perro'],
+      maxAgeMonths: 11,
+    },
+    {
+      title: 'Vacuna antirrabica cachorro',
+      nextDueRule: { amount: 1, unit: 'years' },
+      species: ['Perro'],
+      maxAgeMonths: 11,
+    },
+    {
+      title: 'Desparasitacion cachorro',
+      nextDueRule: { amount: 1, unit: 'months' },
+      species: ['Perro'],
+      maxAgeMonths: 11,
+    },
+    {
+      title: 'Vacuna multiple anual',
+      nextDueRule: { amount: 1, unit: 'years' },
+      species: ['Perro'],
+      minAgeMonths: 12,
+    },
+    {
+      title: 'Vacuna antirrabica anual',
+      nextDueRule: { amount: 1, unit: 'years' },
+      species: ['Perro'],
+      minAgeMonths: 12,
+    },
+    {
+      title: 'Desparasitacion adulto',
+      nextDueRule: { amount: 3, unit: 'months' },
+      species: ['Perro', 'Gato'],
+      minAgeMonths: 12,
+    },
+    {
+      title: 'Vacuna triple felina gatito - 1ra dosis',
+      nextDueRule: { amount: 21, unit: 'days' },
+      species: ['Gato'],
+      maxAgeMonths: 11,
+    },
+    {
+      title: 'Vacuna triple felina gatito - 2da dosis',
+      nextDueRule: { amount: 1, unit: 'years' },
+      species: ['Gato'],
+      maxAgeMonths: 11,
+    },
+    {
+      title: 'Vacuna leucemia felina - 1ra dosis',
+      nextDueRule: { amount: 21, unit: 'days' },
+      species: ['Gato'],
+      maxAgeMonths: 11,
+    },
+    {
+      title: 'Vacuna leucemia felina - 2da dosis',
+      nextDueRule: { amount: 1, unit: 'years' },
+      species: ['Gato'],
+      maxAgeMonths: 11,
+    },
+    {
+      title: 'Desparasitacion gatito',
+      nextDueRule: { amount: 1, unit: 'months' },
+      species: ['Gato'],
+      maxAgeMonths: 11,
+    },
+    {
+      title: 'Vacuna triple felina anual',
+      nextDueRule: { amount: 1, unit: 'years' },
+      species: ['Gato'],
+      minAgeMonths: 12,
+    },
+    {
+      title: 'Vacuna leucemia felina anual',
+      nextDueRule: { amount: 1, unit: 'years' },
+      species: ['Gato'],
+      minAgeMonths: 12,
+    },
+    {
+      title: 'Vacuna antirrabica anual felina',
+      nextDueRule: { amount: 1, unit: 'years' },
+      species: ['Gato'],
+      minAgeMonths: 12,
+    },
+    {
+      title: 'Vacuna anual',
+      nextDueRule: { amount: 1, unit: 'years' },
+      species: ['Conejo', 'Ave', 'Otro'],
+    },
+    {
+      title: 'Desparasitacion',
+      nextDueRule: { amount: 3, unit: 'months' },
+      species: ['Conejo', 'Ave', 'Otro'],
+    },
   ],
   visita: [
-    'Control general',
-    'Consulta veterinaria',
-    'Chequeo anual',
-    'Urgencia',
-    'Control postoperatorio',
+    {
+      title: 'Control de cachorro',
+      nextDueRule: { amount: 1, unit: 'months' },
+      species: ['Perro'],
+      maxAgeMonths: 11,
+    },
+    {
+      title: 'Control de gatito',
+      nextDueRule: { amount: 1, unit: 'months' },
+      species: ['Gato'],
+      maxAgeMonths: 11,
+    },
+    {
+      title: 'Control anual',
+      nextDueRule: { amount: 1, unit: 'years' },
+    },
+    {
+      title: 'Consulta veterinaria',
+    },
+    {
+      title: 'Urgencia',
+    },
+    {
+      title: 'Control postoperatorio',
+      nextDueRule: { amount: 7, unit: 'days' },
+    },
   ],
   medicina: [
-    'Inicio de tratamiento',
-    'Control de tratamiento',
-    'Antibiotico',
-    'Antiinflamatorio',
-    'Vitaminas o suplemento',
+    {
+      title: 'Inicio de tratamiento',
+    },
+    {
+      title: 'Control de tratamiento',
+      nextDueRule: { amount: 7, unit: 'days' },
+    },
+    {
+      title: 'Antibiotico',
+    },
+    {
+      title: 'Antiinflamatorio',
+    },
+    {
+      title: 'Vitaminas o suplemento',
+      nextDueRule: { amount: 1, unit: 'months' },
+    },
   ],
   otro: [],
 } as const;

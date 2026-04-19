@@ -1,5 +1,7 @@
-import { format, isPast, isSameDay, differenceInYears } from 'date-fns';
+import { addDays, addMonths, addYears, differenceInMonths, differenceInYears, format, isPast, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { EventCatalogItem, EventDueRule } from './constants';
+import { Pet } from './types';
 
 /**
  * Parsea una fecha en formato YYYY-MM-DD como fecha local (sin conversión UTC)
@@ -30,8 +32,56 @@ export function formatDateMonthYear(dateString: string): string {
   return format(parseLocalDate(dateString), 'MMMM yyyy', { locale: es });
 }
 
+export function toDateInputValue(date: Date): string {
+  return format(date, 'yyyy-MM-dd');
+}
+
+export function applyDueRule(eventDate: string, rule?: EventDueRule): string | null {
+  if (!eventDate || !rule) {
+    return null;
+  }
+
+  const baseDate = parseLocalDate(eventDate);
+  const nextDate =
+    rule.unit === 'years'
+      ? addYears(baseDate, rule.amount)
+      : rule.unit === 'months'
+        ? addMonths(baseDate, rule.amount)
+        : addDays(baseDate, rule.amount);
+
+  return toDateInputValue(nextDate);
+}
+
 export function calculateAge(birthDate: string): number {
   return differenceInYears(new Date(), parseLocalDate(birthDate));
+}
+
+export function calculateAgeInMonths(birthDate: string): number {
+  return differenceInMonths(new Date(), parseLocalDate(birthDate));
+}
+
+export function getEventCatalogOptions(catalog: readonly EventCatalogItem[], pet: Pet | null): EventCatalogItem[] {
+  if (!pet) {
+    return [...catalog];
+  }
+
+  const ageInMonths = pet.birth_date ? calculateAgeInMonths(pet.birth_date) : null;
+
+  return catalog.filter((item) => {
+    if (item.species && !item.species.includes(pet.species)) {
+      return false;
+    }
+
+    if (ageInMonths !== null && item.minAgeMonths !== undefined && ageInMonths < item.minAgeMonths) {
+      return false;
+    }
+
+    if (ageInMonths !== null && item.maxAgeMonths !== undefined && ageInMonths > item.maxAgeMonths) {
+      return false;
+    }
+
+    return true;
+  });
 }
 
 export function isPastDate(dateString: string): boolean {

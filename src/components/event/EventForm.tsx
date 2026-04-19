@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Event, EventType } from '@/lib/types';
-import { EVENT_STANDARD_TITLES, EVENT_TYPES, EVENT_TYPE_LABELS } from '@/lib/constants';
+import { Event, EventType, Pet } from '@/lib/types';
+import { EVENT_CATALOG, EVENT_TYPES, EVENT_TYPE_LABELS } from '@/lib/constants';
+import { getPet } from '@/lib/supabase';
+import { applyDueRule, calculateAgeInMonths, getEventCatalogOptions, toDateInputValue } from '@/lib/utils';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 
@@ -26,17 +28,42 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
   const [type, setType] = useState<EventType>(event?.type || 'vacuna');
   const [title, setTitle] = useState(event?.title || '');
   const [description, setDescription] = useState(event?.description || '');
-  const [eventDate, setEventDate] = useState(event?.event_date || '');
+  const [eventDate, setEventDate] = useState(event?.event_date || toDateInputValue(new Date()));
   const [nextDueDate, setNextDueDate] = useState(event?.next_due_date || '');
   const [notes, setNotes] = useState(event?.notes || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  const standardTitles = useMemo<readonly string[]>(
-    () => EVENT_STANDARD_TITLES[type] as readonly string[],
-    [type]
-  );
+  const [nextDueDateTouched, setNextDueDateTouched] = useState(Boolean(event?.next_due_date));
+  const [pet, setPet] = useState<Pet | null>(null);
   const [selectedTitle, setSelectedTitle] = useState('');
+
+  useEffect(() => {
+    const fetchPet = async () => {
+      try {
+        const data = await getPet(petId);
+        setPet(data);
+      } catch (err) {
+        console.error('Error fetching pet for event form:', err);
+      }
+    };
+
+    if (petId) {
+      fetchPet();
+    }
+  }, [petId]);
+
+  const catalogOptions = useMemo(
+    () => getEventCatalogOptions(EVENT_CATALOG[type], pet),
+    [pet, type]
+  );
+  const standardTitles = useMemo(
+    () => catalogOptions.map((option) => option.title),
+    [catalogOptions]
+  );
+  const selectedCatalogItem = useMemo(
+    () => catalogOptions.find((option) => option.title === title) ?? null,
+    [catalogOptions, title]
+  );
 
   useEffect(() => {
     const nextSelection =
@@ -46,6 +73,21 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
 
     setSelectedTitle(nextSelection);
   }, [standardTitles, title, type]);
+
+  useEffect(() => {
+    const suggestedNextDueDate = applyDueRule(eventDate, selectedCatalogItem?.nextDueRule);
+
+    if (!suggestedNextDueDate) {
+      if (!nextDueDateTouched) {
+        setNextDueDate('');
+      }
+      return;
+    }
+
+    if (!nextDueDateTouched || !nextDueDate) {
+      setNextDueDate(suggestedNextDueDate);
+    }
+  }, [eventDate, nextDueDate, nextDueDateTouched, selectedCatalogItem]);
 
   const showCustomTitleInput = type === 'otro' || selectedTitle === CUSTOM_TITLE_VALUE;
 
@@ -60,7 +102,7 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
       return;
     }
 
-    const nextTitles = EVENT_STANDARD_TITLES[nextType] as readonly string[];
+    const nextTitles = getEventCatalogOptions(EVENT_CATALOG[nextType], pet).map((option) => option.title);
     if (title && nextTitles.includes(title)) {
       setSelectedTitle(title);
       return;
@@ -72,6 +114,24 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
     }
   };
 
+  const petContextLabel = useMemo(() => {
+    if (!pet) {
+      return null;
+    }
+
+    if (pet.species === 'Perro') {
+      const ageInMonths = pet.birth_date ? calculateAgeInMonths(pet.birth_date) : null;
+      return ageInMonths !== null && ageInMonths < 12 ? 'Perro cachorro' : 'Perro adulto';
+    }
+
+    if (pet.species === 'Gato') {
+      const ageInMonths = pet.birth_date ? calculateAgeInMonths(pet.birth_date) : null;
+      return ageInMonths !== null && ageInMonths < 12 ? 'Gato gatito' : 'Gato adulto';
+    }
+
+    return pet.species;
+  }, [pet]);
+
   const handleTitleOptionChange = (value: string) => {
     setSelectedTitle(value);
 
@@ -81,6 +141,7 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
     }
 
     setTitle(value);
+    setNextDueDateTouched(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -150,22 +211,29 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
             Este tipo de evento usa un titulo personalizado.
           </p>
         ) : (
-          <select
-            value={selectedTitle}
-            onChange={(e) => handleTitleOptionChange(e.target.value)}
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 text-base font-medium bg-white hover:border-gray-300"
-            required
-          >
-            <option value="" disabled>
-              Selecciona un titulo
-            </option>
-            {standardTitles.map((option) => (
-              <option key={option} value={option}>
-                {option}
+          <>
+            {petContextLabel && (
+              <p className="text-xs text-blue-600 ml-1">
+                Opciones sugeridas para {petContextLabel}.
+              </p>
+            )}
+            <select
+              value={selectedTitle}
+              onChange={(e) => handleTitleOptionChange(e.target.value)}
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 text-base font-medium bg-white hover:border-gray-300"
+              required
+            >
+              <option value="" disabled>
+                Selecciona un titulo
               </option>
-            ))}
-            <option value={CUSTOM_TITLE_VALUE}>Otro</option>
-          </select>
+              {standardTitles.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+              <option value={CUSTOM_TITLE_VALUE}>Otro</option>
+            </select>
+          </>
         )}
         {showCustomTitleInput && (
           <Input
@@ -207,9 +275,14 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
           type="date"
           label="Proxima dosis / revision"
           value={nextDueDate}
-          onChange={(e) => setNextDueDate(e.target.value)}
+          onChange={(e) => {
+            setNextDueDate(e.target.value);
+            setNextDueDateTouched(true);
+          }}
         />
-        <p className="text-xs text-gray-500 ml-1">Opcional. Sirve para recordatorios futuros.</p>
+        <p className="text-xs text-gray-500 ml-1">
+          Opcional. Se completa automaticamente para vacunas y controles estandar, pero puedes ajustarla.
+        </p>
       </div>
 
       <div className="space-y-2">
