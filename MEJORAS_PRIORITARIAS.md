@@ -4,6 +4,10 @@
 **Timeline:** 2 semanas  
 **Prioridad:** Landing Page → Notificaciones → Fotos
 
+- [ ] **Registro diario tipo Bullet Journal de Mascotas** (TODO futuro)
+  - Bitacora diaria para registrar estado de animo, apetito, agua, paseo, sintomas, medicacion y observaciones
+  - Pensado como Pet Tracker liviano para seguimiento cotidiano y deteccion temprana de cambios
+
 ---
 
 ## FASE 1: LANDING PAGE MEJORADA (3-4 horas)
@@ -646,6 +650,9 @@ const handleCreatePet = async () => {
 - [ ] **Onboarding** (siguiente fase)
 - [ ] **Búsqueda/Filtro** (siguiente fase)
 - [ ] **Testing Automatizado** (siguiente fase)
+- [ ] **GamificaciÃ³n con badges** (TODO futuro)
+  - DiseÃ±ar insignias segÃºn comportamiento responsable del tutor con la mascota
+  - Ejemplos: vacunas al dÃ­a, controles a tiempo, historial completo, adherencia a tratamientos
 
 ---
 
