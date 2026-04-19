@@ -30,11 +30,21 @@ import {
 import { Modal } from '@/components/ui/Modal';
 import { PetPhoto } from '@/components/pet/PetPhoto';
 
-function getUpcomingEvent(events: Event[]) {
+function sortByEventDateDesc(events: Event[]) {
+  return [...events].sort(
+    (a, b) => parseLocalDate(b.event_date).getTime() - parseLocalDate(a.event_date).getTime()
+  );
+}
+
+function isVaccineEvent(event: Event) {
+  return event.type === 'vacuna' && event.title.toLowerCase().includes('vacuna');
+}
+
+function getUpcomingVaccine(events: Event[]) {
   const today = new Date();
 
   return [...events]
-    .filter((event) => event.next_due_date)
+    .filter((event) => isVaccineEvent(event) && event.next_due_date)
     .sort(
       (a, b) =>
         parseLocalDate(a.next_due_date as string).getTime() -
@@ -44,13 +54,31 @@ function getUpcomingEvent(events: Event[]) {
 }
 
 function getLastVisit(events: Event[]) {
-  return events.find((event) => event.type === 'visita') ?? events[0] ?? null;
+  return sortByEventDateDesc(events).find((event) => event.type === 'visita') ?? null;
 }
 
-function getStatus(nextDueDate: string | null) {
+function getStatus(events: Event[], nextDueDate: string | null) {
+  const overdueEvents = events.filter((event) => {
+    if (!event.next_due_date) {
+      return false;
+    }
+
+    return differenceInCalendarDays(parseLocalDate(event.next_due_date), new Date()) < 0;
+  });
+
+  if (overdueEvents.length > 0) {
+    return {
+      label: 'Eventos atrasados',
+      detail: `${overdueEvents.length} ${overdueEvents.length === 1 ? 'evento atrasado' : 'eventos atrasados'}`,
+      tone: 'text-rose-700',
+      badge: 'bg-rose-100 text-rose-700',
+    };
+  }
+
   if (!nextDueDate) {
     return {
       label: 'Sin próximos recordatorios',
+      detail: null as string | null,
       tone: 'text-slate-700',
       badge: 'bg-slate-100 text-slate-700',
     };
@@ -59,9 +87,12 @@ function getStatus(nextDueDate: string | null) {
   const remainingDays = differenceInCalendarDays(parseLocalDate(nextDueDate), new Date());
 
   if (remainingDays < 0) {
+    const overdueDays = Math.abs(remainingDays);
+
     return {
-      label: 'Atrasado',
-      tone: 'text-rose-600',
+      label: 'Vencida',
+      detail: `Vencida en ${overdueDays} ${overdueDays === 1 ? 'día' : 'días'}`,
+      tone: 'text-rose-700',
       badge: 'bg-rose-100 text-rose-700',
     };
   }
@@ -69,6 +100,7 @@ function getStatus(nextDueDate: string | null) {
   if (remainingDays <= 14) {
     return {
       label: 'Atención pronto',
+      detail: null,
       tone: 'text-amber-600',
       badge: 'bg-amber-100 text-amber-700',
     };
@@ -76,6 +108,7 @@ function getStatus(nextDueDate: string | null) {
 
   return {
     label: 'Al día',
+    detail: null,
     tone: 'text-emerald-600',
     badge: 'bg-emerald-100 text-emerald-700',
   };
@@ -168,9 +201,9 @@ export default function PetDetailPage() {
 
   const age = pet.birth_date ? calculateAge(pet.birth_date) : null;
   const latestVisit = getLastVisit(events);
-  const upcomingEvent = getUpcomingEvent(events);
-  const status = getStatus(upcomingEvent?.next_due_date ?? null);
-  const recentHighlights = events.slice(0, 3);
+  const upcomingVaccine = getUpcomingVaccine(events);
+  const status = getStatus(events, upcomingVaccine?.next_due_date ?? null);
+  const recentHighlights = sortByEventDateDesc(events).slice(0, 3);
   const quickAccessLabel = pet.license_url ? 'Licencia lista' : 'Carnet listo';
 
   const handleDeletePet = async () => {
@@ -335,12 +368,17 @@ export default function PetDetailPage() {
                   <div>
                     <p className="text-sm text-slate-500">Próxima vacuna</p>
                     <p className="mt-2 text-2xl font-black text-slate-950">
-                      {upcomingEvent?.next_due_date ? formatDate(upcomingEvent.next_due_date) : 'Sin fecha'}
+                      {upcomingVaccine?.next_due_date ? formatDate(upcomingVaccine.next_due_date) : 'Sin fecha'}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-slate-500">Estado</p>
                     <p className={`mt-2 text-2xl font-black ${status.tone}`}>{status.label}</p>
+                    {status.detail && (
+                      <p className="mt-1 text-sm font-bold uppercase tracking-[0.12em] text-rose-700">
+                        {status.detail}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -372,7 +410,7 @@ export default function PetDetailPage() {
                   <div className="rounded-2xl bg-slate-50 p-4">
                     <p className="text-sm text-slate-500">Próximo hito</p>
                     <p className="mt-1 font-semibold text-slate-900">
-                      {upcomingEvent ? upcomingEvent.title : 'Sin recordatorios activos'}
+                      {upcomingVaccine ? upcomingVaccine.title : 'Sin recordatorios activos'}
                     </p>
                   </div>
                 </div>
