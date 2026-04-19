@@ -72,6 +72,7 @@ Editar `.env.local` con tus credenciales de Supabase:
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=tu_project_url_aqui
 NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key_aqui
+NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key_aqui
 FEEDBACK_ADMIN_EMAIL=admin@tu-dominio.com
 ```
@@ -147,6 +148,7 @@ git status
 3. **Agregar variables de entorno** en Vercel Dashboard:
    - `NEXT_PUBLIC_SUPABASE_URL` → Tu Project URL
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY` → Tu anon key
+   - `NEXT_PUBLIC_GA_MEASUREMENT_ID` → Tu Measurement ID de GA4
    - `SUPABASE_SERVICE_ROLE_KEY` → Tu service role key
    - `FEEDBACK_ADMIN_EMAIL` → Email de la cuenta administradora de feedback
 4. **Deploy** → Automático en cada push a `main`

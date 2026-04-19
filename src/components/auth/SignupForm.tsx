@@ -8,6 +8,7 @@ import { generateDevEmail, isDevelopment } from '@/lib/devUtils';
 import { useRateLimiter } from '@/hooks/useRateLimiter';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { analytics } from '@/lib/analytics';
 
 export function SignupForm() {
   const router = useRouter();
@@ -77,6 +78,7 @@ export function SignupForm() {
       }
 
       await signUp(finalEmail, password);
+      analytics.signUp();
       reset(); // Reset rate limiter en éxito
       router.push('/dashboard');
     } catch (err) {

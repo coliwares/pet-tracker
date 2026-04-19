@@ -8,6 +8,8 @@ import { supabase } from '@/lib/supabase';
 import { Container } from '@/components/ui/Container';
 import { Loading } from '@/components/ui/Loading';
 import { EventForm } from '@/components/event/EventForm';
+import { Event } from '@/lib/types';
+import { analytics } from '@/lib/analytics';
 import { ArrowLeft } from 'lucide-react';
 
 export default function NewEventPage() {
@@ -30,7 +32,7 @@ export default function NewEventPage() {
     return null;
   }
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: Partial<Event>) => {
     const { data: event, error } = await supabase
       .from('events')
       .insert([data])
@@ -39,6 +41,7 @@ export default function NewEventPage() {
 
     if (error) throw error;
 
+    analytics.createEvent(event.type, Boolean(event.next_due_date));
     router.push(`/dashboard/${petId}`);
   };
 

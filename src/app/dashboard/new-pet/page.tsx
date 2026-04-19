@@ -8,6 +8,7 @@ import { Pet } from '@/lib/types';
 import { Container } from '@/components/ui/Container';
 import { Loading } from '@/components/ui/Loading';
 import { PetForm, PetFormSubmitOptions } from '@/components/pet/PetForm';
+import { analytics } from '@/lib/analytics';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
@@ -81,7 +82,10 @@ export default function NewPetPage() {
           <div className="bg-white p-8 md:p-10 rounded-2xl shadow-card border-2 border-gray-100">
             <PetForm
               onSubmit={handleSubmit}
-              onSuccess={(pet) => router.push(`/dashboard/${pet.id}`)}
+              onSuccess={(pet) => {
+                analytics.createPet(pet.species, Boolean(pet.photo_url));
+                router.push(`/dashboard/${pet.id}`);
+              }}
               submitLabel="Crear Mascota"
             />
           </div>

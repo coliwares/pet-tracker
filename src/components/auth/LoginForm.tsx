@@ -7,6 +7,7 @@ import { validateEmail, validatePassword } from '@/lib/utils';
 import { useRateLimiter } from '@/hooks/useRateLimiter';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { analytics } from '@/lib/analytics';
 
 interface LoginFormProps {
   isDemo?: boolean;
@@ -60,6 +61,7 @@ export function LoginForm({ isDemo = false }: LoginFormProps) {
     try {
       setLoading(true);
       await signIn(email, password);
+      analytics.login(isDemo);
       reset(); // Reset rate limiter en éxito
       router.push('/dashboard');
     } catch (err) {
