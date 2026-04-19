@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/Button';
 import { Loading } from '@/components/ui/Loading';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PetCard } from '@/components/pet/PetCard';
+import { UpcomingVaccinesCard } from '@/components/home/UpcomingVaccinesCard';
+import { UpcomingVisitsCard } from '@/components/home/UpcomingVisitsCard';
 import { Plus, PawPrint } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -50,6 +52,9 @@ export default function DashboardPage() {
             </Button>
           </Link>
         </div>
+
+        <UpcomingVaccinesCard />
+        <UpcomingVisitsCard />
 
         {pets.length === 0 ? (
           <div className="bg-white rounded-3xl shadow-card p-12 border-2 border-gray-100">
