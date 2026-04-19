@@ -1,0 +1,15 @@
+# .codex/config.toml
+model = "gpt-5.4"
+approval_policy = "untrusted"
+
+[profiles.review]
+model = "gpt-5.4"
+approval_policy = "untrusted"
+
+[profiles.refactor]
+model = "gpt-5.4"
+approval_policy = "on-request"
+
+[profiles.heavy]
+model = "gpt-5.4"
+approval_policy = "on-request"

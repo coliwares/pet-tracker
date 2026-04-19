@@ -236,6 +236,27 @@ cat docs/testing/TESTING_GUIDE.md
 # - Edge Cases (8 tests)
 ```
 
+### Testing automatizado E2E
+
+```bash
+# Suite Playwright
+npm run test:e2e
+
+# UI interactiva
+npm run test:e2e:ui
+
+# Navegador visible
+npm run test:e2e:headed
+```
+
+La configuración vive en `playwright.config.ts` y las suites iniciales están en `tests/e2e/`.
+Por defecto usan la cuenta demo `test@pettrack.cl / pettrack`, pero puedes sobreescribirla con:
+
+```bash
+PLAYWRIGHT_DEMO_EMAIL=tu-email
+PLAYWRIGHT_DEMO_PASSWORD=tu-password
+```
+
 ## 📝 Licencia
 
 MIT
