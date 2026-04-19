@@ -12,9 +12,10 @@ import { Container } from '@/components/ui/Container';
 import { Button } from '@/components/ui/Button';
 import { Loading } from '@/components/ui/Loading';
 import { Timeline } from '@/components/event/Timeline';
-import { ArrowLeft, Plus, PawPrint, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2 } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { deletePet } from '@/lib/supabase';
+import { PetPhoto } from '@/components/pet/PetPhoto';
 
 export default function PetDetailPage() {
   const params = useParams();
@@ -91,17 +92,14 @@ export default function PetDetailPage() {
           <div className="flex-shrink-0 space-y-4">
             {/* Foto de mascota */}
             <div>
-              {pet.photo_url ? (
-                <img
-                  src={pet.photo_url}
-                  alt={pet.name}
-                  className="w-40 h-40 rounded-3xl object-cover ring-4 ring-blue-100 shadow-xl"
-                />
-              ) : (
-                <div className="w-40 h-40 rounded-3xl bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center shadow-xl">
-                  <PawPrint className="w-20 h-20 text-white" />
-                </div>
-              )}
+              <PetPhoto
+                name={pet.name}
+                photoUrl={pet.photo_url}
+                sizeClassName="w-40 h-40 rounded-3xl"
+                imageClassName="object-cover ring-4 ring-blue-100 shadow-xl"
+                fallbackClassName="bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center shadow-xl"
+                iconClassName="w-20 h-20 text-white"
+              />
               <p className="text-xs text-center text-gray-500 mt-2 font-medium">Foto de {pet.name}</p>
             </div>
 
