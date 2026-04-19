@@ -31,7 +31,7 @@
    
    Ir a **SQL Editor** y ejecutar el script:
    ```bash
-   # Copia el contenido de supabase-setup.sql
+   # Copia el contenido de supabase/supabase-setup.sql
    # y ejecútalo en el SQL Editor de Supabase
    ```
    
@@ -43,7 +43,7 @@
 
 3. **Configurar Storage (para fotos):**
    
-   Ver guía completa en: [STORAGE_SETUP.md](STORAGE_SETUP.md)
+   Ver guía completa en: [docs/setup/STORAGE_SETUP.md](docs/setup/STORAGE_SETUP.md)
    
    Resumen:
    - Crear bucket `pet-photos` (publico)
@@ -79,7 +79,7 @@ FEEDBACK_ADMIN_EMAIL=admin@tu-dominio.com
 
 ⚠️ **Importante:** Nunca subas `.env.local` a GitHub (ya está en `.gitignore`)
 
-Si ya tenías una base creada antes de este cambio, ejecuta nuevamente la parte de `feedback` del archivo `supabase-setup.sql` para crear la nueva tabla y sus policies.
+Si ya tenías una base creada antes de este cambio, ejecuta nuevamente la parte de `feedback` del archivo `supabase/supabase-setup.sql` para crear la nueva tabla y sus policies.
 
 ### 3. Ejecutar en desarrollo
 
@@ -97,7 +97,7 @@ En modo desarrollo, el proyecto incluye utilidades para facilitar el testing:
 - **Truco Gmail +alias:** `test+1@gmail.com`, `test+2@gmail.com` (todos van al mismo inbox)
 - **Logs de desarrollo:** Información útil en consola
 
-Ver: [RATE_LIMIT_FIX.md](RATE_LIMIT_FIX.md) para más detalles
+Ver: [docs/archive/RATE_LIMIT_FIX.md](docs/archive/RATE_LIMIT_FIX.md) para más detalles
 
 ## 📱 Funcionalidades
 
@@ -209,22 +209,23 @@ pet-carnet/
 - **Variables de entorno:** Credenciales protegidas (nunca en el código)
 - **Validaciones:** Email y contraseñas validadas en frontend y backend
 
-Ver más detalles en: [SECURITY_IMPROVEMENTS.md](SECURITY_IMPROVEMENTS.md)
+Ver más detalles en: [docs/setup/SECURITY_IMPROVEMENTS.md](docs/setup/SECURITY_IMPROVEMENTS.md)
 
 ## 📚 Documentación
 
-- **[GETTING_STARTED.md](GETTING_STARTED.md)** - Guía de inicio rápido
-- **[TESTING_GUIDE.md](TESTING_GUIDE.md)** - 56 casos de prueba
-- **[SECURITY_IMPROVEMENTS.md](SECURITY_IMPROVEMENTS.md)** - Medidas de seguridad
-- **[RATE_LIMIT_FIX.md](RATE_LIMIT_FIX.md)** - Solución a rate limits en testing
-- **[DESIGN_UPDATE.md](DESIGN_UPDATE.md)** - Guía de diseño visual
-- **[FORMS_UPDATE.md](FORMS_UPDATE.md)** - Mejoras en formularios
+- **[docs/README.md](docs/README.md)** - Índice general de documentación
+- **[docs/setup/GETTING_STARTED.md](docs/setup/GETTING_STARTED.md)** - Guía de inicio rápido
+- **[docs/testing/TESTING_GUIDE.md](docs/testing/TESTING_GUIDE.md)** - 56 casos de prueba
+- **[docs/setup/SECURITY_IMPROVEMENTS.md](docs/setup/SECURITY_IMPROVEMENTS.md)** - Medidas de seguridad
+- **[docs/archive/RATE_LIMIT_FIX.md](docs/archive/RATE_LIMIT_FIX.md)** - Solución a rate limits en testing
+- **[docs/design/DESIGN_UPDATE.md](docs/design/DESIGN_UPDATE.md)** - Guía de diseño visual
+- **[docs/design/FORMS_UPDATE.md](docs/design/FORMS_UPDATE.md)** - Mejoras en formularios
 
 ## 🧪 Testing
 
 ```bash
 # Ver guía completa de testing
-cat TESTING_GUIDE.md
+cat docs/testing/TESTING_GUIDE.md
 
 # El proyecto incluye 56 casos de prueba que cubren:
 # - Autenticación (11 tests)

@@ -91,7 +91,7 @@ Si ya tienes la tabla `pets` creada, agrega el campo `license_url`:
 ALTER TABLE pets ADD COLUMN license_url TEXT;
 ```
 
-Si estas creando la base desde cero, `supabase-setup.sql` ya incluye este campo.
+Si estas creando la base desde cero, `supabase/supabase-setup.sql` ya incluye este campo.
 
 ---
 

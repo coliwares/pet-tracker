@@ -39,7 +39,7 @@ test+3@gmail.com
 # Opción 3: Esperar 1 hora
 ```
 
-**Ver detalles completos en:** [RATE_LIMIT_FIX.md](RATE_LIMIT_FIX.md)
+**Ver detalles completos en:** [../archive/RATE_LIMIT_FIX.md](../archive/RATE_LIMIT_FIX.md)
 
 ---
 

@@ -622,20 +622,20 @@ const handleCreatePet = async () => {
 ## ✅ CHECKLIST DE IMPLEMENTACIÓN
 
 ### Semana 1
-- [ ] **Landing Page Mejorada**
+- [x] **Landing Page Mejorada**
   - [x] Reemplazar HomeContent.tsx
   - [x] Probar en mobile/desktop
   - [x] Validar enlaces CTA
   
-- [ ] **Notificaciones de Vacunas**
+- [x] **Notificaciones de Vacunas**
   - [x] Crear UpcomingVaccinesCard.tsx
   - [x] Agregar al dashboard
-  - [ ] Probar con eventos de prueba
+  - [x] Probar con eventos de prueba
   
-- [ ] **Fotos de Mascotas**
+- [x] **Fotos de Mascotas**
   - [x] Crear fallback de foto de mascota (`PetPhoto.tsx`)
   - [x] Modificar `PetCard.tsx`
-  - [ ] Probar upload y display
+  - [x] Probar upload y display
 
 - [ ] **Analytics Básicas**
   - [x] Crear analytics.ts

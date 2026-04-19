@@ -8,7 +8,7 @@
 - [ ] Crear nuevo proyecto (ej: "pet-carnet")
 - [ ] Esperar a que el proyecto esté listo
 - [ ] Ir a **SQL Editor** → **New Query**
-- [ ] Copiar y pegar el contenido de `supabase-setup.sql`
+- [ ] Copiar y pegar el contenido de `supabase/supabase-setup.sql`
 - [ ] Ejecutar el script (botón RUN)
 - [ ] Ir a **Settings → API** y copiar:
   - `URL` (Project URL)
@@ -62,7 +62,7 @@ Abrir: [http://localhost:3000](http://localhost:3000)
 - Reiniciar el servidor (`Ctrl+C` y luego `npm run dev`)
 
 ### Error: "relation pets does not exist"
-- Ejecutar el script SQL en Supabase (`supabase-setup.sql`)
+- Ejecutar el script SQL en Supabase (`supabase/supabase-setup.sql`)
 - Verificar en Supabase → Table Editor que existen las tablas `pets` y `events`
 
 ### No puedo ver las mascotas de otros usuarios (esto es correcto!)
