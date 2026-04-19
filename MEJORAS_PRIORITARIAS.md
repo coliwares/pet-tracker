@@ -4,10 +4,6 @@
 **Timeline:** 2 semanas  
 **Prioridad:** Landing Page → Notificaciones → Fotos
 
-- [ ] **Registro diario tipo Bullet Journal de Mascotas** (TODO futuro)
-  - Bitacora diaria para registrar estado de animo, apetito, agua, paseo, sintomas, medicacion y observaciones
-  - Pensado como Pet Tracker liviano para seguimiento cotidiano y deteccion temprana de cambios
-
 ---
 
 ## FASE 1: LANDING PAGE MEJORADA (3-4 horas)
@@ -627,25 +623,39 @@ const handleCreatePet = async () => {
 
 ### Semana 1
 - [ ] **Landing Page Mejorada**
-  - [ ] Reemplazar HomeContent.tsx
+  - [x] Reemplazar HomeContent.tsx
   - [ ] Probar en mobile/desktop
   - [ ] Validar enlaces CTA
   
 - [ ] **Notificaciones de Vacunas**
-  - [ ] Crear UpcomingVaccinesCard.tsx
-  - [ ] Agregar al dashboard
+  - [x] Crear UpcomingVaccinesCard.tsx
+  - [x] Agregar al dashboard
   - [ ] Probar con eventos de prueba
   
 - [ ] **Fotos de Mascotas**
-  - [ ] Crear PetImage.tsx y PetAvatar.tsx
-  - [ ] Modificar PetCard.tsx
+  - [x] Crear fallback de foto de mascota (`PetPhoto.tsx`)
+  - [x] Modificar `PetCard.tsx`
   - [ ] Probar upload y display
 
 - [ ] **Analytics Básicas**
-  - [ ] Crear analytics.ts
-  - [ ] Integrar en auth/pet flows
+  - [x] Crear analytics.ts
+  - [x] Integrar en auth/pet flows
   - [ ] Validar tracking
 
+### Hecho hoy
+- [x] Agregar tarjeta de controles veterinarios prÃ³ximos en dashboard
+- [x] Resaltar en rojo vacunas y visitas atrasadas
+- [x] Resolver nombre real de la mascota en tarjetas de recordatorios
+- [x] Actualizar documentaciÃ³n de Storage a bucket pÃºblico
+- [x] Limpiar archivos viejos al reemplazar foto o licencia
+- [x] Evitar archivos huÃ©rfanos al crear mascotas nuevas
+- [x] Agregar fallback visual cuando falla la carga de una foto
+- [x] Normalizar tÃ­tulos de eventos con dropdown y opciÃ³n `Otro`
+- [x] Autocompletar fecha del evento con hoy en nuevos registros
+- [x] Sugerir `prÃ³xima dosis / revisiÃ³n` segÃºn tipo de vacuna o control
+- [x] Afinar calendario veterinario por especie, cachorro/gatito, adulto y refuerzos
+- [x] Evitar duplicaciÃ³n de vacunas en historial, incluyendo series de cachorro y gatito
+- [x] Dejar TODO futuro para gamificaciÃ³n con badges
 ### Semana 2
 - [ ] **Onboarding** (siguiente fase)
 - [ ] **Búsqueda/Filtro** (siguiente fase)
@@ -655,6 +665,12 @@ const handleCreatePet = async () => {
   - Ejemplos: vacunas al dÃ­a, controles a tiempo, historial completo, adherencia a tratamientos
 
 ---
+## MODULOS FUTUROS
+
+- [ ] **Registro diario tipo Bullet Journal de Mascotas**
+  - Bitacora diaria para registrar estado de animo, apetito, agua, paseo, sintomas, medicacion y observaciones
+  - Pensado como Pet Tracker liviano para seguimiento cotidiano y deteccion temprana de cambios
+
 
 ## 🚀 DEPLOY SEQUENCE
 
