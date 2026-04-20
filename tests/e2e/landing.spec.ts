@@ -1,6 +1,14 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('Landing', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.context().clearCookies();
+    await page.addInitScript(() => {
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+    });
+  });
+
   test('muestra la propuesta de valor y los CTAs principales', async ({ page }) => {
     await page.goto('/');
 
@@ -14,9 +22,11 @@ test.describe('Landing', () => {
 
   test('el CTA de demo lleva a login con credenciales precargadas', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('link', { name: /probar demo/i }).click();
+    await Promise.all([
+      page.waitForURL(/\/login\?demo=true$/, { timeout: 15000 }),
+      page.getByRole('link', { name: /probar demo/i }).click(),
+    ]);
 
-    await expect(page).toHaveURL(/\/login\?demo=true$/);
     await expect(page.getByText(/cuenta demo precargada/i)).toBeVisible();
     await expect(page.locator('input[type="email"]')).toHaveValue(/test@pettrack\.cl/i);
   });
@@ -24,7 +34,9 @@ test.describe('Landing', () => {
   test('signup informa que el registro está temporalmente cerrado', async ({ page }) => {
     await page.goto('/signup');
 
-    await expect(page.getByRole('heading', { name: /registro temporalmente cerrado/i })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: /registro temporalmente cerrado/i })
+    ).toBeVisible();
     await expect(page.getByRole('button', { name: /proximamente/i })).toBeDisabled();
   });
 });

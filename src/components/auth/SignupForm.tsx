@@ -15,24 +15,21 @@ export function SignupForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [honeypot, setHoneypot] = useState(''); // Campo trampa para bots
+  const [honeypot, setHoneypot] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Rate limiting: 3 intentos por minuto
   const { checkLimit, recordAttempt, reset } = useRateLimiter({
     maxAttempts: 3,
-    windowMs: 60000
+    windowMs: 60000,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // 🛡️ Protección 1: Honeypot - detectar bots
     if (honeypot !== '') {
-      console.warn('🤖 Bot detected - honeypot filled');
-      // No mostrar error, solo ignorar silenciosamente
+      console.warn('Bot detected - honeypot filled');
       setLoading(true);
       setTimeout(() => {
         setError('Error al crear cuenta');
@@ -41,7 +38,6 @@ export function SignupForm() {
       return;
     }
 
-    // 🛡️ Protección 2: Rate limiting
     try {
       checkLimit();
     } catch (err) {
@@ -69,17 +65,15 @@ export function SignupForm() {
 
     try {
       setLoading(true);
-
-      // 🔧 En desarrollo, genera email único para evitar rate limits
       const finalEmail = generateDevEmail(email);
 
       if (isDevelopment() && finalEmail !== email) {
-        console.log('🔧 [DEV] Email transformado:', email, '→', finalEmail);
+        console.log('[DEV] Email transformado:', email, '->', finalEmail);
       }
 
       await signUp(finalEmail, password);
       analytics.signUp();
-      reset(); // Reset rate limiter en éxito
+      reset();
       router.push('/dashboard');
     } catch (err) {
       recordAttempt();
@@ -91,22 +85,23 @@ export function SignupForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* 🚧 Banner de mantenimiento */}
       <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl p-6 mb-6">
         <div className="flex items-start gap-3">
-          <span className="text-3xl">🚧</span>
+          <span className="text-3xl" aria-hidden="true">
+            !
+          </span>
           <div>
             <h3 className="font-bold text-amber-900 text-lg mb-1">
               Registro Temporalmente Deshabilitado
             </h3>
             <p className="text-amber-800 text-sm">
-              Estamos realizando mejoras en el sistema. El registro de nuevas cuentas estará disponible próximamente.
+              Estamos realizando mejoras en el sistema. El registro de nuevas cuentas estará
+              disponible próximamente.
             </p>
           </div>
         </div>
       </div>
 
-      {/* 🛡️ Campo honeypot - invisible para humanos, visible para bots */}
       <input
         type="text"
         name="website"
@@ -121,7 +116,7 @@ export function SignupForm() {
       <div className="space-y-1 opacity-50 pointer-events-none">
         <Input
           type="email"
-          label="📧 Email"
+          label="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="tu@email.com"
@@ -134,7 +129,7 @@ export function SignupForm() {
       <div className="space-y-1 opacity-50 pointer-events-none">
         <Input
           type="password"
-          label="🔒 Contraseña"
+          label="Contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Mínimo 6 caracteres"
@@ -147,7 +142,7 @@ export function SignupForm() {
       <div className="space-y-1 opacity-50 pointer-events-none">
         <Input
           type="password"
-          label="✅ Confirmar contraseña"
+          label="Confirmar contraseña"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           placeholder="Repite tu contraseña"
@@ -158,14 +153,17 @@ export function SignupForm() {
 
       {error && (
         <div className="bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-300 text-red-700 px-4 py-3 rounded-xl font-medium animate-fade-in">
-          ⚠️ {error}
+          {error}
         </div>
       )}
 
-      <Button type="submit" className="w-full text-lg py-4 mt-8" disabled={true}>
-        <span className="flex items-center justify-center gap-2">
-          🚧 Próximamente
-        </span>
+      <Button
+        type="submit"
+        className="w-full text-lg py-4 mt-8"
+        disabled={true}
+        aria-label="Proximamente"
+      >
+        <span className="flex items-center justify-center gap-2">Próximamente</span>
       </Button>
 
       <p className="text-center text-xs text-gray-500 mt-4">

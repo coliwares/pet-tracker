@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { createPet, updatePet } from '@/lib/supabase';
@@ -15,12 +14,6 @@ import Link from 'next/link';
 export default function NewPetPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
-    }
-  }, [user, loading, router]);
 
   if (loading) {
     return <Loading />;
@@ -81,6 +74,7 @@ export default function NewPetPage() {
 
           <div className="bg-white p-8 md:p-10 rounded-2xl shadow-card border-2 border-gray-100">
             <PetForm
+              userId={user.id}
               onSubmit={handleSubmit}
               onSuccess={(pet) => {
                 analytics.createPet(pet.species, Boolean(pet.photo_url));

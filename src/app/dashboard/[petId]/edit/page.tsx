@@ -84,6 +84,7 @@ export default function EditPetPage() {
           <div className="bg-white p-8 md:p-10 rounded-2xl shadow-card border-2 border-gray-100">
             <PetForm
               pet={pet}
+              userId={user.id}
               onSubmit={handleSubmit}
               onSuccess={(updatedPet) => router.push(`/dashboard/${updatedPet.id}`)}
               submitLabel="Guardar Cambios"

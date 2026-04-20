@@ -6,7 +6,6 @@ import { SPECIES } from '@/lib/constants';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { uploadPetPhoto, deletePetPhoto, validateFile, compressImage } from '@/lib/storage';
-import { useAuth } from '@/hooks/useAuth';
 
 export interface PetFormSubmitOptions {
   mode: 'create' | 'update';
@@ -15,13 +14,13 @@ export interface PetFormSubmitOptions {
 
 interface PetFormProps {
   pet?: Pet;
+  userId: string;
   onSubmit: (data: Partial<Pet>, options: PetFormSubmitOptions) => Promise<Pet>;
   onSuccess?: (pet: Pet) => void | Promise<void>;
   submitLabel?: string;
 }
 
-export function PetForm({ pet, onSubmit, onSuccess, submitLabel = 'Guardar' }: PetFormProps) {
-  const { user } = useAuth();
+export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guardar' }: PetFormProps) {
   const [name, setName] = useState(pet?.name || '');
   const [species, setSpecies] = useState<Species>(pet?.species || 'Perro');
   const [breed, setBreed] = useState(pet?.breed || '');
@@ -79,7 +78,7 @@ export function PetForm({ pet, onSubmit, onSuccess, submitLabel = 'Guardar' }: P
       return;
     }
 
-    if (!user?.id) {
+    if (!userId) {
       setError('Usuario no autenticado');
       return;
     }
@@ -119,7 +118,7 @@ export function PetForm({ pet, onSubmit, onSuccess, submitLabel = 'Guardar' }: P
           const compressed = await compressImage(photoFile, 1200);
           const uploadedUrl = await uploadPetPhoto(
             compressed,
-            user.id,
+            userId,
             savedPet.id,
             'photo'
           );
@@ -136,7 +135,7 @@ export function PetForm({ pet, onSubmit, onSuccess, submitLabel = 'Guardar' }: P
           const compressed = await compressImage(licenseFile, 1200);
           const uploadedUrl = await uploadPetPhoto(
             compressed,
-            user.id,
+            userId,
             savedPet.id,
             'license'
           );
@@ -169,7 +168,7 @@ export function PetForm({ pet, onSubmit, onSuccess, submitLabel = 'Guardar' }: P
         const compressed = await compressImage(photoFile, 1200);
         const uploadedUrl = await uploadPetPhoto(
           compressed,
-          user.id,
+          userId,
           pet?.id || 'temp-' + Date.now(),
           'photo'
         );
@@ -187,7 +186,7 @@ export function PetForm({ pet, onSubmit, onSuccess, submitLabel = 'Guardar' }: P
         const compressed = await compressImage(licenseFile, 1200);
         const uploadedUrl = await uploadPetPhoto(
           compressed,
-          user.id,
+          userId,
           pet?.id || 'temp-' + Date.now(),
           'license'
         );

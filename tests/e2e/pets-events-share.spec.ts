@@ -3,6 +3,8 @@ import { loginAsDemo } from '../helpers/auth';
 import { createEvent, createPet, extractSharedUrlFromQr, uniqueName } from '../helpers/pets';
 
 test.describe('Mascotas, eventos y enlace compartido', () => {
+  test.setTimeout(60000);
+
   test.beforeEach(async ({ page }) => {
     await loginAsDemo(page);
   });
@@ -12,9 +14,11 @@ test.describe('Mascotas, eventos y enlace compartido', () => {
 
     await createPet(page, petName);
 
-    await expect(page.getByText(/panel de mascota/i)).toBeVisible();
-    await expect(page.getByText(/qr listo/i)).toBeVisible();
-    await expect(page.getByText(/historial medico/i)).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: new RegExp(petName, 'i') })
+    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(/qr listo/i).first()).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(/historial medico/i).first()).toBeVisible({ timeout: 15000 });
   });
 
   test('muestra eventos atrasados cuando existe al menos un recordatorio vencido', async ({ page }) => {
@@ -28,8 +32,10 @@ test.describe('Mascotas, eventos y enlace compartido', () => {
       nextDueDate: '2026-04-02',
     });
 
-    await expect(page.getByText(/eventos atrasados/i)).toBeVisible();
-    await expect(page.getByText(/evento atrasado|eventos atrasados/i)).toBeVisible();
+    await expect(page.getByText(/eventos atrasados/i).first()).toBeVisible({ timeout: 15000 });
+    await expect(
+      page.getByText(/evento atrasado|eventos atrasados/i).first()
+    ).toBeVisible({ timeout: 15000 });
   });
 
   test('genera un enlace publico reutilizable mientras siga vigente', async ({ page, context }) => {

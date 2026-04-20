@@ -23,7 +23,7 @@ test.describe('Autenticacion', () => {
     await page.goto('/login');
     await page.locator('input[type="email"]').fill('test@pettrack.cl');
     await page.locator('input[type="password"]').fill('credencial-invalida');
-    await page.getByRole('button', { name: /ingresar/i }).click();
+    await page.locator('form').getByTestId('login-submit').click();
 
     await expect(page.getByText(/error|invalido|incorrect/i)).toBeVisible();
   });

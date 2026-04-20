@@ -7,7 +7,7 @@ export async function loginAsDemo(page: Page) {
   await page.goto('/login');
   await page.locator('input[type="email"]').fill(demoEmail);
   await page.locator('input[type="password"]').fill(demoPassword);
-  await page.getByRole('button', { name: /ingresar/i }).click();
+  await page.locator('form').getByTestId('login-submit').click();
   await expect(page).toHaveURL(/\/dashboard$/);
 }
 

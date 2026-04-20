@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/Button';
 import { Container } from '@/components/ui/Container';
-import { Loading } from '@/components/ui/Loading';
 import {
   CheckCircle,
   Clock,
@@ -80,17 +79,7 @@ const testimonials = [
 ] as const;
 
 export function HomeContent() {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-[calc(100vh-4rem)] bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.14),_transparent_36%),linear-gradient(180deg,_#fff8ef_0%,_#fffdf9_38%,_#f7fbff_100%)]">
-        <Container className="py-24">
-          <Loading text="Preparando tu espacio..." />
-        </Container>
-      </div>
-    );
-  }
+  const { user } = useAuth();
 
   if (user) {
     return (
@@ -152,7 +141,7 @@ export function HomeContent() {
               </Link>
               <Link href="/login">
                 <Button variant="secondary" size="lg" className="min-w-52">
-                  Ingresar
+                  Ingresar ahora
                 </Button>
               </Link>
             </div>

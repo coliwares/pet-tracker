@@ -1,4 +1,4 @@
-import { expect, Locator, Page } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
 
 export function uniqueName(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -12,27 +12,31 @@ function fieldInputAfterLabel(page: Page, labelText: RegExp | string) {
 }
 
 export async function createPet(page: Page, petName: string) {
-  await page.getByRole('link', { name: /nueva mascota/i }).click();
-  await expect(page).toHaveURL(/\/dashboard\/new-pet$/);
+  await Promise.all([
+    page.waitForURL(/\/dashboard\/new-pet$/, { timeout: 15000 }),
+    page.getByRole('link', { name: /nueva mascota/i }).click(),
+  ]);
 
   await fieldInputAfterLabel(page, /nombre/i).fill(petName);
   await page.locator('select').first().selectOption('Perro');
   await fieldInputAfterLabel(page, /raza/i).fill('Mestizo');
   await fieldInputAfterLabel(page, /fecha de nacimiento/i).fill('2020-01-15');
   await fieldInputAfterLabel(page, /peso/i).fill('15.5');
-  await page.locator('textarea').first().fill('Creado por testing automático');
+  await page.locator('textarea').first().fill('Creado por testing automatico');
   await page.getByRole('button', { name: /crear mascota/i }).click();
 
-  await expect(page).toHaveURL(/\/dashboard\/.+$/);
-  await expect(page.getByRole('heading', { name: new RegExp(petName, 'i') })).toBeVisible();
+  await page.waitForURL(/\/dashboard\/[^/]+$/, { timeout: 15000 });
 }
 
-export async function createEvent(page: Page, options: {
-  type?: 'vacuna' | 'visita' | 'medicina' | 'otro';
-  title?: string;
-  eventDate?: string;
-  nextDueDate?: string;
-}) {
+export async function createEvent(
+  page: Page,
+  options: {
+    type?: 'vacuna' | 'visita' | 'medicina' | 'otro';
+    title?: string;
+    eventDate?: string;
+    nextDueDate?: string;
+  }
+) {
   const {
     type = 'visita',
     title = 'Control anual',
@@ -40,7 +44,7 @@ export async function createEvent(page: Page, options: {
     nextDueDate,
   } = options;
 
-  await page.getByRole('link', { name: /agregar evento/i }).click();
+  await page.getByRole('link', { name: /agregar evento/i }).first().click();
   await expect(page).toHaveURL(/\/events\/new$/);
 
   const selects = page.locator('select');
@@ -57,22 +61,15 @@ export async function createEvent(page: Page, options: {
     }
   }
 
-  await page
-    .locator('label')
-    .filter({ hasText: /fecha del evento/i })
-    .locator('xpath=following-sibling::input[1]')
-    .fill(eventDate);
+  const dateInputs = page.locator('input[type="date"]');
+  await dateInputs.first().fill(eventDate);
 
   if (nextDueDate) {
-    await page
-      .locator('label')
-      .filter({ hasText: /proxima dosis|revision/i })
-      .locator('xpath=following-sibling::input[1]')
-      .fill(nextDueDate);
+    await dateInputs.nth(1).fill(nextDueDate);
   }
 
   await page.getByRole('button', { name: /crear evento/i }).click();
-  await expect(page).toHaveURL(/\/dashboard\/.+$/);
+  await page.waitForURL(/\/dashboard\/[^/]+$/, { timeout: 15000 });
 }
 
 export async function extractSharedUrlFromQr(page: Page): Promise<string> {

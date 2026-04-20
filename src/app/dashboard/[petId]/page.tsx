@@ -174,12 +174,6 @@ export default function PetDetailPage() {
   const { events, loading: eventsLoading } = useEvents(petId);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-    }
-  }, [authLoading, router, user]);
-
-  useEffect(() => {
     const fetchPet = async () => {
       try {
         const data = await getPet(petId);
