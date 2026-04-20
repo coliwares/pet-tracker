@@ -6,12 +6,13 @@ import Link from 'next/link';
 import { AlertCircle, ChevronRight } from 'lucide-react';
 import { getCurrentUser, getPets, supabase } from '@/lib/supabase';
 import { EventType } from '@/lib/types';
-import { formatDate, parseLocalDate } from '@/lib/utils';
+import { formatDate, getEventHistoryGroup, parseLocalDate } from '@/lib/utils';
 
 type UpcomingEventRow = {
   id: string;
   pet_id: string;
   title: string;
+  event_date: string;
   next_due_date: string;
   petName: string;
 };
@@ -59,10 +60,10 @@ export function UpcomingDueEventsCard({
 
         const { data, error } = await supabase
           .from('events')
-          .select('id, pet_id, title, next_due_date')
+          .select('id, pet_id, title, event_date, next_due_date')
           .eq('type', type)
           .not('next_due_date', 'is', null)
-          .lte('next_due_date', endDate.toISOString().slice(0, 10))
+          .order('event_date', { ascending: false })
           .order('next_due_date', { ascending: true });
 
         if (error) {
@@ -77,10 +78,28 @@ export function UpcomingDueEventsCard({
           id: string;
           pet_id: string;
           title: string;
+          event_date: string;
           next_due_date: string;
         }>;
 
-        const petIds = Array.from(new Set(baseEvents.map((event) => event.pet_id)));
+        const activeEventsByGroup = new Map<string, UpcomingEventRow>();
+
+        for (const event of baseEvents) {
+          const eventGroupKey = `${event.pet_id}:${getEventHistoryGroup(event.title)}`;
+
+          if (!activeEventsByGroup.has(eventGroupKey)) {
+            activeEventsByGroup.set(eventGroupKey, {
+              ...event,
+              petName: 'Mascota',
+            });
+          }
+        }
+
+        const filteredEvents = Array.from(activeEventsByGroup.values()).filter((event) => {
+          return parseLocalDate(event.next_due_date) <= endDate;
+        });
+
+        const petIds = Array.from(new Set(filteredEvents.map((event) => event.pet_id)));
 
         let petNamesById = new Map<string, string>();
 
@@ -103,10 +122,14 @@ export function UpcomingDueEventsCard({
         }
 
         setEvents(
-          baseEvents.map((event) => ({
+          filteredEvents.map((event) => ({
             ...event,
             petName: petNamesById.get(event.pet_id) ?? 'Mascota',
           }))
+            .sort(
+              (a, b) =>
+                parseLocalDate(a.next_due_date).getTime() - parseLocalDate(b.next_due_date).getTime()
+            )
         );
       } catch (error) {
         console.error(`Error fetching upcoming ${type} events:`, error);

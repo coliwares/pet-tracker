@@ -160,6 +160,8 @@ export async function updateEvent(eventId: string, updates: Partial<Event>) {
     .select()
     .single();
   if (error) throw error;
+
+  await archivePreviousVaccineEvents(data);
   return data;
 }
 

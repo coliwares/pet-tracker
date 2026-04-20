@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useEvents } from '@/hooks/useEvents';
 import { Event, Pet } from '@/lib/types';
 import { createPetShareLink, deletePet, getPet } from '@/lib/supabase';
-import { calculateAge, formatDate, formatDateTime, parseLocalDate } from '@/lib/utils';
+import { calculateAge, formatDate, formatDateTime, getEventHistoryGroup, parseLocalDate } from '@/lib/utils';
 import { Container } from '@/components/ui/Container';
 import { Button } from '@/components/ui/Button';
 import { Loading } from '@/components/ui/Loading';
@@ -41,11 +41,30 @@ function isVaccineEvent(event: Event) {
   return event.type === 'vacuna' && event.title.toLowerCase().includes('vacuna');
 }
 
+function getActiveDueEvents(events: Event[]) {
+  const activeEventsByGroup = new Map<string, Event>();
+
+  for (const event of sortByEventDateDesc(events)) {
+    if (!event.next_due_date) {
+      continue;
+    }
+
+    const eventGroupKey =
+      event.type === 'vacuna' ? getEventHistoryGroup(event.title) : `${event.type}:${event.title}`;
+
+    if (!activeEventsByGroup.has(eventGroupKey)) {
+      activeEventsByGroup.set(eventGroupKey, event);
+    }
+  }
+
+  return Array.from(activeEventsByGroup.values());
+}
+
 function getUpcomingVaccine(events: Event[]) {
   const today = new Date();
 
-  return [...events]
-    .filter((event) => isVaccineEvent(event) && event.next_due_date)
+  return getActiveDueEvents(events)
+    .filter((event) => isVaccineEvent(event))
     .sort(
       (a, b) =>
         parseLocalDate(a.next_due_date as string).getTime() -
@@ -59,7 +78,7 @@ function getLastVisit(events: Event[]) {
 }
 
 function getStatus(events: Event[], nextDueDate: string | null) {
-  const overdueEvents = events.filter((event) => {
+  const overdueEvents = getActiveDueEvents(events).filter((event) => {
     if (!event.next_due_date) {
       return false;
     }
