@@ -3,10 +3,10 @@
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { createEvent } from '@/lib/supabase';
+import { createEvent, updateEvent } from '@/lib/supabase';
 import { Container } from '@/components/ui/Container';
 import { Loading } from '@/components/ui/Loading';
-import { EventForm } from '@/components/event/EventForm';
+import { EventForm, EventFormSubmitOptions } from '@/components/event/EventForm';
 import { Event } from '@/lib/types';
 import { analytics } from '@/lib/analytics';
 import { ArrowLeft } from 'lucide-react';
@@ -25,11 +25,13 @@ export default function NewEventPage() {
     return null;
   }
 
-  const handleSubmit = async (data: Partial<Event>) => {
-    const event = await createEvent(data as Omit<Event, 'id' | 'created_at' | 'updated_at'>);
+  const handleSubmit = async (data: Partial<Event>, options: EventFormSubmitOptions) => {
+    const event =
+      options.mode === 'create'
+        ? await createEvent(data as Omit<Event, 'id' | 'created_at' | 'updated_at'>)
+        : await updateEvent(options.eventId as string, data);
 
-    analytics.createEvent(event.type, Boolean(event.next_due_date));
-    router.push(`/dashboard/${petId}`);
+    return event;
   };
 
   return (
@@ -59,7 +61,16 @@ export default function NewEventPage() {
           </div>
 
           <div className="bg-white p-8 md:p-10 rounded-2xl shadow-card border-2 border-gray-100">
-            <EventForm petId={petId} onSubmit={handleSubmit} submitLabel="Crear Evento" />
+            <EventForm
+              petId={petId}
+              userId={user.id}
+              onSubmit={handleSubmit}
+              onSuccess={(event) => {
+                analytics.createEvent(event.type, Boolean(event.next_due_date));
+                router.push(`/dashboard/${petId}`);
+              }}
+              submitLabel="Crear Evento"
+            />
           </div>
         </div>
       </Container>

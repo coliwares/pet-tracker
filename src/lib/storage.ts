@@ -9,62 +9,51 @@ const BUCKET_NAME = 'pet-photos';
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
+type PetUploadType = 'photo' | 'license';
+type EventUploadType = 'attachment';
+
 /**
  * Valida un archivo antes de subirlo
  */
 export function validateFile(file: File): { valid: boolean; error?: string } {
-  // Validar tamaño
   if (file.size > MAX_FILE_SIZE) {
     return {
       valid: false,
-      error: `El archivo es muy grande. Máximo ${MAX_FILE_SIZE / 1024 / 1024}MB`
+      error: `El archivo es muy grande. Maximo ${MAX_FILE_SIZE / 1024 / 1024}MB`,
     };
   }
 
-  // Validar tipo
   if (!ALLOWED_TYPES.includes(file.type)) {
     return {
       valid: false,
-      error: 'Formato no permitido. Solo JPG, PNG o WebP'
+      error: 'Formato no permitido. Solo JPG, PNG o WebP',
     };
   }
 
   return { valid: true };
 }
 
-/**
- * Sube una foto de mascota a Supabase Storage
- *
- * @param file - Archivo a subir
- * @param userId - ID del usuario
- * @param petId - ID de la mascota
- * @param type - Tipo de archivo ('photo' o 'license')
- * @returns URL pública del archivo o null si falla
- */
-export async function uploadPetPhoto(
+async function uploadImageAsset(
   file: File,
   userId: string,
-  petId: string,
-  type: 'photo' | 'license'
+  entityId: string,
+  type: PetUploadType | EventUploadType
 ): Promise<string | null> {
   try {
-    // Validar archivo
     const validation = validateFile(file);
     if (!validation.valid) {
       throw new Error(validation.error);
     }
 
-    // Generar nombre único: userId/petId-type-timestamp.ext
     const fileExt = file.name.split('.').pop();
     const timestamp = Date.now();
-    const fileName = `${userId}/${petId}-${type}-${timestamp}.${fileExt}`;
+    const fileName = `${userId}/${entityId}-${type}-${timestamp}.${fileExt}`;
 
-    // Subir archivo
     const { data, error } = await supabase.storage
       .from(BUCKET_NAME)
       .upload(fileName, file, {
         cacheControl: '3600',
-        upsert: false
+        upsert: false,
       });
 
     if (error) {
@@ -72,7 +61,6 @@ export async function uploadPetPhoto(
       throw error;
     }
 
-    // Obtener URL pública
     const { data: urlData } = supabase.storage
       .from(BUCKET_NAME)
       .getPublicUrl(data.path);
@@ -85,13 +73,33 @@ export async function uploadPetPhoto(
 }
 
 /**
- * Elimina una foto del storage
- *
- * @param url - URL completa del archivo
+ * Sube una foto o licencia de mascota a Supabase Storage
+ */
+export async function uploadPetPhoto(
+  file: File,
+  userId: string,
+  petId: string,
+  type: PetUploadType
+): Promise<string | null> {
+  return uploadImageAsset(file, userId, petId, type);
+}
+
+/**
+ * Sube una imagen adjunta para un evento medico
+ */
+export async function uploadEventAttachment(
+  file: File,
+  userId: string,
+  eventId: string
+): Promise<string | null> {
+  return uploadImageAsset(file, userId, eventId, 'attachment');
+}
+
+/**
+ * Elimina un archivo del storage a partir de su URL publica
  */
 export async function deletePetPhoto(url: string): Promise<boolean> {
   try {
-    // Extraer path del URL
     const urlObj = new URL(url);
     const path = urlObj.pathname.split(`/${BUCKET_NAME}/`)[1];
 
@@ -116,18 +124,18 @@ export async function deletePetPhoto(url: string): Promise<boolean> {
   }
 }
 
+export async function deleteStorageFile(url: string): Promise<boolean> {
+  return deletePetPhoto(url);
+}
+
 /**
  * Obtiene una URL firmada para un archivo existente
- * Útil cuando el bucket es privado y necesitas mostrar imágenes
- *
- * @param filePath - Path del archivo en Storage (ejemplo: "user-id/pet-id-photo-123.jpg")
- * @returns URL firmada válida por 1 año, o null si falla
+ * Util cuando el bucket es privado y necesitas mostrar imagenes
  */
 export async function getSignedUrl(filePath: string): Promise<string | null> {
   try {
     if (!filePath) return null;
 
-    // Si filePath es una URL completa, extraer solo el path
     let path = filePath;
     if (filePath.includes('/storage/v1/object/')) {
       const parts = filePath.split(`/${BUCKET_NAME}/`);
@@ -136,7 +144,7 @@ export async function getSignedUrl(filePath: string): Promise<string | null> {
 
     const { data, error } = await supabase.storage
       .from(BUCKET_NAME)
-      .createSignedUrl(path, 31536000); // 1 año
+      .createSignedUrl(path, 31536000);
 
     if (error || !data) {
       console.error('Error getting signed URL:', error);
@@ -151,8 +159,7 @@ export async function getSignedUrl(filePath: string): Promise<string | null> {
 }
 
 /**
- * Comprime una imagen antes de subirla (opcional)
- * Útil para reducir tamaño de archivos grandes
+ * Comprime una imagen antes de subirla
  */
 export async function compressImage(file: File, maxWidth: number = 1200): Promise<File> {
   return new Promise((resolve) => {
@@ -168,7 +175,6 @@ export async function compressImage(file: File, maxWidth: number = 1200): Promis
         let width = img.width;
         let height = img.height;
 
-        // Redimensionar si es muy grande
         if (width > maxWidth) {
           height = (height * maxWidth) / width;
           width = maxWidth;
@@ -185,7 +191,7 @@ export async function compressImage(file: File, maxWidth: number = 1200): Promis
             if (blob) {
               const compressedFile = new File([blob], file.name, {
                 type: 'image/jpeg',
-                lastModified: Date.now()
+                lastModified: Date.now(),
               });
               resolve(compressedFile);
             } else {
@@ -193,7 +199,7 @@ export async function compressImage(file: File, maxWidth: number = 1200): Promis
             }
           },
           'image/jpeg',
-          0.85 // Calidad 85%
+          0.85
         );
       };
     };

@@ -5,10 +5,10 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { Event } from '@/lib/types';
-import { supabase } from '@/lib/supabase';
+import { supabase, updateEvent } from '@/lib/supabase';
 import { Container } from '@/components/ui/Container';
 import { Loading } from '@/components/ui/Loading';
-import { EventForm } from '@/components/event/EventForm';
+import { EventForm, EventFormSubmitOptions } from '@/components/event/EventForm';
 import { ArrowLeft } from 'lucide-react';
 
 export default function EditEventPage() {
@@ -57,15 +57,9 @@ export default function EditEventPage() {
     return null;
   }
 
-  const handleSubmit = async (data: Partial<Event>) => {
-    const { error } = await supabase
-      .from('events')
-      .update(data)
-      .eq('id', eventId);
-
-    if (error) throw error;
-
-    router.push(`/dashboard/${petId}`);
+  const handleSubmit = async (data: Partial<Event>, options: EventFormSubmitOptions) => {
+    const updatedEvent = await updateEvent(options.eventId as string, data);
+    return updatedEvent;
   };
 
   return (
@@ -97,8 +91,10 @@ export default function EditEventPage() {
           <div className="bg-white p-8 md:p-10 rounded-2xl shadow-card border-2 border-gray-100">
             <EventForm
               petId={petId}
+              userId={user.id}
               event={event}
               onSubmit={handleSubmit}
+              onSuccess={() => router.push(`/dashboard/${petId}`)}
               submitLabel="Guardar Cambios"
             />
           </div>
