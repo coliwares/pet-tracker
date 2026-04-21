@@ -304,7 +304,7 @@ export function HomeContent() {
                   <span>*</span>
                 </div>
                 <blockquote className="text-base leading-7 text-slate-700">
-                  "{testimonial.quote}"
+                  &ldquo;{testimonial.quote}&rdquo;
                 </blockquote>
                 <figcaption className="mt-5 font-semibold text-slate-950">{testimonial.author}</figcaption>
               </figure>

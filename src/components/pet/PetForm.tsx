@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import { Pet, Species } from '@/lib/types';
 import { SPECIES } from '@/lib/constants';
@@ -334,10 +335,13 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
 
           {photoPreview && (
             <div className="relative inline-block">
-              <img
+              <Image
                 src={photoPreview}
                 alt="Preview"
+                width={128}
+                height={128}
                 className="w-32 h-32 object-cover rounded-xl border-2 border-gray-200"
+                unoptimized
               />
               <button
                 type="button"
@@ -377,10 +381,13 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
 
           {licensePreview && (
             <div className="relative inline-block">
-              <img
+              <Image
                 src={licensePreview}
                 alt="Preview licencia"
+                width={128}
+                height={128}
                 className="w-32 h-32 object-cover rounded-xl border-2 border-gray-200"
+                unoptimized
               />
               <button
                 type="button"

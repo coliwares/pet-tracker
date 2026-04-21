@@ -35,7 +35,6 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
   const [error, setError] = useState('');
   const [nextDueDateTouched, setNextDueDateTouched] = useState(Boolean(event?.next_due_date));
   const [pet, setPet] = useState<Pet | null>(null);
-  const [selectedTitle, setSelectedTitle] = useState('');
 
   useEffect(() => {
     const fetchPet = async () => {
@@ -64,30 +63,25 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
     () => catalogOptions.find((option) => option.title === title) ?? null,
     [catalogOptions, title]
   );
-
-  useEffect(() => {
-    const nextSelection =
+  const selectedTitle = useMemo(
+    () =>
       type === 'otro' || (title && !standardTitles.includes(title))
         ? CUSTOM_TITLE_VALUE
-        : title || '';
+        : title || '',
+    [standardTitles, title, type]
+  );
 
-    setSelectedTitle(nextSelection);
-  }, [standardTitles, title, type]);
-
-  useEffect(() => {
-    const suggestedNextDueDate = applyDueRule(eventDate, selectedCatalogItem?.nextDueRule);
-
-    if (!suggestedNextDueDate) {
-      if (!nextDueDateTouched) {
-        setNextDueDate('');
-      }
-      return;
+  const getSuggestedNextDueDate = (nextEventDate: string, nextTitle: string, nextType = type) => {
+    if (nextType === 'otro' || !nextTitle) {
+      return '';
     }
 
-    if (!nextDueDateTouched || !nextDueDate) {
-      setNextDueDate(suggestedNextDueDate);
-    }
-  }, [eventDate, nextDueDate, nextDueDateTouched, selectedCatalogItem]);
+    const nextCatalogItem = getEventCatalogOptions(EVENT_CATALOG[nextType], pet).find(
+      (option) => option.title === nextTitle
+    );
+
+    return applyDueRule(nextEventDate, nextCatalogItem?.nextDueRule) ?? '';
+  };
 
   const showCustomTitleInput = type === 'otro' || selectedTitle === CUSTOM_TITLE_VALUE;
 
@@ -95,22 +89,28 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
     setType(nextType);
 
     if (nextType === 'otro') {
-      setSelectedTitle(CUSTOM_TITLE_VALUE);
       if (!event || event.type !== 'otro') {
         setTitle('');
+      }
+      if (!nextDueDateTouched) {
+        setNextDueDate('');
       }
       return;
     }
 
     const nextTitles = getEventCatalogOptions(EVENT_CATALOG[nextType], pet).map((option) => option.title);
     if (title && nextTitles.includes(title)) {
-      setSelectedTitle(title);
+      if (!nextDueDateTouched) {
+        setNextDueDate(getSuggestedNextDueDate(eventDate, title, nextType));
+      }
       return;
     }
 
-    setSelectedTitle('');
     if (!event || event.type !== nextType) {
       setTitle('');
+    }
+    if (!nextDueDateTouched) {
+      setNextDueDate('');
     }
   };
 
@@ -133,15 +133,18 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
   }, [pet]);
 
   const handleTitleOptionChange = (value: string) => {
-    setSelectedTitle(value);
-
     if (value === CUSTOM_TITLE_VALUE) {
       setTitle('');
+      if (!nextDueDateTouched) {
+        setNextDueDate('');
+      }
       return;
     }
 
     setTitle(value);
-    setNextDueDateTouched(false);
+    if (!nextDueDateTouched) {
+      setNextDueDate(getSuggestedNextDueDate(eventDate, value));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -238,7 +241,13 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
         {showCustomTitleInput && (
           <Input
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              const nextTitle = e.target.value;
+              setTitle(nextTitle);
+              if (!nextDueDateTouched) {
+                setNextDueDate(getSuggestedNextDueDate(eventDate, nextTitle));
+              }
+            }}
             placeholder="Escribe el título del evento"
             required
           />
@@ -250,7 +259,13 @@ export function EventForm({ petId, event, onSubmit, submitLabel = 'Guardar' }: E
           type="date"
           label="Fecha del evento *"
           value={eventDate}
-          onChange={(e) => setEventDate(e.target.value)}
+          onChange={(e) => {
+            const nextEventDate = e.target.value;
+            setEventDate(nextEventDate);
+            if (!nextDueDateTouched) {
+              setNextDueDate(getSuggestedNextDueDate(nextEventDate, title));
+            }
+          }}
           required
         />
         <p className="text-xs text-gray-500 ml-1">Cuando ocurrió o está programado.</p>

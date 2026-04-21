@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Feedback, FeedbackStatus } from '@/lib/types';
 import {
   getAllFeedback,
@@ -14,7 +14,7 @@ export function useFeedbackAdmin(filters: { type: string; status: string }) {
   const [error, setError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const fetchAdminStatus = async () => {
+  const fetchAdminStatus = useCallback(async () => {
     try {
       const data = await getFeedbackAdminStatus();
       setIsAdmin(data.isAdmin);
@@ -23,9 +23,9 @@ export function useFeedbackAdmin(filters: { type: string; status: string }) {
       setIsAdmin(false);
       return false;
     }
-  };
+  }, []);
 
-  const fetchFeedback = async () => {
+  const fetchFeedback = useCallback(async () => {
     try {
       setLoading(true);
       const admin = await fetchAdminStatus();
@@ -44,11 +44,15 @@ export function useFeedbackAdmin(filters: { type: string; status: string }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchAdminStatus, filters]);
 
   useEffect(() => {
-    fetchFeedback();
-  }, [filters.status, filters.type]);
+    const timeoutId = setTimeout(() => {
+      void fetchFeedback();
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
+  }, [fetchFeedback]);
 
   const updateStatus = async (feedbackId: string, status: FeedbackStatus) => {
     const updated = await updateFeedbackStatus(feedbackId, status);

@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import { PawPrint } from 'lucide-react';
 
@@ -31,11 +32,14 @@ export function PetPhoto({
   }
 
   return (
-    <img
+    <Image
       src={photoUrl}
       alt={name}
+      width={160}
+      height={160}
       className={`${sizeClassName} ${imageClassName}`}
       onError={() => setImageError(true)}
+      unoptimized
     />
   );
 }

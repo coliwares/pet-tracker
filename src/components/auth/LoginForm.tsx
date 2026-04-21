@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 
@@ -24,13 +24,6 @@ function getErrorMessage(initialError?: string) {
 export function LoginForm({ initialError = '', isDemo = false }: LoginFormProps) {
   const [email, setEmail] = useState(() => (isDemo ? 'test@pettrack.cl' : ''));
   const [password, setPassword] = useState(() => (isDemo ? 'pettrack' : ''));
-
-  useEffect(() => {
-    if (isDemo) {
-      setEmail('test@pettrack.cl');
-      setPassword('pettrack');
-    }
-  }, [isDemo]);
 
   return (
     <form action="/auth/login" method="post" className="space-y-6">

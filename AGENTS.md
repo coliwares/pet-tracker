@@ -32,6 +32,7 @@ Priorizar:
 - No cambiar migraciones existentes sin explicar impacto.
 - No modificar variables de entorno ni credenciales reales.
 - Para cambios grandes, proponer plan corto antes de editar.
+- una vez ejecutados los test correctamente elimina los datos creados.
 
 ## QA esperado
 - Para bugs: incluir reproducción, causa probable y fix.

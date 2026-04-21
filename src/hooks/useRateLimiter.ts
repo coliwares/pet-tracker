@@ -43,7 +43,7 @@ export function useRateLimiter({
     setBlockedUntil(null);
   }, []);
 
-  const isBlocked = blockedUntil !== null && Date.now() < blockedUntil;
+  const isBlocked = blockedUntil !== null;
 
   return {
     checkLimit,

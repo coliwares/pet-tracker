@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Feedback } from '@/lib/types';
 import { createFeedback, getFeedback, supabase } from '@/lib/supabase';
 
@@ -9,7 +9,7 @@ export function useFeedback() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchFeedback = async () => {
+  const fetchFeedback = useCallback(async () => {
     try {
       setLoading(true);
       const {
@@ -29,11 +29,15 @@ export function useFeedback() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchFeedback();
-  }, []);
+    const timeoutId = setTimeout(() => {
+      void fetchFeedback();
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
+  }, [fetchFeedback]);
 
   const add = async (payload: Omit<Feedback, 'id' | 'status' | 'created_at' | 'updated_at'>) => {
     const created = await createFeedback(payload);

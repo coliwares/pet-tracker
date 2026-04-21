@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -399,10 +400,13 @@ export default function PetDetailPage() {
                 <div className="mt-6 flex items-center gap-4 rounded-[1.5rem] bg-white/8 p-4">
                   <div className="flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-[1.35rem] bg-white p-2">
                     {qrCodeUrl ? (
-                      <img
+                      <Image
                         src={qrCodeUrl}
                         alt={`QR para compartir el carnet de ${pet.name}`}
+                        width={96}
+                        height={96}
                         className="h-full w-full rounded-lg object-contain"
+                        unoptimized
                       />
                     ) : (
                       <QrCode className="h-10 w-10 text-slate-400" />
