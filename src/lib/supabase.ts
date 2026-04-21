@@ -1,5 +1,12 @@
 import { createBrowserClient } from '@supabase/auth-helpers-nextjs';
-import { Pet, Event, Feedback, FeedbackStatus, PetShareLinkResponse } from './types';
+import {
+  Pet,
+  Event,
+  Feedback,
+  FeedbackStatus,
+  PetShareLinkResponse,
+  BetaAccessRequest,
+} from './types';
 import { getEventHistoryGroup } from './utils';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -288,6 +295,82 @@ export async function createPetShareLink(petId: string) {
   }
 
   return (await response.json()) as PetShareLinkResponse;
+}
+
+export async function getBetaAccessRequests(filters?: {
+  status?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}) {
+  const token = await getAccessToken();
+  const params = new URLSearchParams();
+
+  if (filters?.status && filters.status !== 'all') {
+    params.set('status', filters.status);
+  }
+
+  if (filters?.dateFrom) {
+    params.set('dateFrom', filters.dateFrom);
+  }
+
+  if (filters?.dateTo) {
+    params.set('dateTo', filters.dateTo);
+  }
+
+  const query = params.toString();
+  const response = await fetch(`/api/beta-access-request/admin${query ? `?${query}` : ''}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(payload?.error ?? 'No se pudieron cargar las solicitudes beta');
+  }
+
+  const payload = (await response.json()) as { requests: BetaAccessRequest[] };
+  return payload.requests;
+}
+
+export async function approveBetaAccessRequest(requestId: string) {
+  const token = await getAccessToken();
+  const response = await fetch('/api/beta-access-request/admin', {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ requestId, action: 'approve' }),
+  });
+
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(payload?.error ?? 'No se pudo aprobar la solicitud');
+  }
+
+  const payload = (await response.json()) as { request: BetaAccessRequest };
+  return payload.request;
+}
+
+export async function rejectBetaAccessRequest(requestId: string) {
+  const token = await getAccessToken();
+  const response = await fetch('/api/beta-access-request/admin', {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ requestId, action: 'reject' }),
+  });
+
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(payload?.error ?? 'No se pudo rechazar la solicitud');
+  }
+
+  const payload = (await response.json()) as { request: BetaAccessRequest };
+  return payload.request;
 }
 
 // Storage

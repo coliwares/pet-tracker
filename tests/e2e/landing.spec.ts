@@ -31,12 +31,12 @@ test.describe('Landing', () => {
     await expect(page.locator('input[type="email"]')).toHaveValue(/test@pettrack\.cl/i);
   });
 
-  test('signup informa que el registro está temporalmente cerrado', async ({ page }) => {
+  test('signup informa que el registro esta temporalmente cerrado y permite pedir acceso', async ({ page }) => {
     await page.goto('/signup');
 
     await expect(
       page.getByRole('heading', { name: /registro temporalmente cerrado/i })
     ).toBeVisible();
-    await expect(page.getByRole('button', { name: /proximamente/i })).toBeDisabled();
+    await expect(page.getByRole('button', { name: /solicitar acceso beta/i })).toBeEnabled();
   });
 });

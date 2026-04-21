@@ -236,5 +236,26 @@ export const FEEDBACK_STATUS_COLORS = {
   resuelto: 'bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border-2 border-emerald-200',
 } as const;
 
+export const BETA_ACCESS_REQUEST_STATUSES = [
+  'nuevo',
+  'contactado',
+  'aprobado',
+  'rechazado',
+] as const;
+
+export const BETA_ACCESS_REQUEST_STATUS_LABELS = {
+  nuevo: 'Nuevo',
+  contactado: 'Contactado',
+  aprobado: 'Aprobado',
+  rechazado: 'Rechazado',
+} as const;
+
+export const BETA_ACCESS_REQUEST_STATUS_COLORS = {
+  nuevo: 'bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-700 border-2 border-amber-200',
+  contactado: 'bg-gradient-to-r from-sky-50 to-cyan-50 text-sky-700 border-2 border-sky-200',
+  aprobado: 'bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border-2 border-emerald-200',
+  rechazado: 'bg-gradient-to-r from-rose-50 to-red-50 text-rose-700 border-2 border-rose-200',
+} as const;
+
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 export const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];

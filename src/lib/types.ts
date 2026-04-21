@@ -54,6 +54,25 @@ export type Feedback = {
   updated_at: string;
 };
 
+export type BetaAccessRequestStatus = 'nuevo' | 'contactado' | 'aprobado' | 'rechazado';
+
+export type BetaAccessRequest = {
+  id: string;
+  email: string;
+  email_normalized: string;
+  full_name: string;
+  reason: string;
+  source: string;
+  status: BetaAccessRequestStatus;
+  request_count: number;
+  last_requested_at: string;
+  approved_at: string | null;
+  approved_by_email: string | null;
+  invited_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type AuthUser = {
   id: string;
   email: string | undefined;

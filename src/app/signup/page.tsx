@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { SignupForm } from '@/components/auth/SignupForm';
+import { BetaAccessRequestForm } from '@/components/auth/BetaAccessRequestForm';
 import { Container } from '@/components/ui/Container';
 
 export default function SignupPage() {
@@ -26,7 +26,7 @@ export default function SignupPage() {
         </div>
 
         <div className="bg-white p-8 rounded-2xl shadow-card border-2 border-gray-100">
-          <SignupForm />
+          <BetaAccessRequestForm />
 
           <div className="mt-8 pt-6 border-t-2 border-gray-100 text-center">
             <p className="text-gray-600">
