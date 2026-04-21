@@ -22,15 +22,45 @@ export default function SetPasswordPage() {
         data: { session },
       } = await supabase.auth.getSession();
 
-      if (!session) {
-        router.replace('/login?error=validation');
+      if (session) {
+        setCheckingSession(false);
         return;
       }
 
-      setCheckingSession(false);
+      // En enlaces de invitacion, la sesion puede establecerse unos instantes despues.
+      const { data: subscription } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+        if (nextSession) {
+          setCheckingSession(false);
+        }
+      });
+
+      const timeoutId = setTimeout(async () => {
+        const {
+          data: { session: fallbackSession },
+        } = await supabase.auth.getSession();
+
+        if (fallbackSession) {
+          setCheckingSession(false);
+          return;
+        }
+
+        router.replace('/login?error=invite-link');
+      }, 4000);
+
+      return () => {
+        subscription.subscription.unsubscribe();
+        clearTimeout(timeoutId);
+      };
     };
 
-    void verifySession();
+    let cleanup: (() => void) | undefined;
+    void verifySession().then((maybeCleanup) => {
+      cleanup = maybeCleanup;
+    });
+
+    return () => {
+      cleanup?.();
+    };
   }, [router]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
