@@ -129,7 +129,10 @@ export async function PATCH(request: NextRequest) {
     }
 
     const email = betaRequest.email_normalized;
-    const { error: inviteError } = await supabase.auth.admin.inviteUserByEmail(email);
+    const origin = request.nextUrl.origin;
+    const { error: inviteError } = await supabase.auth.admin.inviteUserByEmail(email, {
+      redirectTo: `${origin}/auth/callback?next=/auth/set-password`,
+    });
     if (inviteError && !isExistingUserError(inviteError.message)) {
       throw inviteError;
     }

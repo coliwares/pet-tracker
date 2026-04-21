@@ -7,9 +7,26 @@ export function LoginPageContent() {
   const searchParams = useSearchParams();
   const isDemo = searchParams.get('demo') === 'true';
   const initialError = searchParams.get('error') ?? '';
+  const passwordUpdated = searchParams.get('password') === 'updated';
 
   return (
     <>
+      {passwordUpdated && (
+        <div className="mb-6 bg-gradient-to-r from-emerald-50 to-green-50 border-2 border-emerald-300 rounded-2xl p-5 animate-fade-in">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl" aria-hidden="true">
+              ●
+            </span>
+            <div className="flex-1">
+              <h3 className="font-bold text-emerald-900 text-base mb-1">Contraseña actualizada</h3>
+              <p className="text-emerald-800 text-sm">
+                Tu contraseña fue configurada correctamente. Ya puedes ingresar.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isDemo && (
         <div className="mb-6 bg-gradient-to-r from-emerald-50 to-green-50 border-2 border-emerald-300 rounded-2xl p-5 animate-fade-in">
           <div className="flex items-start gap-3">
