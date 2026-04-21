@@ -1,15 +1,24 @@
 # .codex/config.toml
+
+# Perfil por defecto: útil para trabajo normal con escritura habilitada.
 model = "gpt-5.4"
-approval_policy = "untrusted"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
 
 [profiles.review]
+# Revisión más estricta y en solo lectura.
 model = "gpt-5.4"
 approval_policy = "untrusted"
+sandbox_mode = "read-only"
 
 [profiles.refactor]
+# Refactors con capacidad de editar archivos del workspace.
 model = "gpt-5.4"
 approval_policy = "on-request"
+sandbox_mode = "workspace-write"
 
 [profiles.heavy]
+# Trabajo largo o de mayor alcance con escritura habilitada.
 model = "gpt-5.4"
 approval_policy = "on-request"
+sandbox_mode = "workspace-write"

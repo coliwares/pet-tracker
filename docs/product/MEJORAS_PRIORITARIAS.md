@@ -619,51 +619,55 @@ const handleCreatePet = async () => {
 
 ---
 
-## ✅ CHECKLIST DE IMPLEMENTACIÓN
+## CHECKLIST DE IMPLEMENTACION
 
-### Semana 1
-- [x] **Landing Page Mejorada**
-  - [x] Reemplazar HomeContent.tsx
-  - [x] Probar en mobile/desktop
-  - [x] Validar enlaces CTA
-  
-- [x] **Notificaciones de Vacunas**
-  - [x] Crear UpcomingVaccinesCard.tsx
-  - [x] Agregar al dashboard
-  - [x] Probar con eventos de prueba
-  
-- [x] **Fotos de Mascotas**
-  - [x] Crear fallback de foto de mascota (`PetPhoto.tsx`)
-  - [x] Modificar `PetCard.tsx`
-  - [x] Probar upload y display
+### Completado hasta ahora
+- [x] **Landing page mejorada**
+- [x] Home renovada en `src/components/home/HomeContent.tsx`
+- [x] Hero, beneficios, testimonios y CTAs principales implementados
+- [x] Flujo de demo y acceso existente reflejado en la landing actual
+- [x] Cobertura e2e para landing en `tests/e2e/landing.spec.ts`
 
-- [ ] **Analytics Básicas**
-  - [x] Crear analytics.ts
-  - [x] Integrar en auth/pet flows
-  - [ ] Validar tracking
+- [x] **Notificaciones de vacunas**
+- [x] `src/components/home/UpcomingVaccinesCard.tsx` agregado al dashboard
+- [x] Tarjeta reutilizable en `src/components/home/UpcomingDueEventsCard.tsx`
+- [x] Nombre real de mascota resuelto en recordatorios
+- [x] Eventos vencidos resaltados en rojo
 
-### Hecho hoy
-- [x] Agregar tarjeta de controles veterinarios prÃ³ximos en dashboard
-- [x] Resaltar en rojo vacunas y visitas atrasadas
-- [x] Resolver nombre real de la mascota en tarjetas de recordatorios
-- [x] Actualizar documentaciÃ³n de Storage a bucket pÃºblico
-- [x] Limpiar archivos viejos al reemplazar foto o licencia
-- [x] Evitar archivos huÃ©rfanos al crear mascotas nuevas
-- [x] Agregar fallback visual cuando falla la carga de una foto
-- [x] Normalizar tÃ­tulos de eventos con dropdown y opciÃ³n `Otro`
-- [x] Autocompletar fecha del evento con hoy en nuevos registros
-- [x] Sugerir `prÃ³xima dosis / revisiÃ³n` segÃºn tipo de vacuna o control
-- [x] Afinar calendario veterinario por especie, cachorro/gatito, adulto y refuerzos
-- [x] Evitar duplicaciÃ³n de vacunas en historial, incluyendo series de cachorro y gatito
-- [x] Dejar TODO futuro para gamificaciÃ³n con badges
-### Semana 2
+- [x] **Controles veterinarios proximos**
+- [x] `src/components/home/UpcomingVisitsCard.tsx` agregado al dashboard
+- [x] Misma logica de proximidad y vencimiento aplicada a visitas
+
+- [x] **Fotos de mascotas**
+- [x] Fallback visual implementado con `src/components/pet/PetPhoto.tsx`
+- [x] `src/components/pet/PetCard.tsx` actualizado para mostrar foto real o fallback
+- [x] Display de fotos desde Storage documentado con bucket publico
+- [x] Limpieza de archivos viejos y prevencion de huerfanos ya considerada en el flujo actual
+
+- [x] **Analytics basicas**
+- [x] `src/lib/analytics.ts` creado
+- [x] Integracion real con Google Analytics / `gtag`
+- [x] Tracking conectado a signup, login, creacion de mascota y creacion de evento
+- [x] `src/components/analytics/GoogleAnalytics.tsx` montado en `src/app/layout.tsx`
+
+- [x] **Mejoras de formularios y eventos**
+- [x] Dropdown con opcion `Otro` para titulos de eventos
+- [x] Fecha del evento autocompletada con el dia actual en nuevos registros
+- [x] Sugerencia de proxima dosis o revision segun tipo de evento
+- [x] Calendario veterinario ajustado por especie y etapa
+- [x] Dedupe de vacunas en historial, incluyendo series de cachorro y gatito
+
+- [x] **Testing automatizado**
+- [x] Suite e2e presente con Playwright
+- [x] Casos para auth, landing y flujo mascotas/eventos/share en `tests/e2e`
+
+### Pendiente real
 - [ ] **Onboarding** (siguiente fase)
-- [ ] **Búsqueda/Filtro** (siguiente fase)
-- [ ] **Testing Automatizado** (siguiente fase)
-- [ ] **GamificaciÃ³n con badges** (TODO futuro)
-  - DiseÃ±ar insignias segÃºn comportamiento responsable del tutor con la mascota
-  - Ejemplos: vacunas al dÃ­a, controles a tiempo, historial completo, adherencia a tratamientos
-
+- [ ] **Busqueda / filtro** (siguiente fase)
+- [ ] **Validacion final de analytics en entorno productivo** (pendiente de QA funcional)
+- [ ] **Gamificacion con badges** (TODO futuro)
+- [ ] Disenar insignias segun comportamiento responsable del tutor con la mascota
+- [ ] Ejemplos: vacunas al dia, controles a tiempo, historial completo, adherencia a tratamientos
 ---
 ## MODULOS FUTUROS
 
