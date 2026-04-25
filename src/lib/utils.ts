@@ -84,10 +84,10 @@ export function formatPetAge(birthDate: string | null): string | null {
     const remainingMonths = differenceInMonths(today, anniversary);
 
     if (remainingMonths > 0) {
-      return `${years} ${years === 1 ? 'ano' : 'anos'} y ${remainingMonths} ${remainingMonths === 1 ? 'mes' : 'meses'}`;
+      return `${years} ${years === 1 ? 'a\u00f1o' : 'a\u00f1os'} y ${remainingMonths} ${remainingMonths === 1 ? 'mes' : 'meses'}`;
     }
 
-    return `${years} ${years === 1 ? 'ano' : 'anos'}`;
+    return `${years} ${years === 1 ? 'a\u00f1o' : 'a\u00f1os'}`;
   }
 
   const months = differenceInMonths(today, birthDateValue);
@@ -96,13 +96,13 @@ export function formatPetAge(birthDate: string | null): string | null {
 
   if (months > 0) {
     if (remainingDays > 0) {
-      return `${months} ${months === 1 ? 'mes' : 'meses'} y ${remainingDays} ${remainingDays === 1 ? 'dia' : 'dias'}`;
+      return `${months} ${months === 1 ? 'mes' : 'meses'} y ${remainingDays} ${remainingDays === 1 ? 'd\u00eda' : 'd\u00edas'}`;
     }
 
     return `${months} ${months === 1 ? 'mes' : 'meses'}`;
   }
 
-  return `${remainingDays} ${remainingDays === 1 ? 'dia' : 'dias'}`;
+  return `${remainingDays} ${remainingDays === 1 ? 'd\u00eda' : 'd\u00edas'}`;
 }
 
 type PetLifeStage = {
