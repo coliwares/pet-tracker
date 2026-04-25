@@ -73,6 +73,29 @@ export type BetaAccessRequest = {
   updated_at: string;
 };
 
+export type TutorProfile = {
+  user_id: string;
+  full_name: string;
+  phone: string;
+  city: string | null;
+  address: string | null;
+  emergency_contact_name: string | null;
+  emergency_contact_phone: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TutorProfileInput = {
+  full_name: string;
+  phone: string;
+  city: string | null;
+  address: string | null;
+  emergency_contact_name: string | null;
+  emergency_contact_phone: string | null;
+  notes: string | null;
+};
+
 export type AuthUser = {
   id: string;
   email: string | undefined;

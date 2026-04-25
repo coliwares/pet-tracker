@@ -6,7 +6,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/Button';
 import { FeedbackModal } from '@/components/feedback/FeedbackModal';
 import { getFeedbackAdminStatus } from '@/lib/supabase';
-import { LayoutDashboard, LogOut, MessageSquareMore, PawPrint, ShieldCheck } from 'lucide-react';
+import {
+  CircleUserRound,
+  LayoutDashboard,
+  LogOut,
+  MessageSquareMore,
+  PawPrint,
+  ShieldCheck,
+} from 'lucide-react';
 
 export function Header() {
   const { user, signOut } = useAuth();
@@ -68,10 +75,28 @@ export function Header() {
                     </Button>
                   </Link>
                 )}
-                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-lg">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium text-gray-700">{user.email}</span>
-                </div>
+                <Link
+                  href="/dashboard/profile"
+                  className="hidden sm:flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 transition-colors hover:border-blue-200 hover:bg-blue-100/70"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <CircleUserRound className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-blue-600">
+                      Mi perfil
+                    </p>
+                    <p className="max-w-44 truncate text-sm font-medium text-gray-700">
+                      {user.email}
+                    </p>
+                  </div>
+                </Link>
+                <Link href="/dashboard/profile" className="md:hidden">
+                  <Button variant="ghost" size="sm">
+                    <CircleUserRound className="h-4 w-4" />
+                  </Button>
+                </Link>
                 <Button variant="secondary" size="sm" onClick={() => setIsFeedbackModalOpen(true)}>
                   <MessageSquareMore className="h-4 w-4 mr-2" />
                   Feedback

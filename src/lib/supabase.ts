@@ -6,6 +6,8 @@ import {
   FeedbackStatus,
   PetShareLinkResponse,
   BetaAccessRequest,
+  TutorProfile,
+  TutorProfileInput,
 } from './types';
 import { getEventHistoryGroup } from './utils';
 
@@ -371,6 +373,24 @@ export async function rejectBetaAccessRequest(requestId: string) {
 
   const payload = (await response.json()) as { request: BetaAccessRequest };
   return payload.request;
+}
+
+export async function updateTutorProfile(profile: TutorProfileInput) {
+  const response = await fetch('/api/tutor-profile', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(profile),
+  });
+
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(payload?.error ?? 'No se pudo guardar el perfil del tutor');
+  }
+
+  const payload = (await response.json()) as { profile: TutorProfile };
+  return payload.profile;
 }
 
 // Storage
