@@ -96,7 +96,7 @@ export function TutorProfileForm({
             Datos del tutor responsable
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Este perfil nos ayuda a mostrar mejor el contexto del tutor y a dejar un contacto claro cuando compartes informacion de tus mascotas.
+            Este perfil nos ayuda a mostrar mejor el contexto del tutor y a dejar un contacto claro cuando compartes información de tus mascotas.
           </p>
         </div>
 
@@ -259,7 +259,7 @@ export function TutorProfileForm({
           </div>
           <h3 className="mt-4 text-xl font-black tracking-tight">Para que sirve este perfil</h3>
           <p className="mt-2 text-sm leading-6 text-slate-200">
-            Te deja lista la informacion del tutor para futuros flujos de contacto, contexto compartido y mejoras del carnet.
+            Te deja lista la información del tutor para futuros flujos de contacto, contexto compartido y mejoras del carnet.
           </p>
         </section>
       </aside>
