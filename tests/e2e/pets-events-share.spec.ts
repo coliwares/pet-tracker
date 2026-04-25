@@ -18,7 +18,7 @@ test.describe('Mascotas, eventos y enlace compartido', () => {
       page.getByRole('heading', { name: new RegExp(petName, 'i') })
     ).toBeVisible({ timeout: 15000 });
     await expect(page.getByText(/qr listo/i).first()).toBeVisible({ timeout: 15000 });
-    await expect(page.getByText(/historial medico/i).first()).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(/historial m[eé]dico/i).first()).toBeVisible({ timeout: 15000 });
   });
 
   test('muestra eventos atrasados cuando existe al menos un recordatorio vencido', async ({ page }) => {
@@ -57,6 +57,6 @@ test.describe('Mascotas, eventos y enlace compartido', () => {
 
     await expect(sharedPage.getByRole('heading', { name: new RegExp(petName, 'i') })).toBeVisible();
     await expect(sharedPage.getByText(/carnet compartido/i)).toBeVisible();
-    await expect(sharedPage.getByText(/publico y de solo lectura/i)).toBeVisible();
+    await expect(sharedPage.getByText(/p[uú]blico y de solo lectura/i)).toBeVisible();
   });
 });

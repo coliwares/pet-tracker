@@ -245,23 +245,23 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-100 rounded-2xl p-4 mb-6">
         <p className="text-sm font-semibold text-gray-700">
-          💡 <span className="text-blue-600">Tip:</span> Los campos marcados con * son obligatorios
+          Tip: <span className="text-blue-600">los campos marcados con *</span> son obligatorios
         </p>
       </div>
 
       <div className="space-y-1">
         <Input
-          label="🐾 Nombre *"
+          label="Nombre *"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Ej: Max, Luna, Rocky..."
+          placeholder="Ej.: Max, Luna, Rocky..."
           required
         />
       </div>
 
       <div className="space-y-2">
         <label className="block text-sm font-semibold text-gray-700 mb-2">
-          🏷️ Especie *
+          Especie *
         </label>
         <select
           value={species}
@@ -279,38 +279,38 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
 
       <div className="space-y-1">
         <Input
-          label="🐕 Raza"
+          label="Raza"
           value={breed}
           onChange={(e) => setBreed(e.target.value)}
-          placeholder="Ej: Labrador, Persa, etc."
+          placeholder="Ej.: Labrador, Persa, etc."
         />
-        <p className="text-xs text-gray-500 ml-1">Opcional - Si conoces la raza específica</p>
+        <p className="text-xs text-gray-500 ml-1">Opcional. Si conoces la raza específica.</p>
       </div>
 
       <div className="space-y-1">
         <Input
           type="date"
-          label="📅 Fecha de nacimiento"
+          label="Fecha de nacimiento"
           value={birthDate}
           onChange={(e) => setBirthDate(e.target.value)}
         />
-        <p className="text-xs text-gray-500 ml-1">Calcularemos automáticamente la edad</p>
+        <p className="text-xs text-gray-500 ml-1">Calcularemos automáticamente la edad.</p>
       </div>
 
       <div className="space-y-1">
         <Input
           type="number"
           step="0.01"
-          label="⚖️ Peso (kg)"
+          label="Peso (kg)"
           value={weight}
           onChange={(e) => setWeight(e.target.value)}
-          placeholder="Ej: 5.5, 12.3, 30.0"
+          placeholder="Ej.: 5.5, 12.3, 30.0"
         />
       </div>
 
       <div className="space-y-2">
         <label className="block text-sm font-semibold text-gray-700 mb-2">
-          💬 Notas adicionales
+          Notas adicionales
         </label>
         <textarea
           value={notes}
@@ -319,18 +319,18 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
           rows={4}
           className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 text-base bg-white hover:border-gray-300 resize-none"
         />
-        <p className="text-xs text-gray-500 ml-1">Ej: Alérgico al pollo, toma medicamentos diarios, etc.</p>
+        <p className="text-xs text-gray-500 ml-1">Ej.: Alérgico al pollo, toma medicamentos diarios, etc.</p>
       </div>
 
       {/* Sección de archivos */}
       <div className="border-t-2 border-gray-100 pt-6 space-y-6">
         <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-          📸 Imágenes
+          Imágenes
         </h3>
 
         <div className="space-y-3">
           <label className="block text-sm font-semibold text-gray-700">
-            🐾 Foto de la mascota
+            Foto de la mascota
           </label>
 
           {photoPreview && (
@@ -370,13 +370,13 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
               file:cursor-pointer file:transition-all"
           />
           <p className="text-xs text-gray-500">
-            JPG, PNG o WebP · Máximo 5MB · Se comprimirá automáticamente
+            JPG, PNG o WebP · Máximo 5 MB · Se comprimirá automáticamente
           </p>
         </div>
 
         <div className="space-y-3">
           <label className="block text-sm font-semibold text-gray-700">
-            📄 Licencia de registro municipal
+            Licencia de registro municipal
           </label>
 
           {licensePreview && (
@@ -433,7 +433,7 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
 
       {error && (
         <div className="bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-300 text-red-700 px-4 py-3 rounded-xl font-medium animate-fade-in">
-          ⚠️ {error}
+          {error}
         </div>
       )}
 
@@ -447,7 +447,7 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
             Guardando...
           </span>
         ) : (
-          <span>✨ {submitLabel}</span>
+          <span>{submitLabel}</span>
         )}
       </Button>
     </form>

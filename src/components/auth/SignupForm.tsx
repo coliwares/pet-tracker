@@ -161,7 +161,7 @@ export function SignupForm() {
         type="submit"
         className="w-full text-lg py-4 mt-8"
         disabled={true}
-        aria-label="Proximamente"
+        aria-label="Próximamente"
       >
         <span className="flex items-center justify-center gap-2">Próximamente</span>
       </Button>

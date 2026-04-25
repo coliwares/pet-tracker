@@ -36,7 +36,7 @@ export function LoginPageContent() {
             <div className="flex-1">
               <h3 className="font-bold text-emerald-900 text-base mb-1">Cuenta Demo Precargada</h3>
               <p className="text-emerald-800 text-sm">
-                Los campos han sido rellenados automáticamente. Solo haz click en
+                Los campos han sido rellenados automáticamente. Solo haz clic en
                 {' '}
                 &quot;Ingresar&quot;
                 {' '}

@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     const formLoadedAt = body.formLoadedAt ?? 0;
     if (!Number.isFinite(formLoadedAt) || Date.now() - formLoadedAt < MIN_FORM_FILL_MS) {
-      return NextResponse.json({ error: 'Solicitud invalida' }, { status: 400 });
+      return NextResponse.json({ error: 'Solicitud inválida' }, { status: 400 });
     }
 
     const name = sanitizeText(body.name);
@@ -60,13 +60,13 @@ export async function POST(request: NextRequest) {
 
     if (name.length < MIN_NAME_LENGTH || name.length > MAX_NAME_LENGTH) {
       return NextResponse.json(
-        { error: 'Nombre invalido. Debe tener entre 2 y 80 caracteres.' },
+        { error: 'Nombre inválido. Debe tener entre 2 y 80 caracteres.' },
         { status: 400 }
       );
     }
 
     if (!validateEmail(email)) {
-      return NextResponse.json({ error: 'Email invalido.' }, { status: 400 });
+      return NextResponse.json({ error: 'Email inválido.' }, { status: 400 });
     }
 
     if (reason.length < MIN_REASON_LENGTH || reason.length > MAX_REASON_LENGTH) {

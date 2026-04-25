@@ -80,7 +80,7 @@ export function EventCard({ event }: EventCardProps) {
           <div className="mt-3 rounded-xl border-2 border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 p-3">
             <span className="flex items-center gap-2 font-bold text-amber-800">
               <span className="text-lg">⏰</span>
-              Proxima dosis: {formatDate(event.next_due_date)}
+              Próxima dosis: {formatDate(event.next_due_date)}
             </span>
           </div>
         )}
@@ -117,7 +117,7 @@ export function EventCard({ event }: EventCardProps) {
 
         {event.notes && (
           <p className="mt-3 rounded-lg border border-gray-100 bg-gray-50 p-3 text-sm italic text-gray-600">
-            💬 {event.notes}
+            {event.notes}
           </p>
         )}
 

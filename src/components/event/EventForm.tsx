@@ -177,7 +177,7 @@ export function EventForm({
     setError('');
 
     if (!title.trim()) {
-      setError('El titulo es obligatorio');
+      setError('El título es obligatorio');
       return;
     }
 
@@ -312,9 +312,9 @@ export function EventForm({
       </div>
 
       <div className="space-y-2">
-        <label className="mb-2 block text-sm font-semibold text-gray-700">Titulo *</label>
+        <label className="mb-2 block text-sm font-semibold text-gray-700">Título *</label>
         {type === 'otro' ? (
-          <p className="ml-1 text-xs text-gray-500">Este tipo de evento usa un titulo personalizado.</p>
+          <p className="ml-1 text-xs text-gray-500">Este tipo de evento usa un título personalizado.</p>
         ) : (
           <>
             {petContextLabel && (
@@ -327,7 +327,7 @@ export function EventForm({
               required
             >
               <option value="" disabled>
-                Selecciona un titulo
+                Selecciona un título
               </option>
               {standardTitles.map((option) => (
                 <option key={option} value={option}>
@@ -348,7 +348,7 @@ export function EventForm({
                 setNextDueDate(getSuggestedNextDueDate(eventDate, nextTitle));
               }
             }}
-            placeholder="Escribe el titulo del evento"
+            placeholder="Escribe el título del evento"
             required
           />
         )}
@@ -368,11 +368,11 @@ export function EventForm({
           }}
           required
         />
-        <p className="ml-1 text-xs text-gray-500">Cuando ocurrio o esta programado.</p>
+        <p className="ml-1 text-xs text-gray-500">Cuando ocurrió o está programado.</p>
       </div>
 
       <div className="space-y-2">
-        <label className="mb-2 block text-sm font-semibold text-gray-700">Descripcion</label>
+        <label className="mb-2 block text-sm font-semibold text-gray-700">Descripción</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -386,7 +386,7 @@ export function EventForm({
       <div className="space-y-1">
         <Input
           type="date"
-          label="Proxima dosis / revision"
+          label="Próxima dosis / revisión"
           value={nextDueDate}
           onChange={(e) => {
             setNextDueDate(e.target.value);
@@ -394,7 +394,7 @@ export function EventForm({
           }}
         />
         <p className="ml-1 text-xs text-gray-500">
-          Opcional. Se completa automaticamente para vacunas y controles estandar, pero puedes ajustarla.
+          Opcional. Se completa automáticamente para vacunas y controles estándar, pero puedes ajustarla.
         </p>
       </div>
 
@@ -413,7 +413,7 @@ export function EventForm({
         <div>
           <h3 className="text-lg font-bold text-gray-800">Imagen adjunta</h3>
           <p className="mt-1 text-sm text-gray-500">
-            Puedes adjuntar una imagen como certificado de vacunas, receta o indicacion medica.
+            Puedes adjuntar una imagen como certificado de vacunas, receta o indicación médica.
           </p>
         </div>
 
@@ -451,7 +451,7 @@ export function EventForm({
 
             const validation = validateFile(file);
             if (!validation.valid) {
-              setError(validation.error || 'Archivo invalido');
+              setError(validation.error || 'Archivo inválido');
               return;
             }
 
@@ -467,7 +467,7 @@ export function EventForm({
             hover:file:border-emerald-300 hover:file:bg-emerald-100"
         />
         <p className="text-xs text-gray-500">
-          Solo imagenes JPG, PNG o WebP · Maximo 5MB · Se comprime automaticamente antes de subir
+          Solo imágenes JPG, PNG o WebP · Máximo 5 MB · Se comprime automáticamente antes de subir
         </p>
       </div>
 

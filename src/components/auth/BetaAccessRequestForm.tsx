@@ -34,7 +34,7 @@ export function BetaAccessRequestForm() {
     }
 
     if (!validateEmail(normalizedEmail)) {
-      setError('Ingresa un email valido.');
+      setError('Ingresa un email válido.');
       return;
     }
 
@@ -42,7 +42,7 @@ export function BetaAccessRequestForm() {
       trimmedReason.length < MIN_REASON_LENGTH ||
       trimmedReason.length > MAX_REASON_LENGTH
     ) {
-      setError('Cuéntanos un poco mas (entre 20 y 500 caracteres).');
+      setError('Cuéntanos un poco más (entre 20 y 500 caracteres).');
       return;
     }
 

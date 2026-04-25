@@ -11,15 +11,15 @@ interface LoginFormProps {
 
 function getErrorMessage(initialError?: string) {
   if (initialError === 'invalid-credentials') {
-    return 'Error: credenciales invalidas';
+    return 'Error: credenciales inválidas';
   }
 
   if (initialError === 'invite-link') {
-    return 'Error: enlace de invitacion invalido o expirado';
+    return 'Error: enlace de invitación inválido o expirado';
   }
 
   if (initialError === 'validation') {
-    return 'Error: revisa el email y la contrasena';
+    return 'Error: revisa el email y la contraseña';
   }
 
   return '';
@@ -47,7 +47,7 @@ export function LoginForm({ initialError = '', isDemo = false }: LoginFormProps)
         <Input
           type="password"
           name="password"
-          label="Contrasena"
+          label="Contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="********"

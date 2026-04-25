@@ -102,7 +102,7 @@ function getStatus(events: Event[], nextDueDate: string | null) {
 
   if (!nextDueDate) {
     return {
-      label: 'Sin proximos recordatorios',
+      label: 'Sin próximos recordatorios',
       detail: null as string | null,
       tone: 'text-slate-700',
       badge: 'bg-slate-100 text-slate-700',
@@ -116,7 +116,7 @@ function getStatus(events: Event[], nextDueDate: string | null) {
 
     return {
       label: 'Vencida',
-      detail: `Vencida en ${overdueDays} ${overdueDays === 1 ? 'dia' : 'dias'}`,
+      detail: `Vencida en ${overdueDays} ${overdueDays === 1 ? 'día' : 'días'}`,
       tone: 'text-rose-700',
       badge: 'bg-rose-100 text-rose-700',
     };
@@ -124,7 +124,7 @@ function getStatus(events: Event[], nextDueDate: string | null) {
 
   if (remainingDays <= 14) {
     return {
-      label: 'Atencion pronto',
+      label: 'Atención pronto',
       detail: null,
       tone: 'text-amber-600',
       badge: 'bg-amber-100 text-amber-700',
@@ -132,7 +132,7 @@ function getStatus(events: Event[], nextDueDate: string | null) {
   }
 
   return {
-    label: 'Al dia',
+    label: 'Al día',
     detail: null,
     tone: 'text-emerald-600',
     badge: 'bg-emerald-100 text-emerald-700',
@@ -145,18 +145,18 @@ function getEventHighlight(event: Event) {
 
     if (remainingDays < 0) {
       const overdueDays = Math.abs(remainingDays);
-      return `Vencido hace ${overdueDays} ${overdueDays === 1 ? 'dia' : 'dias'}`;
+      return `Vencido hace ${overdueDays} ${overdueDays === 1 ? 'día' : 'días'}`;
     }
 
     if (remainingDays === 0) {
       return 'Corresponde hoy';
     }
 
-    return `Proximo hito en ${remainingDays} ${remainingDays === 1 ? 'dia' : 'dias'}`;
+    return `Próximo hito en ${remainingDays} ${remainingDays === 1 ? 'día' : 'días'}`;
   }
 
   if (event.type === 'visita') {
-    return 'Resumen clinico listo para compartir';
+    return 'Resumen clínico listo para compartir';
   }
 
   if (event.type === 'medicina') {
@@ -198,7 +198,7 @@ export default function PetDetailPage() {
   const petId = params.petId as string;
   const { events, loading: eventsLoading } = useEvents(petId);
   const trackedPetViewRef = useRef<string | null>(null);
-  const { dismissStep, isDismissed, showStep } = useOnboardingState(user?.id);
+  const { dismissStep, isDismissed } = useOnboardingState(user?.id);
   const [eventSearch, setEventSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | Event['type']>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'proximos' | 'vencidos'>('all');
@@ -263,7 +263,6 @@ export default function PetDetailPage() {
   const latestVisit = getLastVisit(events);
   const upcomingVaccine = getUpcomingVaccine(events);
   const status = getStatus(events, upcomingVaccine?.next_due_date ?? null);
-  const recentHighlights = sortedEvents.slice(0, 3);
   const hasStartedTimeline = events.length > 0;
   const showActivationPanel = events.length === 1;
   const onboardingIntent = searchParams.get('onboarding');
@@ -277,16 +276,6 @@ export default function PetDetailPage() {
     : '';
   const deferredEventSearch = useDeferredValue(eventSearch);
   const normalizedEventSearch = deferredEventSearch.trim().toLowerCase();
-
-  useEffect(() => {
-    if (hasStartedTimeline) {
-      showStep(firstEventStepId);
-    }
-
-    if (!showActivationPanel) {
-      showStep(firstActivationStepId);
-    }
-  }, [firstActivationStepId, firstEventStepId, hasStartedTimeline, showActivationPanel, showStep]);
 
   const filteredEvents = useMemo(() => {
     const today = new Date();
@@ -328,7 +317,7 @@ export default function PetDetailPage() {
     normalizedEventSearch.length > 0 || typeFilter !== 'all' || statusFilter !== 'all';
 
   if (authLoading || loading) {
-    return <Loading text="Cargando informacion..." />;
+    return <Loading text="Cargando información..." />;
   }
 
   if (!user || !pet) {
@@ -396,7 +385,7 @@ export default function PetDetailPage() {
               title={
                 shouldForceFirstEventPanel
                   ? 'Mascota creada. Sigamos con el primer evento.'
-                  : 'Tu ficha ya esta lista. Ahora registra el primer evento.'
+                  : 'Tu ficha ya está lista. Ahora registra el primer evento.'
               }
               description="Carga una vacuna, control o tratamiento para activar el historial."
               progressLabel="Paso 2 de 3"
@@ -405,7 +394,7 @@ export default function PetDetailPage() {
               surfaceClassName="border-emerald-200 bg-[linear-gradient(135deg,_#ecfdf5_0%,_#ffffff_100%)]"
               steps={[
                 { label: 'Mascota creada', completed: true },
-                { label: 'Registrar primer evento medico' },
+                { label: 'Registrar primer evento médico' },
                 { label: 'Compartir el carnet cuando haga falta' },
               ]}
               primaryActionLabel="Registrar evento"
@@ -429,8 +418,8 @@ export default function PetDetailPage() {
               badge="Carnet activo"
               title={
                 shouldForceActivationPanel
-                  ? 'Primer evento guardado. El carnet ya esta en marcha.'
-                  : 'El carnet ya esta en marcha'
+                  ? 'Primer evento guardado. El carnet ya está en marcha.'
+                  : 'El carnet ya está en marcha'
               }
               description="Sigue completando el historial o comparte el carnet desde el QR."
               progressLabel="Paso 3 de 3"
@@ -475,7 +464,7 @@ export default function PetDetailPage() {
                       </p>
                       <h1 className="mt-2 text-4xl font-black tracking-tight text-slate-950">
                         {pet.name}
-                        {age !== null ? `, ${age} ${age === 1 ? 'ano' : 'anos'}` : ''}
+                        {age !== null ? `, ${age} ${age === 1 ? 'año' : 'años'}` : ''}
                       </h1>
 
                       <div className="mt-4 flex flex-wrap gap-2">
@@ -534,7 +523,7 @@ export default function PetDetailPage() {
                 className="rounded-[1.75rem] bg-slate-950 p-6 text-white shadow-[0_24px_70px_rgba(15,23,42,0.24)]"
               >
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-sky-200">
-                  Acceso rapido
+                  Acceso rápido
                 </p>
 
                 <div className="mt-5">
@@ -567,7 +556,7 @@ export default function PetDetailPage() {
                       QR listo
                     </p>
                     <p className="mt-2 text-sm leading-6 text-slate-300">
-                      Escanealo desde el telefono para abrir este carnet al instante.
+                      Escanéalo desde el teléfono para abrir este carnet al instante.
                     </p>
                     <p className="mt-2 text-xs font-medium text-sky-200">
                       {shareExpiresAt
@@ -621,13 +610,13 @@ export default function PetDetailPage() {
               <div className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div>
-                    <p className="text-sm text-slate-500">Ultimo control</p>
+                    <p className="text-sm text-slate-500">Último control</p>
                     <p className="mt-2 text-2xl font-black text-slate-950">
                       {latestVisit ? formatDate(latestVisit.event_date) : 'Sin registro'}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-slate-500">Proxima vacuna</p>
+                    <p className="text-sm text-slate-500">Próxima vacuna</p>
                     <p className="mt-2 text-2xl font-black text-slate-950">
                       {upcomingVaccine?.next_due_date ? formatDate(upcomingVaccine.next_due_date) : 'Sin fecha'}
                     </p>
@@ -651,11 +640,11 @@ export default function PetDetailPage() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
-                      Resumen clinico
+                      Resumen clínico
                     </p>
                     <p className="text-lg font-bold text-slate-950">
                       {events.length === 0
-                        ? 'Aun no hay eventos cargados'
+                        ? 'Aún no hay eventos cargados'
                         : `${events.length} ${events.length === 1 ? 'evento registrado' : 'eventos registrados'}`}
                     </p>
                   </div>
@@ -663,13 +652,13 @@ export default function PetDetailPage() {
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-sm text-slate-500">Ultima actualizacion</p>
+                    <p className="text-sm text-slate-500">Última actualización</p>
                     <p className="mt-1 font-semibold text-slate-900">
                       {sortedEvents[0] ? formatDate(sortedEvents[0].event_date) : 'Pendiente'}
                     </p>
                   </div>
                   <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-sm text-slate-500">Proximo hito</p>
+                    <p className="text-sm text-slate-500">Próximo hito</p>
                     <p className="mt-1 font-semibold text-slate-900">
                       {upcomingVaccine ? upcomingVaccine.title : 'Sin recordatorios activos'}
                     </p>
@@ -706,7 +695,7 @@ export default function PetDetailPage() {
               ) : (
                 <div className="rounded-[1.6rem] border border-dashed border-slate-300 bg-white/80 px-6 py-8 text-center text-slate-500">
                   {hasActiveEventFilters
-                    ? 'No encontramos eventos con esos filtros. Ajusta la busqueda o limpia los criterios.'
+                    ? 'No encontramos eventos con esos filtros. Ajusta la búsqueda o limpia los criterios.'
                     : `Agrega vacunas, controles o tratamientos para empezar a construir el carnet visual de ${pet.name}.`}
                 </div>
               )}
@@ -717,7 +706,7 @@ export default function PetDetailPage() {
         <section className="mt-8 rounded-[2rem] border border-white/80 bg-white/85 p-8 shadow-[0_24px_70px_rgba(15,23,42,0.06)] backdrop-blur">
           <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h2 className="mb-2 text-3xl font-extrabold text-slate-950">Historial medico</h2>
+              <h2 className="mb-2 text-3xl font-extrabold text-slate-950">Historial médico</h2>
               <p className="text-slate-600">Timeline de vacunas, visitas y tratamientos.</p>
             </div>
             <Link href={`/dashboard/${petId}/events/new`}>
@@ -740,7 +729,7 @@ export default function PetDetailPage() {
                     <input
                       value={eventSearch}
                       onChange={(event) => setEventSearch(event.target.value)}
-                      placeholder="Titulo, descripcion o notas"
+                      placeholder="Título, descripción o notas"
                       className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
                     />
                   </div>
@@ -773,7 +762,7 @@ export default function PetDetailPage() {
                     className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 outline-none transition-colors focus:border-sky-300"
                   >
                     <option value="all">Todos</option>
-                    <option value="proximos">Proximos</option>
+                    <option value="proximos">Próximos</option>
                     <option value="vencidos">Vencidos</option>
                   </select>
                 </div>
@@ -815,10 +804,10 @@ export default function PetDetailPage() {
           loading={deleting}
         >
           <p className="text-gray-600">
-            Estas seguro de que deseas eliminar a <strong>{pet.name}</strong>?
+            ¿Estás seguro de que deseas eliminar a <strong>{pet.name}</strong>?
           </p>
           <p className="mt-2 text-gray-600">
-            Esta accion eliminara tambien todos los eventos medicos asociados y no se puede deshacer.
+            Esta acción eliminará también todos los eventos médicos asociados y no se puede deshacer.
           </p>
         </Modal>
       </Container>

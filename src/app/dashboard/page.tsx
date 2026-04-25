@@ -90,7 +90,7 @@ export default function DashboardPage() {
               surfaceClassName="border-sky-200 bg-[linear-gradient(135deg,_#eff6ff_0%,_#ffffff_100%)]"
               steps={[
                 { label: 'Agrega tu primera mascota' },
-                { label: 'Registra su primer evento medico' },
+                { label: 'Registra su primer evento médico' },
                 { label: 'Comparte el carnet cuando lo necesites' },
               ]}
               primaryActionLabel="Agregar mascota"
@@ -135,7 +135,7 @@ export default function DashboardPage() {
                   </div>
                 }
                 title="No tienes mascotas registradas"
-                description="Agrega tu primera mascota para empezar a gestionar su historial medico, vacunas y visitas veterinarias"
+                description="Agrega tu primera mascota para empezar a gestionar su historial médico, vacunas y visitas veterinarias"
                 actionLabel="Agregar mi primera mascota"
                 onAction={() => router.push('/dashboard/new-pet')}
               />
@@ -214,7 +214,7 @@ export default function DashboardPage() {
                     </div>
                   }
                   title="No encontramos mascotas"
-                  description="Prueba con otro nombre o cambia el filtro de especie para ver mas resultados."
+                  description="Prueba con otro nombre o cambia el filtro de especie para ver más resultados."
                   actionLabel="Limpiar filtros"
                   onAction={() => {
                     setSearch('');
