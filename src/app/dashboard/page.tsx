@@ -16,7 +16,7 @@ import { UpcomingVisitsCard } from '@/components/home/UpcomingVisitsCard';
 import { OnboardingPanel } from '@/components/onboarding/OnboardingPanel';
 import { analytics } from '@/lib/analytics';
 import { Species } from '@/lib/types';
-import { CircleUserRound, PawPrint, Plus, Search, Sparkles } from 'lucide-react';
+import { PawPrint, Plus, Search, Sparkles } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -115,12 +115,6 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href="/dashboard/profile">
-              <Button variant="secondary" size="lg">
-                <CircleUserRound className="mr-2 h-5 w-5" />
-                Perfil del tutor
-              </Button>
-            </Link>
             <Link href="/dashboard/new-pet">
               <Button size="lg" className="shadow-lg">
                 <Plus className="mr-2 h-5 w-5" />
