@@ -684,8 +684,16 @@ const handleCreatePet = async () => {
 - [x] Casos para auth, landing y flujo mascotas/eventos/share en `tests/e2e`
 
 ### Pendiente real
-- [ ] **Onboarding** (siguiente fase)
-- [ ] **Busqueda / filtro** (siguiente fase)
+- [x] **Onboarding**
+- [x] Onboarding MVP implementado con franja minimalista y colapsada al inicio de dashboard y ficha de mascota
+- [x] Persistencia por usuario con opcion de `Saltar`
+- [x] Continuidad entre crear mascota y registrar primer evento
+
+- [x] **Busqueda / filtro**
+- [x] Dashboard con busqueda por nombre de mascota y filtro por especie
+- [x] Ficha de mascota con busqueda en historial, filtro por tipo y filtro por estado
+- [x] Resultados y estados vacios manejados client-side sobre los datos ya cargados
+
 - [ ] **Validacion final de analytics en entorno productivo** (pendiente de QA funcional)
 - [ ] **Gamificacion con badges** (TODO futuro)
 - [ ] Disenar insignias segun comportamiento responsable del tutor con la mascota
