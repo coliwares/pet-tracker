@@ -47,7 +47,7 @@ export default async function TutorProfilePage() {
               Perfil del tutor
             </h1>
             <p className="mt-2 max-w-2xl text-lg text-slate-600">
-              Guarda tus datos principales para tener una ficha mas completa y preparada para proximos flujos de contacto.
+              Guarda tus datos principales para tener una ficha mas completa y preparada para próximos flujos de contacto.
             </p>
           </div>
         </div>
