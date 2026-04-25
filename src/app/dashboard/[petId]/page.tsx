@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useRef, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { differenceInCalendarDays } from 'date-fns';
@@ -26,6 +26,7 @@ import {
   HeartPulse,
   Plus,
   QrCode,
+  Search,
   Scale,
   Share2,
   ShieldCheck,
@@ -198,6 +199,9 @@ export default function PetDetailPage() {
   const { events, loading: eventsLoading } = useEvents(petId);
   const trackedPetViewRef = useRef<string | null>(null);
   const { dismissStep, isDismissed, showStep } = useOnboardingState(user?.id);
+  const [eventSearch, setEventSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState<'all' | Event['type']>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'proximos' | 'vencidos'>('all');
 
   useEffect(() => {
     const fetchPet = async () => {
@@ -271,6 +275,8 @@ export default function PetDetailPage() {
   const qrCodeUrl = shareUrl
     ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=0&data=${encodeURIComponent(shareUrl)}`
     : '';
+  const deferredEventSearch = useDeferredValue(eventSearch);
+  const normalizedEventSearch = deferredEventSearch.trim().toLowerCase();
 
   useEffect(() => {
     if (hasStartedTimeline) {
@@ -281,6 +287,45 @@ export default function PetDetailPage() {
       showStep(firstActivationStepId);
     }
   }, [firstActivationStepId, firstEventStepId, hasStartedTimeline, showActivationPanel, showStep]);
+
+  const filteredEvents = useMemo(() => {
+    const today = new Date();
+
+    return events.filter((event) => {
+      const textMatches = normalizedEventSearch.length === 0
+        ? true
+        : [event.title, event.description ?? '', event.notes ?? '']
+            .join(' ')
+            .toLowerCase()
+            .includes(normalizedEventSearch);
+
+      const typeMatches = typeFilter === 'all' ? true : event.type === typeFilter;
+
+      const statusMatches = (() => {
+        if (statusFilter === 'all') {
+          return true;
+        }
+
+        if (!event.next_due_date) {
+          return false;
+        }
+
+        const diff = differenceInCalendarDays(parseLocalDate(event.next_due_date), today);
+
+        if (statusFilter === 'proximos') {
+          return diff >= 0;
+        }
+
+        return diff < 0;
+      })();
+
+      return textMatches && typeMatches && statusMatches;
+    });
+  }, [events, normalizedEventSearch, statusFilter, typeFilter]);
+
+  const filteredHighlights = filteredEvents.slice(0, 3);
+  const hasActiveEventFilters =
+    normalizedEventSearch.length > 0 || typeFilter !== 'all' || statusFilter !== 'all';
 
   if (authLoading || loading) {
     return <Loading text="Cargando informacion..." />;
@@ -634,8 +679,8 @@ export default function PetDetailPage() {
             </div>
 
             <div className="mt-6 grid gap-4">
-              {recentHighlights.length > 0 ? (
-                recentHighlights.map((event) => (
+              {filteredHighlights.length > 0 ? (
+                filteredHighlights.map((event) => (
                   <article
                     key={event.id}
                     className="flex items-start gap-4 rounded-[1.6rem] border border-slate-200 bg-white px-5 py-4 shadow-sm"
@@ -660,7 +705,9 @@ export default function PetDetailPage() {
                 ))
               ) : (
                 <div className="rounded-[1.6rem] border border-dashed border-slate-300 bg-white/80 px-6 py-8 text-center text-slate-500">
-                  Agrega vacunas, controles o tratamientos para empezar a construir el carnet visual de {pet.name}.
+                  {hasActiveEventFilters
+                    ? 'No encontramos eventos con esos filtros. Ajusta la busqueda o limpia los criterios.'
+                    : `Agrega vacunas, controles o tratamientos para empezar a construir el carnet visual de ${pet.name}.`}
                 </div>
               )}
             </div>
@@ -681,7 +728,80 @@ export default function PetDetailPage() {
             </Link>
           </div>
 
-          {eventsLoading ? <Loading text="Cargando eventos..." /> : <Timeline events={events} />}
+          {!eventsLoading ? (
+            <div className="mb-6 rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-4">
+              <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr_0.8fr]">
+                <div>
+                  <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    Buscar en historial
+                  </label>
+                  <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                    <Search className="h-4 w-4 text-slate-400" />
+                    <input
+                      value={eventSearch}
+                      onChange={(event) => setEventSearch(event.target.value)}
+                      placeholder="Titulo, descripcion o notas"
+                      className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    Tipo
+                  </label>
+                  <select
+                    value={typeFilter}
+                    onChange={(event) => setTypeFilter(event.target.value as 'all' | Event['type'])}
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 outline-none transition-colors focus:border-sky-300"
+                  >
+                    <option value="all">Todos los tipos</option>
+                    <option value="vacuna">Vacunas</option>
+                    <option value="visita">Visitas</option>
+                    <option value="medicina">Medicinas</option>
+                    <option value="otro">Otros</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    Estado
+                  </label>
+                  <select
+                    value={statusFilter}
+                    onChange={(event) => setStatusFilter(event.target.value as 'all' | 'proximos' | 'vencidos')}
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 outline-none transition-colors focus:border-sky-300"
+                  >
+                    <option value="all">Todos</option>
+                    <option value="proximos">Proximos</option>
+                    <option value="vencidos">Vencidos</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
+                <div className="rounded-full bg-sky-50 px-3 py-1.5 font-semibold text-sky-800">
+                  {filteredEvents.length} {filteredEvents.length === 1 ? 'evento' : 'eventos'}
+                </div>
+                {hasActiveEventFilters ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-3 text-xs"
+                    onClick={() => {
+                      setEventSearch('');
+                      setTypeFilter('all');
+                      setStatusFilter('all');
+                    }}
+                  >
+                    Limpiar filtros
+                  </Button>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+
+          {eventsLoading ? <Loading text="Cargando eventos..." /> : <Timeline events={filteredEvents} />}
         </section>
 
         <Modal
