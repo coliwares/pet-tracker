@@ -1,7 +1,7 @@
 import { addDays, addMonths, addYears, differenceInMonths, differenceInYears, format, isPast, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { EVENT_CATALOG, EventCatalogItem, EventDueRule } from './constants';
-import { Pet } from './types';
+import { Pet, Species } from './types';
 
 /**
  * Parsea una fecha en formato YYYY-MM-DD como fecha local (sin conversión UTC)
@@ -58,6 +58,38 @@ export function calculateAge(birthDate: string): number {
 
 export function calculateAgeInMonths(birthDate: string): number {
   return differenceInMonths(new Date(), parseLocalDate(birthDate));
+}
+
+type PetLifeStage = {
+  label: string;
+  className: string;
+};
+
+export function getPetLifeStage(birthDate: string | null, species: Species): PetLifeStage | null {
+  if (!birthDate) {
+    return null;
+  }
+
+  const ageInMonths = calculateAgeInMonths(birthDate);
+
+  if (ageInMonths < 12) {
+    return {
+      label: species === 'Gato' ? 'Gatito' : species === 'Perro' ? 'Cachorro' : 'Bebe',
+      className: 'bg-emerald-50 text-emerald-700',
+    };
+  }
+
+  if (ageInMonths < 84) {
+    return {
+      label: 'Adulto',
+      className: 'bg-amber-50 text-amber-700',
+    };
+  }
+
+  return {
+    label: 'Senior',
+    className: 'bg-fuchsia-50 text-fuchsia-700',
+  };
 }
 
 export function getEventCatalogOptions(catalog: readonly EventCatalogItem[], pet: Pet | null): EventCatalogItem[] {
