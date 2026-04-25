@@ -1,4 +1,14 @@
-import { addDays, addMonths, addYears, differenceInMonths, differenceInYears, format, isPast, isSameDay } from 'date-fns';
+import {
+  addDays,
+  addMonths,
+  addYears,
+  differenceInCalendarDays,
+  differenceInMonths,
+  differenceInYears,
+  format,
+  isPast,
+  isSameDay,
+} from 'date-fns';
 import { es } from 'date-fns/locale';
 import { EVENT_CATALOG, EventCatalogItem, EventDueRule } from './constants';
 import { Pet, Species } from './types';
@@ -58,6 +68,41 @@ export function calculateAge(birthDate: string): number {
 
 export function calculateAgeInMonths(birthDate: string): number {
   return differenceInMonths(new Date(), parseLocalDate(birthDate));
+}
+
+export function formatPetAge(birthDate: string | null): string | null {
+  if (!birthDate) {
+    return null;
+  }
+
+  const birthDateValue = parseLocalDate(birthDate);
+  const today = new Date();
+  const years = differenceInYears(today, birthDateValue);
+
+  if (years >= 1) {
+    const anniversary = addYears(birthDateValue, years);
+    const remainingMonths = differenceInMonths(today, anniversary);
+
+    if (remainingMonths > 0) {
+      return `${years} ${years === 1 ? 'ano' : 'anos'} y ${remainingMonths} ${remainingMonths === 1 ? 'mes' : 'meses'}`;
+    }
+
+    return `${years} ${years === 1 ? 'ano' : 'anos'}`;
+  }
+
+  const months = differenceInMonths(today, birthDateValue);
+  const monthlyAnniversary = addMonths(birthDateValue, months);
+  const remainingDays = differenceInCalendarDays(today, monthlyAnniversary);
+
+  if (months > 0) {
+    if (remainingDays > 0) {
+      return `${months} ${months === 1 ? 'mes' : 'meses'} y ${remainingDays} ${remainingDays === 1 ? 'dia' : 'dias'}`;
+    }
+
+    return `${months} ${months === 1 ? 'mes' : 'meses'}`;
+  }
+
+  return `${remainingDays} ${remainingDays === 1 ? 'dia' : 'dias'}`;
 }
 
 type PetLifeStage = {

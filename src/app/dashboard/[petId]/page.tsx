@@ -11,7 +11,7 @@ import { useOnboardingState } from '@/hooks/useOnboardingState';
 import { Event, Pet } from '@/lib/types';
 import { createPetShareLink, deletePet, getPet } from '@/lib/supabase';
 import { analytics } from '@/lib/analytics';
-import { calculateAge, formatDate, formatDateTime, getEventHistoryGroup, parseLocalDate } from '@/lib/utils';
+import { formatDate, formatDateTime, formatPetAge, getEventHistoryGroup, parseLocalDate } from '@/lib/utils';
 import { Container } from '@/components/ui/Container';
 import { Button } from '@/components/ui/Button';
 import { Loading } from '@/components/ui/Loading';
@@ -259,7 +259,7 @@ export default function PetDetailPage() {
   }, [user, pet]);
 
   const sortedEvents = sortByEventDateDesc(events);
-  const age = pet?.birth_date ? calculateAge(pet.birth_date) : null;
+  const age = formatPetAge(pet?.birth_date ?? null);
   const latestVisit = getLastVisit(events);
   const upcomingVaccine = getUpcomingVaccine(events);
   const status = getStatus(events, upcomingVaccine?.next_due_date ?? null);
@@ -464,7 +464,7 @@ export default function PetDetailPage() {
                       </p>
                       <h1 className="mt-2 text-4xl font-black tracking-tight text-slate-950">
                         {pet.name}
-                        {age !== null ? `, ${age} ${age === 1 ? 'año' : 'años'}` : ''}
+                        {age ? `, ${age}` : ''}
                       </h1>
 
                       <div className="mt-4 flex flex-wrap gap-2">

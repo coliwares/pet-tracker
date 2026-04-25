@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Pet } from '@/lib/types';
-import { calculateAge, getPetLifeStage } from '@/lib/utils';
+import { formatPetAge, getPetLifeStage } from '@/lib/utils';
 import { PetPhoto } from '@/components/pet/PetPhoto';
 
 interface PetCardProps {
@@ -8,7 +8,7 @@ interface PetCardProps {
 }
 
 export function PetCard({ pet }: PetCardProps) {
-  const age = pet.birth_date ? calculateAge(pet.birth_date) : null;
+  const age = formatPetAge(pet.birth_date);
   const lifeStage = getPetLifeStage(pet.birth_date, pet.species);
 
   return (
@@ -47,7 +47,7 @@ export function PetCard({ pet }: PetCardProps) {
             <div className="mt-3 flex flex-wrap gap-3">
               {age !== null ? (
                 <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
-                  {age} {age === 1 ? 'ano' : 'anos'}
+                  {age}
                 </span>
               ) : null}
               {pet.weight ? (
