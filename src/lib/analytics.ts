@@ -70,4 +70,24 @@ export const analytics = {
       has_next_due_date: hasNextDueDate,
     });
   },
+
+  viewPetDetail(petId: string, species: string) {
+    trackEvent('view_pet_detail', {
+      pet_id: petId,
+      pet_species: species,
+    });
+  },
+
+  sharePet(petId: string, method: 'native_share' | 'clipboard') {
+    trackEvent('share_pet', {
+      pet_id: petId,
+      share_method: method,
+    });
+  },
+
+  exportPdf(petId: string) {
+    trackEvent('export_pdf', {
+      pet_id: petId,
+    });
+  },
 };

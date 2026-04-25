@@ -1,19 +1,22 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { differenceInCalendarDays } from 'date-fns';
 import { useAuth } from '@/hooks/useAuth';
 import { useEvents } from '@/hooks/useEvents';
+import { useOnboardingState } from '@/hooks/useOnboardingState';
 import { Event, Pet } from '@/lib/types';
 import { createPetShareLink, deletePet, getPet } from '@/lib/supabase';
+import { analytics } from '@/lib/analytics';
 import { calculateAge, formatDate, formatDateTime, getEventHistoryGroup, parseLocalDate } from '@/lib/utils';
 import { Container } from '@/components/ui/Container';
 import { Button } from '@/components/ui/Button';
 import { Loading } from '@/components/ui/Loading';
 import { Timeline } from '@/components/event/Timeline';
+import { OnboardingPanel } from '@/components/onboarding/OnboardingPanel';
 import {
   ArrowLeft,
   CalendarDays,
@@ -181,6 +184,7 @@ function getEventIcon(event: Event) {
 export default function PetDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const [pet, setPet] = useState<Pet | null>(null);
   const [loading, setLoading] = useState(true);
@@ -192,6 +196,8 @@ export default function PetDetailPage() {
   const [copiedLink, setCopiedLink] = useState(false);
   const petId = params.petId as string;
   const { events, loading: eventsLoading } = useEvents(petId);
+  const trackedPetViewRef = useRef<string | null>(null);
+  const { dismissStep, isDismissed, showStep } = useOnboardingState(user?.id);
 
   useEffect(() => {
     const fetchPet = async () => {
@@ -235,6 +241,47 @@ export default function PetDetailPage() {
     }
   }, [authLoading, petId, user]);
 
+  useEffect(() => {
+    if (!user || !pet) {
+      return;
+    }
+
+    if (trackedPetViewRef.current === pet.id) {
+      return;
+    }
+
+    analytics.viewPetDetail(pet.id, pet.species);
+    trackedPetViewRef.current = pet.id;
+  }, [user, pet]);
+
+  const sortedEvents = sortByEventDateDesc(events);
+  const age = pet?.birth_date ? calculateAge(pet.birth_date) : null;
+  const latestVisit = getLastVisit(events);
+  const upcomingVaccine = getUpcomingVaccine(events);
+  const status = getStatus(events, upcomingVaccine?.next_due_date ?? null);
+  const recentHighlights = sortedEvents.slice(0, 3);
+  const hasStartedTimeline = events.length > 0;
+  const showActivationPanel = events.length === 1;
+  const onboardingIntent = searchParams.get('onboarding');
+  const firstEventStepId = `pet-first-event:${petId}`;
+  const firstActivationStepId = `pet-first-activation:${petId}`;
+  const shouldForceFirstEventPanel = onboardingIntent === 'pet-created';
+  const shouldForceActivationPanel = onboardingIntent === 'event-created';
+  const quickAccessLabel = pet?.license_url ? 'Licencia lista' : 'Carnet listo';
+  const qrCodeUrl = shareUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=0&data=${encodeURIComponent(shareUrl)}`
+    : '';
+
+  useEffect(() => {
+    if (hasStartedTimeline) {
+      showStep(firstEventStepId);
+    }
+
+    if (!showActivationPanel) {
+      showStep(firstActivationStepId);
+    }
+  }, [firstActivationStepId, firstEventStepId, hasStartedTimeline, showActivationPanel, showStep]);
+
   if (authLoading || loading) {
     return <Loading text="Cargando informacion..." />;
   }
@@ -242,17 +289,6 @@ export default function PetDetailPage() {
   if (!user || !pet) {
     return null;
   }
-
-  const sortedEvents = sortByEventDateDesc(events);
-  const age = pet.birth_date ? calculateAge(pet.birth_date) : null;
-  const latestVisit = getLastVisit(events);
-  const upcomingVaccine = getUpcomingVaccine(events);
-  const status = getStatus(events, upcomingVaccine?.next_due_date ?? null);
-  const recentHighlights = sortedEvents.slice(0, 3);
-  const quickAccessLabel = pet.license_url ? 'Licencia lista' : 'Carnet listo';
-  const qrCodeUrl = shareUrl
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=0&data=${encodeURIComponent(shareUrl)}`
-    : '';
 
   const handleDeletePet = async () => {
     try {
@@ -280,6 +316,7 @@ export default function PetDetailPage() {
           text: `Revisa el carnet de ${pet.name}`,
           url: shareUrl,
         });
+        analytics.sharePet(petId, 'native_share');
         return;
       } catch {
         // Fallback to copy below.
@@ -288,6 +325,7 @@ export default function PetDetailPage() {
 
     try {
       await navigator.clipboard.writeText(shareUrl);
+      analytics.sharePet(petId, 'clipboard');
       setCopiedLink(true);
       window.setTimeout(() => setCopiedLink(false), 2000);
     } catch (err) {
@@ -305,6 +343,69 @@ export default function PetDetailPage() {
           <ArrowLeft className="mr-2 h-5 w-5 transition-transform group-hover:-translate-x-1" />
           Volver al dashboard
         </Link>
+
+        {!hasStartedTimeline && (!isDismissed(firstEventStepId) || shouldForceFirstEventPanel) ? (
+          <div className="mb-4">
+            <OnboardingPanel
+              badge="Onboarding"
+              title={
+                shouldForceFirstEventPanel
+                  ? 'Mascota creada. Sigamos con el primer evento.'
+                  : 'Tu ficha ya esta lista. Ahora registra el primer evento.'
+              }
+              description="Carga una vacuna, control o tratamiento para activar el historial."
+              progressLabel="Paso 2 de 3"
+              icon={HeartPulse}
+              accentClassName="text-emerald-700"
+              surfaceClassName="border-emerald-200 bg-[linear-gradient(135deg,_#ecfdf5_0%,_#ffffff_100%)]"
+              steps={[
+                { label: 'Mascota creada', completed: true },
+                { label: 'Registrar primer evento medico' },
+                { label: 'Compartir el carnet cuando haga falta' },
+              ]}
+              primaryActionLabel="Registrar evento"
+              primaryActionHref={`/dashboard/${petId}/events/new`}
+              secondaryActionLabel="Editar ficha"
+              secondaryActionHref={`/dashboard/${petId}/edit`}
+              supportingActions={[
+                { href: `/dashboard/${petId}/events/new?type=vacuna`, label: 'Vacuna' },
+                { href: `/dashboard/${petId}/events/new?type=visita`, label: 'Control' },
+                { href: `/dashboard/${petId}/events/new?type=medicina`, label: 'Tratamiento' },
+              ]}
+              dismissLabel="Saltar"
+              onDismiss={() => dismissStep(firstEventStepId)}
+            />
+          </div>
+        ) : null}
+
+        {showActivationPanel && (!isDismissed(firstActivationStepId) || shouldForceActivationPanel) ? (
+          <div className="mb-4">
+            <OnboardingPanel
+              badge="Carnet activo"
+              title={
+                shouldForceActivationPanel
+                  ? 'Primer evento guardado. El carnet ya esta en marcha.'
+                  : 'El carnet ya esta en marcha'
+              }
+              description="Sigue completando el historial o comparte el carnet desde el QR."
+              progressLabel="Paso 3 de 3"
+              icon={CheckCircle2}
+              accentClassName="text-sky-700"
+              surfaceClassName="border-sky-200 bg-[linear-gradient(135deg,_#eff6ff_0%,_#ffffff_100%)]"
+              steps={[
+                { label: 'Mascota creada', completed: true },
+                { label: 'Primer evento registrado', completed: true },
+                { label: 'Carnet listo para compartir', completed: true },
+              ]}
+              primaryActionLabel="Agregar otro evento"
+              primaryActionHref={`/dashboard/${petId}/events/new`}
+              secondaryActionLabel="Ir al QR"
+              secondaryActionHref="#share-access"
+              dismissLabel="Saltar"
+              onDismiss={() => dismissStep(firstActivationStepId)}
+            />
+          </div>
+        ) : null}
 
         <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/80 p-5 shadow-[0_28px_80px_rgba(15,23,42,0.08)] backdrop-blur sm:p-8">
           <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.18),_transparent_34%),radial-gradient(circle_at_top_right,_rgba(251,146,60,0.16),_transparent_30%)]" />
@@ -383,7 +484,10 @@ export default function PetDetailPage() {
                 </div>
               </div>
 
-              <div className="rounded-[1.75rem] bg-slate-950 p-6 text-white shadow-[0_24px_70px_rgba(15,23,42,0.24)]">
+              <div
+                id="share-access"
+                className="rounded-[1.75rem] bg-slate-950 p-6 text-white shadow-[0_24px_70px_rgba(15,23,42,0.24)]"
+              >
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-sky-200">
                   Acceso rapido
                 </p>

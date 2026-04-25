@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { createEvent, updateEvent } from '@/lib/supabase';
@@ -14,8 +14,17 @@ import { ArrowLeft } from 'lucide-react';
 export default function NewEventPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, loading } = useAuth();
   const petId = params.petId as string;
+  const requestedType = searchParams.get('type');
+  const initialType =
+    requestedType === 'vacuna' ||
+    requestedType === 'visita' ||
+    requestedType === 'medicina' ||
+    requestedType === 'otro'
+      ? requestedType
+      : undefined;
 
   if (loading) {
     return <Loading />;
@@ -64,10 +73,11 @@ export default function NewEventPage() {
             <EventForm
               petId={petId}
               userId={user.id}
+              initialType={initialType}
               onSubmit={handleSubmit}
               onSuccess={(event) => {
                 analytics.createEvent(event.type, Boolean(event.next_due_date));
-                router.push(`/dashboard/${petId}`);
+                router.push(`/dashboard/${petId}?onboarding=event-created`);
               }}
               submitLabel="Crear Evento"
             />

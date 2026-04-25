@@ -19,6 +19,7 @@ interface EventFormProps {
   petId: string;
   userId: string;
   event?: Event;
+  initialType?: EventType;
   onSubmit: (data: Partial<Event>, options: EventFormSubmitOptions) => Promise<Event>;
   onSuccess?: (event: Event) => void | Promise<void>;
   submitLabel?: string;
@@ -37,11 +38,12 @@ export function EventForm({
   petId,
   userId,
   event,
+  initialType,
   onSubmit,
   onSuccess,
   submitLabel = 'Guardar',
 }: EventFormProps) {
-  const [type, setType] = useState<EventType>(event?.type || 'vacuna');
+  const [type, setType] = useState<EventType>(event?.type || initialType || 'vacuna');
   const [title, setTitle] = useState(event?.title || '');
   const [description, setDescription] = useState(event?.description || '');
   const [eventDate, setEventDate] = useState(event?.event_date || toDateInputValue(new Date()));

@@ -292,10 +292,16 @@ const testimonials = [
 
 ---
 
-## FASE 2: NOTIFICACIONES DE PRÓXIMAS VACUNAS (2-3 horas)
+## FASE 2: NOTIFICACIONES DE PRÓXIMAS VACUNAS (2-3 horas) ✅ IMPLEMENTADO
 
 ### 🎯 Objetivo
 Mostrar alertas visuales de próximas vacunas en dashboard
+
+### Estado actual
+- ✅ Implementado en `src/components/home/UpcomingVaccinesCard.tsx`
+- ✅ Renderizado en `src/app/dashboard/page.tsx`
+- ✅ La lógica actual usa `next_due_date` y el tipo `vacuna`
+- ℹ️ La implementación final evolucionó respecto al snippet original y reutiliza `UpcomingDueEventsCard`
 
 ### Archivo: `src/components/home/UpcomingVaccinesCard.tsx` (NUEVO)
 
@@ -414,10 +420,17 @@ import { UpcomingVaccinesCard } from '@/components/home/UpcomingVaccinesCard';
 
 ---
 
-## FASE 3: MOSTRAR FOTOS DE MASCOTAS (2-3 horas)
+## FASE 3: MOSTRAR FOTOS DE MASCOTAS (2-3 horas) ✅ IMPLEMENTADO
 
 ### 🎯 Objetivo
 Mostrar foto real de mascota en cards (en lugar de avatar genérico)
+
+### Estado actual
+- ✅ Implementado en `src/components/pet/PetPhoto.tsx`
+- ✅ Usado en `src/components/pet/PetCard.tsx` y en el detalle de mascota
+- ✅ El flujo de alta/edición ya sube y guarda `photo_url` desde `src/components/pet/PetForm.tsx`
+- ✅ La subida valida tipo/tamaño y comprime imágenes antes de enviarlas a Supabase Storage
+- ℹ️ La implementación final usa `PetPhoto` con fallback visual, en lugar de `PetImage`/`PetAvatar` del snippet original
 
 ### Archivo: `src/components/pet/PetImage.tsx` (NUEVO)
 
@@ -529,10 +542,18 @@ import { PetImage } from './PetImage';
 
 ---
 
-## FASE 4: ANALYTICS BÁSICAS (2-3 horas)
+## FASE 4: ANALYTICS BÁSICAS (2-3 horas) ✅ IMPLEMENTADO
 
 ### 🎯 Objetivo
 Tracking de eventos clave para medir retention
+
+### Estado actual
+- ✅ Implementado en `src/lib/analytics.ts`
+- ✅ `src/components/analytics/GoogleAnalytics.tsx` montado en `src/app/layout.tsx`
+- ✅ Tracking activo para `login`, `create_pet`, `create_event`, `view_pet_detail` y `share_pet`
+- ✅ `sign_up` sigue conectado en el formulario, aunque el registro hoy está temporalmente cerrado
+- ℹ️ `export_pdf` quedó preparado en la capa de analytics, pero no existe todavía un flujo real de exportación PDF en la UI
+- ℹ️ La implementación final evolucionó desde el MVP con `localStorage` a Google Analytics / `gtag`
 
 ### Archivo: `src/lib/analytics.ts` (NUEVO)
 
@@ -647,7 +668,8 @@ const handleCreatePet = async () => {
 - [x] **Analytics basicas**
 - [x] `src/lib/analytics.ts` creado
 - [x] Integracion real con Google Analytics / `gtag`
-- [x] Tracking conectado a signup, login, creacion de mascota y creacion de evento
+- [x] Tracking conectado a login, creacion de mascota, creacion de evento, vista de ficha y compartir carnet
+- [x] Hook de `sign_up` conservado en el formulario actual, sujeto a reapertura del registro
 - [x] `src/components/analytics/GoogleAnalytics.tsx` montado en `src/app/layout.tsx`
 
 - [x] **Mejoras de formularios y eventos**

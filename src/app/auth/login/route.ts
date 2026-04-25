@@ -9,12 +9,19 @@ function buildRedirect(
   request: NextRequest,
   path: string,
   cookiesToSet: PendingCookie[],
-  error?: 'invalid-credentials' | 'validation'
+  error?: 'invalid-credentials' | 'validation',
+  params?: Record<string, string>
 ) {
   const url = new URL(path, request.url);
 
   if (error) {
     url.searchParams.set('error', error);
+  }
+
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      url.searchParams.set(key, value);
+    });
   }
 
   const response = NextResponse.redirect(url, { status: 303 });
@@ -30,6 +37,7 @@ export async function POST(request: NextRequest) {
   const formData = await request.formData();
   const email = String(formData.get('email') ?? '').trim();
   const password = String(formData.get('password') ?? '');
+  const normalizedEmail = email.toLowerCase();
   let cookiesToSet: PendingCookie[] = [];
 
   if (!email || !password || password.length < 6) {
@@ -56,5 +64,9 @@ export async function POST(request: NextRequest) {
     return buildRedirect(request, '/login', cookiesToSet, 'invalid-credentials');
   }
 
-  return buildRedirect(request, '/dashboard', cookiesToSet);
+  const loginMethod = normalizedEmail === 'test@pettrack.cl' ? 'demo' : 'password';
+
+  return buildRedirect(request, '/dashboard', cookiesToSet, undefined, {
+    login: loginMethod,
+  });
 }
