@@ -48,6 +48,16 @@ export async function signOut() {
   if (error) throw error;
 }
 
+export async function signInWithGoogle() {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`,
+    },
+  });
+  if (error) throw error;
+}
+
 // Fetches
 export async function getPets(userId: string) {
   const { data, error } = await supabase
