@@ -27,4 +27,10 @@ test.describe('Autenticacion', () => {
 
     await expect(page.getByText(/error|invalido|incorrect/i)).toBeVisible();
   });
+
+  test('muestra error cuando Google no esta habilitado para el email', async ({ page }) => {
+    await page.goto('/login?error=google-beta-restricted');
+
+    await expect(page.getByText(/acceso beta habilitado para ingresar con google/i)).toBeVisible();
+  });
 });

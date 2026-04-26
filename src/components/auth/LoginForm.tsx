@@ -23,6 +23,10 @@ function getErrorMessage(initialError?: string) {
     return 'Error: revisa el email y la contraseña';
   }
 
+  if (initialError === 'google-beta-restricted') {
+    return 'Error: tu email no tiene acceso beta habilitado para ingresar con Google.';
+  }
+
   return '';
 }
 
@@ -35,6 +39,7 @@ export function LoginForm({ initialError = '', isDemo = false }: LoginFormProps)
   async function handleGoogleLogin() {
     setGoogleLoading(true);
     setGoogleError('');
+
     try {
       await signInWithGoogle();
     } catch {

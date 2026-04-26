@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/auth-helpers-nextjs';
+import { canUseGoogleAuth } from '@/lib/server/betaAccess';
+import { getSupabaseAdminClient } from '@/lib/server/supabaseAdmin';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -12,6 +14,12 @@ function safeNextPath(rawNext: string | null) {
   }
 
   return rawNext;
+}
+
+function buildLoginRedirect(request: NextRequest, error: string) {
+  const url = new URL('/login', request.url);
+  url.searchParams.set('error', error);
+  return NextResponse.redirect(url, { status: 303 });
 }
 
 export async function GET(request: NextRequest) {
@@ -54,12 +62,34 @@ export async function GET(request: NextRequest) {
   }
 
   if (error) {
-    return NextResponse.redirect(
-      new URL('/login?error=invite-link', request.url),
-      {
-        status: 303,
+    return buildLoginRedirect(request, 'invite-link');
+  }
+
+  if (code) {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return buildLoginRedirect(request, 'invite-link');
+    }
+
+    const providers = Array.isArray(user.app_metadata?.providers) ? user.app_metadata.providers : [];
+    const isGoogleFlow =
+      user.app_metadata?.provider === 'google' || providers.includes('google');
+
+    if (isGoogleFlow) {
+      const isAllowed = await canUseGoogleAuth(user);
+
+      if (!isAllowed) {
+        const adminSupabase = getSupabaseAdminClient();
+        await supabase.auth.signOut();
+        await adminSupabase.auth.admin.deleteUser(user.id);
+
+        return buildLoginRedirect(request, 'google-beta-restricted');
       }
-    );
+    }
   }
 
   const response = NextResponse.redirect(new URL(next, request.url), { status: 303 });
