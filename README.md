@@ -60,6 +60,37 @@ npm run lint
 npm run test
 ```
 
+## SMTP con Resend
+
+Este proyecto no usa un mailer propio para autenticacion. Los correos de registro, confirmacion e invitaciones salen desde Supabase Auth, por lo que Resend debe configurarse como proveedor SMTP dentro de Supabase.
+
+Pasos recomendados:
+
+1. Verifica tu dominio en Resend y crea una API key solo para SMTP.
+2. En Supabase ve a `Authentication -> Email -> SMTP Settings` y habilita `Custom SMTP`.
+3. Usa las credenciales SMTP de Resend:
+
+```text
+Host: smtp.resend.com
+Port: 587
+Username: resend
+Password: <tu api key de Resend>
+```
+
+4. En `Authentication -> URL Configuration` define correctamente:
+   - `Site URL`: la URL publica de la app en Vercel
+   - `Redirect URLs`: incluye `http://localhost:3000/auth/callback` y tu dominio productivo con `/auth/callback`
+5. Prueba estos flujos despues del cambio:
+   - signup normal
+   - email de confirmacion
+   - invitacion beta desde el panel admin
+   - recuperacion o cambio de password si lo habilitas
+
+Notas:
+
+- No guardes credenciales SMTP de Resend en `.env.local` de esta app salvo que luego implementemos un mailer propio.
+- El codigo actual ya usa Supabase Auth para `signUp` e invitaciones admin, asi que no necesita cambios para que el SMTP funcione.
+
 ## Estructura de documentacion
 
 - [docs/README.md](docs/README.md): indice general

@@ -26,6 +26,31 @@ interface EventFormProps {
 }
 
 const CUSTOM_TITLE_VALUE = '__custom__';
+const CUSTOM_MEDICINE_INTERVAL_VALUE = '__custom_interval__';
+const ANTIPARASITARIO_TITLE = 'Antiparasitario';
+
+function getInitialMedicineDoseInterval(event?: Event): '1' | '3' | '' {
+  if (!event || event.type !== 'medicina' || event.title !== ANTIPARASITARIO_TITLE) {
+    return '';
+  }
+
+  if (!event.event_date || !event.next_due_date) {
+    return '';
+  }
+
+  const oneMonthDate = applyDueRule(event.event_date, { amount: 1, unit: 'months' });
+  const threeMonthDate = applyDueRule(event.event_date, { amount: 3, unit: 'months' });
+
+  if (event.next_due_date === oneMonthDate) {
+    return '1';
+  }
+
+  if (event.next_due_date === threeMonthDate) {
+    return '3';
+  }
+
+  return '';
+}
 
 const eventIcons: Record<EventType, string> = {
   vacuna: '💉',
@@ -52,6 +77,9 @@ export function EventForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [nextDueDateTouched, setNextDueDateTouched] = useState(Boolean(event?.next_due_date));
+  const [medicineDoseInterval, setMedicineDoseInterval] = useState<'1' | '3' | ''>(() =>
+    getInitialMedicineDoseInterval(event)
+  );
   const [pet, setPet] = useState<Pet | null>(null);
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [attachmentPreview, setAttachmentPreview] = useState<string | null>(event?.file_url || null);
@@ -92,10 +120,24 @@ export function EventForm({
   const getSuggestedNextDueDate = (
     nextEventDate: string,
     nextTitle: string,
-    nextType = type
+    nextType = type,
+    nextMedicineDoseInterval = medicineDoseInterval
   ) => {
     if (nextType === 'otro' || !nextTitle) {
       return '';
+    }
+
+    if (nextType === 'medicina' && nextTitle === ANTIPARASITARIO_TITLE) {
+      if (!nextMedicineDoseInterval) {
+        return '';
+      }
+
+      return (
+        applyDueRule(nextEventDate, {
+          amount: Number(nextMedicineDoseInterval),
+          unit: 'months',
+        }) ?? ''
+      );
     }
 
     const nextCatalogItem = getEventCatalogOptions(EVENT_CATALOG[nextType], pet).find(
@@ -106,6 +148,7 @@ export function EventForm({
   };
 
   const showCustomTitleInput = type === 'otro' || selectedTitle === CUSTOM_TITLE_VALUE;
+  const showMedicineDoseInterval = type === 'medicina' && title === ANTIPARASITARIO_TITLE;
 
   const handleTypeChange = (nextType: EventType) => {
     setType(nextType);
@@ -117,6 +160,7 @@ export function EventForm({
       if (!nextDueDateTouched) {
         setNextDueDate('');
       }
+      setMedicineDoseInterval('');
       return;
     }
 
@@ -133,6 +177,9 @@ export function EventForm({
 
     if (!event || event.type !== nextType) {
       setTitle('');
+    }
+    if (nextType !== 'medicina') {
+      setMedicineDoseInterval('');
     }
     if (!nextDueDateTouched) {
       setNextDueDate('');
@@ -160,6 +207,7 @@ export function EventForm({
   const handleTitleOptionChange = (value: string) => {
     if (value === CUSTOM_TITLE_VALUE) {
       setTitle('');
+      setMedicineDoseInterval('');
       if (!nextDueDateTouched) {
         setNextDueDate('');
       }
@@ -167,6 +215,9 @@ export function EventForm({
     }
 
     setTitle(value);
+    if (type === 'medicina' && value !== ANTIPARASITARIO_TITLE) {
+      setMedicineDoseInterval('');
+    }
     if (!nextDueDateTouched) {
       setNextDueDate(getSuggestedNextDueDate(eventDate, value));
     }
@@ -344,6 +395,9 @@ export function EventForm({
             onChange={(e) => {
               const nextTitle = e.target.value;
               setTitle(nextTitle);
+              if (type === 'medicina' && nextTitle !== ANTIPARASITARIO_TITLE) {
+                setMedicineDoseInterval('');
+              }
               if (!nextDueDateTouched) {
                 setNextDueDate(getSuggestedNextDueDate(eventDate, nextTitle));
               }
@@ -353,6 +407,35 @@ export function EventForm({
           />
         )}
       </div>
+
+      {showMedicineDoseInterval && (
+        <div className="space-y-2">
+          <label className="mb-2 block text-sm font-semibold text-gray-700">Frecuencia de próxima dosis</label>
+          <select
+            value={medicineDoseInterval || CUSTOM_MEDICINE_INTERVAL_VALUE}
+            onChange={(e) => {
+              const nextInterval: '1' | '3' | '' =
+                e.target.value === CUSTOM_MEDICINE_INTERVAL_VALUE
+                  ? ''
+                  : e.target.value === '1'
+                    ? '1'
+                    : '3';
+              setMedicineDoseInterval(nextInterval);
+              if (!nextDueDateTouched) {
+                setNextDueDate(getSuggestedNextDueDate(eventDate, title, type, nextInterval));
+              }
+            }}
+            className="w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-base font-medium transition-all duration-200 hover:border-gray-300 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          >
+            <option value={CUSTOM_MEDICINE_INTERVAL_VALUE}>Selecciona una frecuencia</option>
+            <option value="1">1 mes</option>
+            <option value="3">3 meses</option>
+          </select>
+          <p className="ml-1 text-xs text-gray-500">
+            Elige cada cuánto corresponde repetir el antiparasitario.
+          </p>
+        </div>
+      )}
 
       <div className="space-y-1">
         <Input

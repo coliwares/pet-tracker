@@ -183,6 +183,9 @@ export const EVENT_CATALOG: Record<typeof EVENT_TYPES[number], readonly EventCat
       nextDueRule: { amount: 7, unit: 'days' },
     },
     {
+      title: 'Antiparasitario',
+    },
+    {
       title: 'Antibiotico',
     },
     {
