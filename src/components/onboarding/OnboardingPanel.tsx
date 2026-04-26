@@ -54,7 +54,11 @@ export function OnboardingPanel({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <section className={`overflow-hidden rounded-full border px-4 py-3 shadow-sm ${surfaceClassName}`}>
+    <section
+      className={`overflow-hidden border px-4 py-3 shadow-sm transition-[border-radius] duration-200 ${
+        expanded ? 'rounded-[2rem]' : 'rounded-[2rem] sm:rounded-full'
+      } ${surfaceClassName}`}
+    >
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0 flex-1">
@@ -109,44 +113,48 @@ export function OnboardingPanel({
 
         {expanded ? (
           <div className="rounded-[1.2rem] border border-white/80 bg-white/70 px-3 py-3">
-          <div className="flex flex-wrap items-center gap-2">
-            {steps.map((step) => (
-              <div
-                key={step.label}
-                className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/85 px-3 py-1.5 text-xs font-medium text-slate-600"
-              >
-                <div className={`rounded-full p-1 ${step.completed ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                  <CheckCircle2 className="h-3 w-3" />
+            <div className="grid gap-2 lg:grid-cols-3">
+              {steps.map((step) => (
+                <div
+                  key={step.label}
+                  className="inline-flex min-w-0 items-center gap-2 rounded-full border border-white/80 bg-white/85 px-3 py-2 text-xs font-medium text-slate-600"
+                >
+                  <div
+                    className={`rounded-full p-1 ${
+                      step.completed ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                    }`}
+                  >
+                    <CheckCircle2 className="h-3 w-3" />
+                  </div>
+                  <span className={step.completed ? 'text-slate-900' : undefined}>{step.label}</span>
                 </div>
-                <span className={step.completed ? 'text-slate-900' : undefined}>{step.label}</span>
-              </div>
-            ))}
-          </div>
-
-          {supportingActions && supportingActions.length > 0 ? (
-            <div className="mt-2 flex flex-wrap gap-2">
-              {supportingActions.map((action) => (
-                <Link key={action.href + action.label} href={action.href}>
-                  <Button variant="ghost" size="sm" className="h-8 px-3 py-1 text-xs">
-                    {action.label}
-                  </Button>
-                </Link>
               ))}
             </div>
-          ) : null}
 
-          {secondaryActionLabel && secondaryActionHref ? (
-            <div className="mt-2">
-              <Link href={secondaryActionHref}>
-                <Button variant="secondary" size="sm" className="h-8 px-3 text-xs">
-                <span className="inline-flex items-center gap-2">
-                  {secondaryActionLabel}
-                  <ChevronRight className="h-4 w-4" />
-                </span>
-                </Button>
-              </Link>
-            </div>
-          ) : null}
+            {supportingActions && supportingActions.length > 0 ? (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {supportingActions.map((action) => (
+                  <Link key={action.href + action.label} href={action.href}>
+                    <Button variant="ghost" size="sm" className="h-8 px-3 py-1 text-xs">
+                      {action.label}
+                    </Button>
+                  </Link>
+                ))}
+              </div>
+            ) : null}
+
+            {secondaryActionLabel && secondaryActionHref ? (
+              <div className="mt-2">
+                <Link href={secondaryActionHref}>
+                  <Button variant="secondary" size="sm" className="h-8 px-3 text-xs">
+                    <span className="inline-flex items-center gap-2">
+                      {secondaryActionLabel}
+                      <ChevronRight className="h-4 w-4" />
+                    </span>
+                  </Button>
+                </Link>
+              </div>
+            ) : null}
           </div>
         ) : null}
       </div>
