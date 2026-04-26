@@ -87,7 +87,6 @@ export default function FeedbackPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         userId={user.id}
-        userEmail={user.email}
         onSubmitted={fetchFeedback}
       />
     </div>

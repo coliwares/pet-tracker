@@ -126,7 +126,6 @@ export function Header() {
           isOpen={isFeedbackModalOpen}
           onClose={() => setIsFeedbackModalOpen(false)}
           userId={user.id}
-          userEmail={user.email}
         />
       )}
     </>

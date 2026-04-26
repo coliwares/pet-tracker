@@ -11,6 +11,7 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
 type PetUploadType = 'photo' | 'license';
 type EventUploadType = 'attachment';
+type FeedbackUploadType = 'feedback';
 
 /**
  * Valida un archivo antes de subirlo
@@ -37,7 +38,7 @@ async function uploadImageAsset(
   file: File,
   userId: string,
   entityId: string,
-  type: PetUploadType | EventUploadType
+  type: PetUploadType | EventUploadType | FeedbackUploadType
 ): Promise<string | null> {
   try {
     const validation = validateFile(file);
@@ -93,6 +94,14 @@ export async function uploadEventAttachment(
   eventId: string
 ): Promise<string | null> {
   return uploadImageAsset(file, userId, eventId, 'attachment');
+}
+
+export async function uploadFeedbackImage(
+  file: File,
+  userId: string,
+  feedbackId: string
+): Promise<string | null> {
+  return uploadImageAsset(file, userId, feedbackId, 'feedback');
 }
 
 /**

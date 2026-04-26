@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Feedback } from '@/lib/types';
+import { FeedbackInput } from '@/lib/feedback';
 import { createFeedback, getFeedback, supabase } from '@/lib/supabase';
 
 export function useFeedback() {
@@ -39,7 +40,7 @@ export function useFeedback() {
     return () => clearTimeout(timeoutId);
   }, [fetchFeedback]);
 
-  const add = async (payload: Omit<Feedback, 'id' | 'status' | 'created_at' | 'updated_at'>) => {
+  const add = async (payload: FeedbackInput) => {
     const created = await createFeedback(payload);
     setFeedback((current) => [created, ...current]);
     return created;

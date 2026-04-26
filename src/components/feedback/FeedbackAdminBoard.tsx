@@ -1,6 +1,8 @@
 'use client';
 
+import Image from 'next/image';
 import { useMemo, useState } from 'react';
+import { ExternalLink, Image as ImageIcon } from 'lucide-react';
 import {
   FEEDBACK_STATUSES,
   FEEDBACK_STATUS_COLORS,
@@ -132,7 +134,9 @@ export function FeedbackAdminBoard({
                       className={`rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:shadow-md ${
                         draggingId === entry.id ? 'scale-[0.98] opacity-60 shadow-lg' : ''
                       } ${
-                        updatingId === entry.id ? 'cursor-wait opacity-70' : 'cursor-grab active:cursor-grabbing'
+                        updatingId === entry.id
+                          ? 'cursor-wait opacity-70'
+                          : 'cursor-grab active:cursor-grabbing'
                       }`}
                     >
                       <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -146,12 +150,38 @@ export function FeedbackAdminBoard({
                         </span>
                       </div>
 
-                      <h3 className="mb-2 text-base font-bold text-gray-900">
-                        {entry.title}
-                      </h3>
+                      <h3 className="mb-2 text-base font-bold text-gray-900">{entry.title}</h3>
                       <p className="mb-4 whitespace-pre-wrap text-sm leading-relaxed text-gray-600">
                         {entry.message}
                       </p>
+
+                      {entry.image_url && (
+                        <div className="mb-4 rounded-2xl border border-blue-100 bg-blue-50/70 p-3">
+                          <div className="flex items-center gap-2 text-xs font-semibold text-blue-700">
+                            <ImageIcon className="h-4 w-4" />
+                            <span>Imagen adjunta</span>
+                          </div>
+                          <div className="mt-3 overflow-hidden rounded-xl border border-blue-100 bg-white">
+                            <Image
+                              src={entry.image_url}
+                              alt={`Adjunto de feedback: ${entry.title}`}
+                              width={288}
+                              height={192}
+                              className="h-40 w-full object-cover"
+                              unoptimized
+                            />
+                          </div>
+                          <a
+                            href={entry.image_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-blue-700 hover:text-blue-800"
+                          >
+                            Ver imagen completa
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
+                        </div>
+                      )}
 
                       <div className="mb-3 rounded-xl bg-slate-50 px-3 py-2 text-sm text-gray-700">
                         <span className="font-semibold">Usuario:</span> {entry.user_email}

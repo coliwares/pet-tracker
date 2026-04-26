@@ -9,6 +9,7 @@ import {
   TutorProfile,
   TutorProfileInput,
 } from './types';
+import { FeedbackInput } from './feedback';
 import { getEventHistoryGroup } from './utils';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -203,15 +204,23 @@ export async function getFeedback(userId: string) {
 }
 
 export async function createFeedback(
-  feedback: Omit<Feedback, 'id' | 'status' | 'created_at' | 'updated_at'>
+  feedback: FeedbackInput
 ) {
-  const { data, error } = await supabase
-    .from('feedback')
-    .insert([{ ...feedback, status: 'nuevo' }])
-    .select()
-    .single();
-  if (error) throw error;
-  return data as Feedback;
+  const response = await fetch('/api/feedback', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(feedback),
+  });
+
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(payload?.error ?? 'No se pudo enviar el feedback');
+  }
+
+  const payload = (await response.json()) as { feedback: Feedback };
+  return payload.feedback;
 }
 
 async function getAccessToken() {

@@ -49,6 +49,7 @@ export type Feedback = {
   type: FeedbackType;
   title: string;
   message: string;
+  image_url: string | null;
   status: FeedbackStatus;
   created_at: string;
   updated_at: string;
