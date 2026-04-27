@@ -11,7 +11,7 @@ import { useOnboardingState } from '@/hooks/useOnboardingState';
 import { Event, Pet } from '@/lib/types';
 import { createPetShareLink, deletePet, getPet } from '@/lib/supabase';
 import { analytics } from '@/lib/analytics';
-import { formatDate, formatDateTime, formatPetAge, getEventHistoryGroup, getSpeciesOption, parseLocalDate } from '@/lib/utils';
+import { buildGoogleCalendarUrl, formatDate, formatDateTime, formatPetAge, getEventHistoryGroup, getSpeciesOption, parseLocalDate } from '@/lib/utils';
 import { Container } from '@/components/ui/Container';
 import { Button } from '@/components/ui/Button';
 import { Loading } from '@/components/ui/Loading';
@@ -707,6 +707,18 @@ export default function PetDetailPage() {
                           <CalendarDays className="h-4 w-4" />
                           {formatDate(event.event_date)}
                         </div>
+                      </div>
+
+                      <div className="mt-4">
+                        <a
+                          href={buildGoogleCalendarUrl(event, pet.name)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-800 transition-colors hover:bg-sky-100"
+                        >
+                          <CalendarDays className="h-4 w-4" />
+                          Agregar a calendario
+                        </a>
                       </div>
                     </div>
                   </article>

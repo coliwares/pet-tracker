@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Event } from '@/lib/types';
 import { EVENT_TYPE_LABELS, EVENT_TYPE_COLORS } from '@/lib/constants';
-import { formatDate } from '@/lib/utils';
+import { buildGoogleCalendarUrl, formatDate } from '@/lib/utils';
 import { deleteEvent } from '@/lib/supabase';
 import { deleteStorageFile } from '@/lib/storage';
 import { Calendar, Edit, ExternalLink, FileText, Trash2 } from 'lucide-react';
@@ -21,6 +21,7 @@ export function EventCard({ event }: EventCardProps) {
   const router = useRouter();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const calendarUrl = buildGoogleCalendarUrl(event);
 
   const handleDelete = async () => {
     try {
@@ -121,7 +122,13 @@ export function EventCard({ event }: EventCardProps) {
           </p>
         )}
 
-        <div className="mt-4 flex gap-2 border-t-2 border-gray-50 pt-4">
+        <div className="mt-4 flex flex-wrap gap-2 border-t-2 border-gray-50 pt-4">
+          <a href={calendarUrl} target="_blank" rel="noreferrer">
+            <Button variant="secondary" size="sm" className="font-semibold">
+              <Calendar className="mr-1 h-4 w-4" />
+              Agregar a calendario
+            </Button>
+          </a>
           <Link href={`/dashboard/${event.pet_id}/events/${event.id}/edit`}>
             <Button variant="ghost" size="sm" className="font-semibold">
               <Edit className="mr-1 h-4 w-4" />

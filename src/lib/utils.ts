@@ -202,3 +202,31 @@ export function validateEmail(email: string): boolean {
 export function validatePassword(password: string): boolean {
   return password.length >= 6;
 }
+
+type CalendarEventInput = {
+  title: string;
+  description?: string | null;
+  notes?: string | null;
+  event_date: string;
+  next_due_date?: string | null;
+};
+
+export function buildGoogleCalendarUrl(event: CalendarEventInput, petName?: string): string {
+  const selectedDate = event.next_due_date ?? event.event_date;
+  const startDate = parseLocalDate(selectedDate);
+  const endDate = addDays(startDate, 1);
+  const text = petName ? `${event.title} - ${petName}` : event.title;
+  const details = [event.description, event.notes].filter(Boolean).join('\n\n');
+
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text,
+    dates: `${format(startDate, 'yyyyMMdd')}/${format(endDate, 'yyyyMMdd')}`,
+  });
+
+  if (details) {
+    params.set('details', details);
+  }
+
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
