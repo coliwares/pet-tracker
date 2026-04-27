@@ -286,6 +286,35 @@ export async function updateFeedbackStatus(feedbackId: string, status: FeedbackS
   return payload.feedback;
 }
 
+export async function sendFeedbackReplyEmail(payload: {
+  feedbackId: string;
+  subject: string;
+  html: string;
+  text: string;
+}) {
+  const token = await getAccessToken();
+  const response = await fetch('/api/feedback/admin/reply', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorPayload = (await response.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(errorPayload?.error ?? 'No se pudo enviar el correo');
+  }
+
+  return (await response.json()) as {
+    ok: boolean;
+    resendId: string;
+    sentTo: string;
+    approvedBy: string | null;
+  };
+}
+
 export async function getFeedbackAdminStatus() {
   const token = await getAccessToken();
   const response = await fetch('/api/feedback/admin/status', {
