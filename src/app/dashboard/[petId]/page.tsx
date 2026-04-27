@@ -82,6 +82,10 @@ function getLastVisit(events: Event[]) {
   return sortByEventDateDesc(events).find((event) => event.type === 'visita') ?? null;
 }
 
+function getLastVaccine(events: Event[]) {
+  return sortByEventDateDesc(events).find((event) => event.type === 'vacuna') ?? null;
+}
+
 function getStatus(events: Event[], nextDueDate: string | null) {
   const overdueEvents = getActiveDueEvents(events).filter((event) => {
     if (!event.next_due_date) {
@@ -261,6 +265,8 @@ export default function PetDetailPage() {
   const sortedEvents = sortByEventDateDesc(events);
   const age = formatPetAge(pet?.birth_date ?? null);
   const latestVisit = getLastVisit(events);
+  const latestVaccine = getLastVaccine(events);
+  const latestControlDate = latestVisit ?? latestVaccine;
   const upcomingVaccine = getUpcomingVaccine(events);
   const status = getStatus(events, upcomingVaccine?.next_due_date ?? null);
   const hasStartedTimeline = events.length > 0;
@@ -625,7 +631,7 @@ export default function PetDetailPage() {
                   <div>
                     <p className="text-sm text-slate-500">Último control</p>
                     <p className="mt-2 text-2xl font-black text-slate-950">
-                      {latestVisit ? formatDate(latestVisit.event_date) : 'Sin registro'}
+                      {latestControlDate ? formatDate(latestControlDate.event_date) : 'Sin registro'}
                     </p>
                   </div>
                   <div>
