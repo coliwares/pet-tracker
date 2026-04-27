@@ -55,9 +55,7 @@ export function OnboardingPanel({
 
   return (
     <section
-      className={`overflow-hidden border px-4 py-3 shadow-sm transition-[border-radius] duration-200 ${
-        expanded ? 'rounded-[2rem]' : 'rounded-[2rem] sm:rounded-full'
-      } ${surfaceClassName}`}
+      className={`overflow-hidden rounded-[1.5rem] border px-4 py-3 shadow-sm ${surfaceClassName}`}
     >
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
