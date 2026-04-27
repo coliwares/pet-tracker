@@ -611,7 +611,7 @@ export default function PetDetailPage() {
                       className="inline-flex items-center gap-2 text-sm font-semibold text-sky-200 transition-colors hover:text-white"
                     >
                       <ShieldCheck className="h-4 w-4" />
-                      ¿Aún no lo tienes? Obtenlo acá
+                      ¿Aún no tienes el registro nacional de mascotas? Obtenlo acá
                     </a>
                   )}
                 </div>

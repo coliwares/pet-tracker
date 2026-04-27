@@ -370,7 +370,7 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
               file:cursor-pointer file:transition-all"
           />
           <p className="text-xs text-gray-500">
-            JPG, PNG o WebP · Máximo 5 MB · Se comprimirá automáticamente
+            Opcional · JPG, PNG o WebP · Máximo 5 MB · Se comprimirá automáticamente
           </p>
         </div>
 
