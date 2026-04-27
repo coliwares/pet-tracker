@@ -38,5 +38,6 @@
 
 - Type-check en verde
 - Lint en verde
+- Unit tests relevantes ejecutados
 - Tests relevantes ejecutados
 - Datos E2E limpiados si corresponde

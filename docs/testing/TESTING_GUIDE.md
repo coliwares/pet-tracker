@@ -8,13 +8,16 @@ Validar cambios sin perder cobertura basica de auth, mascotas, eventos y vistas 
 
 1. `npm run type-check`
 2. `npm run lint`
-3. `npm run test`
+3. `npm run test:unit`
+4. `npm run test`
 
 ## Suite automatizada
 
 - Configuracion en `playwright.config.ts`
 - Specs en `tests/e2e/`
 - Helpers en `tests/helpers/`
+- Unit tests en `tests/unit/`
+- Runner unitario en `vitest.config.ts`
 
 ## Credenciales demo
 
