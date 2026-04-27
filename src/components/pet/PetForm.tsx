@@ -418,6 +418,14 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
           <p className="text-xs text-gray-500">
             Opcional · Sube una foto o captura del registro nacional de mascotas si ya lo tienes
           </p>
+          <a
+            href="https://registratumascota.cl/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex text-xs font-semibold text-purple-700 transition-colors hover:text-purple-800"
+          >
+            ¿Aún no lo tienes? Obtenlo acá
+          </a>
         </div>
       </div>
 
