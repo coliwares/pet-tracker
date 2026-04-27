@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
-import { FileText } from 'lucide-react';
+import { ChevronDown, FileText } from 'lucide-react';
 import { Pet, Species } from '@/lib/types';
 import { SPECIES } from '@/lib/constants';
 import { Input } from '@/components/ui/Input';
@@ -294,18 +294,21 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
         <label className="block text-sm font-semibold text-gray-700 mb-2">
           Especie *
         </label>
-        <select
-          value={species}
-          onChange={(e) => setSpecies(e.target.value as Species)}
-          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 text-base font-medium bg-white hover:border-gray-300"
-          required
-        >
-          {SPECIES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            value={species}
+            onChange={(e) => setSpecies(e.target.value as Species)}
+            className="w-full appearance-none px-4 py-3 pr-14 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 text-base font-medium bg-white hover:border-gray-300"
+            required
+          >
+            {SPECIES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+        </div>
       </div>
 
       <div className="space-y-1">
