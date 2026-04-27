@@ -54,7 +54,7 @@ export default function AdminFeedbackPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <Container className="py-12">
+      <Container className="max-w-[100rem] py-12">
         <Link
           href="/dashboard"
           className="group mb-8 inline-flex items-center text-base font-semibold text-gray-600 transition-colors hover:text-blue-600"
