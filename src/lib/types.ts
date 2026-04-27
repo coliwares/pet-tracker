@@ -4,7 +4,19 @@ export type User = {
   created_at: string;
 };
 
-export type Species = 'Perro' | 'Gato' | 'Conejo' | 'Ave' | 'Otro';
+export type Species =
+  | 'Perro'
+  | 'Gato'
+  | 'Ave'
+  | 'Pez'
+  | 'Conejo'
+  | 'Hamster'
+  | 'Cobaya'
+  | 'Huron'
+  | 'Tortuga'
+  | 'Reptil'
+  | 'Anfibio'
+  | 'Otro';
 
 export type Pet = {
   id: string;

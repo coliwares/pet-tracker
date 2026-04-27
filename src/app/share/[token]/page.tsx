@@ -3,7 +3,7 @@ import { CalendarDays, Clock3, ShieldCheck, Stethoscope } from 'lucide-react';
 import { Container } from '@/components/ui/Container';
 import { PetPhoto } from '@/components/pet/PetPhoto';
 import { getSharedPetByToken } from '@/lib/server/petShare';
-import { formatDate, formatDateTime, formatPetAge } from '@/lib/utils';
+import { formatDate, formatDateTime, formatPetAge, getSpeciesOption } from '@/lib/utils';
 import { Event } from '@/lib/types';
 
 function getEventIcon(event: Event) {
@@ -54,6 +54,7 @@ export default async function SharedPetPage({
 
   const { pet, events, expiresAt } = sharedPet;
   const age = formatPetAge(pet.birth_date);
+  const speciesLabel = getSpeciesOption(pet.species)?.label ?? pet.species;
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.16),_transparent_32%),linear-gradient(180deg,_#fff8ef_0%,_#fffdf9_36%,_#f4f9ff_100%)]">
@@ -83,7 +84,7 @@ export default async function SharedPetPage({
 
                     <div className="mt-4 flex flex-wrap gap-2">
                       <span className="rounded-full bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-800">
-                        {pet.species}
+                        {speciesLabel}
                       </span>
                       {pet.breed && (
                         <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">

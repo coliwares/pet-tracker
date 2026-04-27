@@ -16,6 +16,7 @@ import { UpcomingVisitsCard } from '@/components/home/UpcomingVisitsCard';
 import { OnboardingPanel } from '@/components/onboarding/OnboardingPanel';
 import { analytics } from '@/lib/analytics';
 import { Species } from '@/lib/types';
+import { SPECIES_OPTIONS } from '@/lib/constants';
 import { PawPrint, Plus, Search, Sparkles } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -172,11 +173,11 @@ export default function DashboardPage() {
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900 outline-none transition-colors focus:border-sky-300"
                   >
                     <option value="all">Todas las especies</option>
-                    <option value="Perro">Perros</option>
-                    <option value="Gato">Gatos</option>
-                    <option value="Conejo">Conejos</option>
-                    <option value="Ave">Aves</option>
-                    <option value="Otro">Otras</option>
+                    {SPECIES_OPTIONS.map((speciesOption) => (
+                      <option key={speciesOption.value} value={speciesOption.value}>
+                        {speciesOption.pluralLabel}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>

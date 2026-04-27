@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { createPet, updatePet } from '@/lib/supabase';
 import { Pet } from '@/lib/types';
+import { DEFAULT_SPECIES } from '@/lib/constants';
 import { Container } from '@/components/ui/Container';
 import { Loading } from '@/components/ui/Loading';
 import { PetForm, PetFormSubmitOptions } from '@/components/pet/PetForm';
@@ -27,7 +28,7 @@ export default function NewPetPage() {
     if (options.mode === 'create') {
       return createPet({
         name: data.name ?? '',
-        species: data.species ?? 'Perro',
+        species: data.species ?? DEFAULT_SPECIES,
         breed: data.breed ?? null,
         birth_date: data.birth_date ?? null,
         weight: data.weight ?? null,

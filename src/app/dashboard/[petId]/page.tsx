@@ -11,7 +11,7 @@ import { useOnboardingState } from '@/hooks/useOnboardingState';
 import { Event, Pet } from '@/lib/types';
 import { createPetShareLink, deletePet, getPet } from '@/lib/supabase';
 import { analytics } from '@/lib/analytics';
-import { formatDate, formatDateTime, formatPetAge, getEventHistoryGroup, parseLocalDate } from '@/lib/utils';
+import { formatDate, formatDateTime, formatPetAge, getEventHistoryGroup, getSpeciesOption, parseLocalDate } from '@/lib/utils';
 import { Container } from '@/components/ui/Container';
 import { Button } from '@/components/ui/Button';
 import { Loading } from '@/components/ui/Loading';
@@ -315,6 +315,7 @@ export default function PetDetailPage() {
   const filteredHighlights = filteredEvents.slice(0, 3);
   const hasActiveEventFilters =
     normalizedEventSearch.length > 0 || typeFilter !== 'all' || statusFilter !== 'all';
+  const speciesLabel = pet ? getSpeciesOption(pet.species)?.label ?? pet.species : '';
 
   if (authLoading || loading) {
     return <Loading text="Cargando información..." />;
@@ -469,7 +470,7 @@ export default function PetDetailPage() {
 
                       <div className="mt-4 flex flex-wrap gap-2">
                         <span className="rounded-full bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-800">
-                          {pet.species}
+                          {speciesLabel}
                         </span>
                         {pet.breed && (
                           <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">

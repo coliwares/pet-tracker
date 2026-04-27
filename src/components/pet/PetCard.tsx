@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Pet } from '@/lib/types';
-import { formatPetAge, getPetLifeStage } from '@/lib/utils';
+import { formatPetAge, getPetLifeStage, getSpeciesOption } from '@/lib/utils';
 import { PetPhoto } from '@/components/pet/PetPhoto';
 
 interface PetCardProps {
@@ -10,6 +10,7 @@ interface PetCardProps {
 export function PetCard({ pet }: PetCardProps) {
   const age = formatPetAge(pet.birth_date);
   const lifeStage = getPetLifeStage(pet.birth_date, pet.species);
+  const speciesLabel = getSpeciesOption(pet.species)?.label ?? pet.species;
 
   return (
     <Link href={`/dashboard/${pet.id}`}>
@@ -41,7 +42,7 @@ export function PetCard({ pet }: PetCardProps) {
             </div>
 
             <p className="mt-1 text-base font-medium text-gray-600">
-              {pet.species} {pet.breed ? `- ${pet.breed}` : ''}
+              {speciesLabel} {pet.breed ? `- ${pet.breed}` : ''}
             </p>
 
             <div className="mt-3 flex flex-wrap gap-3">

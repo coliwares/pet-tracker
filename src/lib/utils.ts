@@ -10,7 +10,7 @@ import {
   isSameDay,
 } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { EVENT_CATALOG, EventCatalogItem, EventDueRule } from './constants';
+import { EVENT_CATALOG, EventCatalogItem, EventDueRule, SPECIES_OPTIONS } from './constants';
 import { Pet, Species } from './types';
 
 /**
@@ -135,6 +135,10 @@ export function getPetLifeStage(birthDate: string | null, species: Species): Pet
     label: 'Senior',
     className: 'bg-fuchsia-50 text-fuchsia-700',
   };
+}
+
+export function getSpeciesOption(species: Species) {
+  return SPECIES_OPTIONS.find((option) => option.value === species) ?? null;
 }
 
 export function getEventCatalogOptions(catalog: readonly EventCatalogItem[], pet: Pet | null): EventCatalogItem[] {

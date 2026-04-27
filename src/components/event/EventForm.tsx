@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Event, EventType, Pet } from '@/lib/types';
 import { EVENT_CATALOG, EVENT_TYPES, EVENT_TYPE_LABELS } from '@/lib/constants';
 import { getPet } from '@/lib/supabase';
-import { applyDueRule, calculateAgeInMonths, getEventCatalogOptions, toDateInputValue } from '@/lib/utils';
+import { applyDueRule, calculateAgeInMonths, getEventCatalogOptions, getSpeciesOption, toDateInputValue } from '@/lib/utils';
 import { compressImage, deleteStorageFile, uploadEventAttachment, validateFile } from '@/lib/storage';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -201,7 +201,7 @@ export function EventForm({
       return ageInMonths !== null && ageInMonths < 12 ? 'Gato gatito' : 'Gato adulto';
     }
 
-    return pet.species;
+    return getSpeciesOption(pet.species)?.label ?? pet.species;
   }, [pet]);
 
   const handleTitleOptionChange = (value: string) => {

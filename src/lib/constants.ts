@@ -1,6 +1,29 @@
 import { Species } from './types';
 
-export const SPECIES = ['Perro', 'Gato', 'Conejo', 'Ave', 'Otro'] as const;
+export const SPECIES_OPTIONS = [
+  { value: 'Perro', label: 'Perro', pluralLabel: 'Perros' },
+  { value: 'Gato', label: 'Gato', pluralLabel: 'Gatos' },
+  { value: 'Ave', label: 'Ave', pluralLabel: 'Aves' },
+  { value: 'Pez', label: 'Pez', pluralLabel: 'Peces' },
+  { value: 'Conejo', label: 'Conejo', pluralLabel: 'Conejos' },
+  { value: 'Hamster', label: 'Hámster', pluralLabel: 'Hámsters' },
+  { value: 'Cobaya', label: 'Cobaya / Cuy', pluralLabel: 'Cobayas / Cuyes' },
+  { value: 'Huron', label: 'Hurón', pluralLabel: 'Hurones' },
+  { value: 'Tortuga', label: 'Tortuga', pluralLabel: 'Tortugas' },
+  { value: 'Reptil', label: 'Reptil', pluralLabel: 'Reptiles' },
+  { value: 'Anfibio', label: 'Anfibio', pluralLabel: 'Anfibios' },
+  { value: 'Otro', label: 'Otro', pluralLabel: 'Otras especies' },
+] as const satisfies ReadonlyArray<{
+  value: Species;
+  label: string;
+  pluralLabel: string;
+}>;
+
+export const SPECIES = SPECIES_OPTIONS.map((species) => species.value) as readonly Species[];
+export const DEFAULT_SPECIES: Species = 'Perro';
+export const GENERIC_PET_SPECIES = SPECIES.filter(
+  (species) => species !== 'Perro' && species !== 'Gato'
+) as readonly Species[];
 
 export const EVENT_TYPES = ['vacuna', 'visita', 'medicina', 'otro'] as const;
 
@@ -138,12 +161,12 @@ export const EVENT_CATALOG: Record<typeof EVENT_TYPES[number], readonly EventCat
     {
       title: 'Vacuna anual',
       nextDueRule: { amount: 1, unit: 'years' },
-      species: ['Conejo', 'Ave', 'Otro'],
+      species: [...GENERIC_PET_SPECIES],
     },
     {
       title: 'Desparasitacion',
       nextDueRule: { amount: 3, unit: 'months' },
-      species: ['Conejo', 'Ave', 'Otro'],
+      species: [...GENERIC_PET_SPECIES],
     },
   ],
   visita: [

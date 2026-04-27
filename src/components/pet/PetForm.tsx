@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { ChevronDown, FileText } from 'lucide-react';
 import { Pet, Species } from '@/lib/types';
-import { SPECIES } from '@/lib/constants';
+import { DEFAULT_SPECIES, SPECIES_OPTIONS } from '@/lib/constants';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { uploadPetPhoto, deletePetPhoto, validateFile, compressImage } from '@/lib/storage';
@@ -41,7 +41,7 @@ interface PetFormProps {
 export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guardar' }: PetFormProps) {
   const maxBirthDate = getTodayDateString();
   const [name, setName] = useState(pet?.name || '');
-  const [species, setSpecies] = useState<Species>(pet?.species || 'Perro');
+  const [species, setSpecies] = useState<Species>(pet?.species || DEFAULT_SPECIES);
   const [breed, setBreed] = useState(pet?.breed || '');
   const [birthDate, setBirthDate] = useState(pet?.birth_date || '');
   const [birthDateError, setBirthDateError] = useState(validateBirthDate(pet?.birth_date || ''));
@@ -301,9 +301,9 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
             className="w-full appearance-none px-4 py-3 pr-14 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 text-base font-medium bg-white hover:border-gray-300"
             required
           >
-            {SPECIES.map((s) => (
-              <option key={s} value={s}>
-                {s}
+            {SPECIES_OPTIONS.map((speciesOption) => (
+              <option key={speciesOption.value} value={speciesOption.value}>
+                {speciesOption.label}
               </option>
             ))}
           </select>
