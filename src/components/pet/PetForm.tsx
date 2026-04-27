@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Image from 'next/image';
 import { useState } from 'react';
@@ -54,7 +54,7 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
     setError('');
   };
 
-  // Manejar selección de licencia
+  // Manejar selección de registro
   const handleLicenseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -132,7 +132,7 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
         }
 
         if (licenseFile) {
-          setUploadProgress('Subiendo licencia de registro...');
+          setUploadProgress('Subiendo registro nacional de mascotas...');
           const compressed = await compressImage(licenseFile, 1200);
           const uploadedUrl = await uploadPetPhoto(
             compressed,
@@ -144,7 +144,7 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
             licenseUrl = uploadedUrl;
             uploadedUrlsToCleanup.push(uploadedUrl);
           } else {
-            throw new Error('Error al subir licencia');
+            throw new Error('Error al subir el registro nacional de mascotas');
           }
         }
 
@@ -181,9 +181,9 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
         }
       }
 
-      // Subir licencia si se seleccionó
+      // Subir registro si se seleccionó
       if (licenseFile) {
-        setUploadProgress('Subiendo licencia de registro...');
+        setUploadProgress('Subiendo registro nacional de mascotas...');
         const compressed = await compressImage(licenseFile, 1200);
         const uploadedUrl = await uploadPetPhoto(
           compressed,
@@ -195,7 +195,7 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
           licenseUrl = uploadedUrl;
           uploadedUrlsToCleanup.push(uploadedUrl);
         } else {
-          throw new Error('Error al subir licencia');
+          throw new Error('Error al subir el registro nacional de mascotas');
         }
       }
 
@@ -220,7 +220,7 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
       }
 
       if (licenseFile && previousLicenseUrl && previousLicenseUrl !== licenseUrl) {
-        setUploadProgress('Limpiando licencia anterior...');
+        setUploadProgress('Limpiando registro anterior...');
         const deleted = await deletePetPhoto(previousLicenseUrl);
         if (!deleted) {
           console.warn('No se pudo eliminar la licencia anterior de la mascota');
@@ -376,14 +376,14 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
 
         <div className="space-y-3">
           <label className="block text-sm font-semibold text-gray-700">
-            Licencia de registro municipal
+            Registro nacional de mascotas
           </label>
 
           {licensePreview && (
             <div className="relative inline-block">
               <Image
                 src={licensePreview}
-                alt="Preview licencia"
+                alt="Preview registro nacional de mascotas"
                 width={128}
                 height={128}
                 className="w-32 h-32 object-cover rounded-xl border-2 border-gray-200"
@@ -416,7 +416,7 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
               file:cursor-pointer file:transition-all"
           />
           <p className="text-xs text-gray-500">
-            Opcional · Foto de la licencia municipal si tu mascota está registrada
+            Opcional · Sube una foto o captura del registro nacional de mascotas si ya lo tienes
           </p>
         </div>
       </div>
@@ -453,3 +453,5 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
     </form>
   );
 }
+
+

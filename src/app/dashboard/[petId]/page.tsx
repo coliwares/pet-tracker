@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Image from 'next/image';
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
@@ -270,7 +270,7 @@ export default function PetDetailPage() {
   const firstActivationStepId = `pet-first-activation:${petId}`;
   const shouldForceFirstEventPanel = onboardingIntent === 'pet-created';
   const shouldForceActivationPanel = onboardingIntent === 'event-created';
-  const quickAccessLabel = pet?.license_url ? 'Licencia lista' : 'Carnet listo';
+  const quickAccessLabel = pet?.license_url ? 'Registro listo' : 'Carnet listo';
   const qrCodeUrl = shareUrl
     ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=0&data=${encodeURIComponent(shareUrl)}`
     : '';
@@ -592,17 +592,29 @@ export default function PetDetailPage() {
                   </div>
                 </div>
 
-                {pet.license_url && (
-                  <a
-                    href={pet.license_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-sky-200 transition-colors hover:text-white"
-                  >
-                    <ShieldCheck className="h-4 w-4" />
-                    Ver licencia municipal
-                  </a>
-                )}
+                <div className="mt-4 space-y-2">
+                  {pet.license_url ? (
+                    <a
+                      href={pet.license_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-sm font-semibold text-sky-200 transition-colors hover:text-white"
+                    >
+                      <ShieldCheck className="h-4 w-4" />
+                      Ver registro nacional de mascotas
+                    </a>
+                  ) : (
+                    <a
+                      href="https://registratumascota.cl/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-sm font-semibold text-sky-200 transition-colors hover:text-white"
+                    >
+                      <ShieldCheck className="h-4 w-4" />
+                      ¿Aún no lo tienes? Obtenlo acá
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -814,3 +826,4 @@ export default function PetDetailPage() {
     </div>
   );
 }
+
