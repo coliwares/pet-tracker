@@ -9,6 +9,22 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { uploadPetPhoto, deletePetPhoto, validateFile, compressImage } from '@/lib/storage';
 
+function getTodayDateString() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function validateBirthDate(value: string) {
+  if (!value) {
+    return '';
+  }
+
+  if (value > getTodayDateString()) {
+    return 'La fecha de nacimiento no puede ser futura';
+  }
+
+  return '';
+}
+
 export interface PetFormSubmitOptions {
   mode: 'create' | 'update';
   petId?: string;
@@ -23,10 +39,12 @@ interface PetFormProps {
 }
 
 export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guardar' }: PetFormProps) {
+  const maxBirthDate = getTodayDateString();
   const [name, setName] = useState(pet?.name || '');
   const [species, setSpecies] = useState<Species>(pet?.species || 'Perro');
   const [breed, setBreed] = useState(pet?.breed || '');
   const [birthDate, setBirthDate] = useState(pet?.birth_date || '');
+  const [birthDateError, setBirthDateError] = useState(validateBirthDate(pet?.birth_date || ''));
   const [weight, setWeight] = useState(pet?.weight?.toString() || '');
   const [notes, setNotes] = useState(pet?.notes || '');
   const [loading, setLoading] = useState(false);
@@ -79,8 +97,16 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
     e.preventDefault();
     setError('');
 
+    const nextBirthDateError = validateBirthDate(birthDate);
+    setBirthDateError(nextBirthDateError);
+
     if (!name.trim()) {
       setError('El nombre es obligatorio');
+      return;
+    }
+
+    if (nextBirthDateError) {
+      setError(nextBirthDateError);
       return;
     }
 
@@ -297,7 +323,13 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
           type="date"
           label="Fecha de nacimiento"
           value={birthDate}
-          onChange={(e) => setBirthDate(e.target.value)}
+          max={maxBirthDate}
+          error={birthDateError}
+          onChange={(e) => {
+            const nextValue = e.target.value;
+            setBirthDate(nextValue);
+            setBirthDateError(validateBirthDate(nextValue));
+          }}
         />
         <p className="text-xs text-gray-500 ml-1">Calcularemos automáticamente la edad.</p>
       </div>
