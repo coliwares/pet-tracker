@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
+import { FileText } from 'lucide-react';
 import { Pet, Species } from '@/lib/types';
 import { SPECIES } from '@/lib/constants';
 import { Input } from '@/components/ui/Input';
@@ -37,6 +38,10 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
   const [photoPreview, setPhotoPreview] = useState<string | null>(pet?.photo_url || null);
   const [licensePreview, setLicensePreview] = useState<string | null>(pet?.license_url || null);
   const [uploadProgress, setUploadProgress] = useState<string>('');
+  const licenseAllowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
+
+  const isPdfFile = (file: File | null) => file?.type === 'application/pdf';
+  const isPdfUrl = (url: string | null) => Boolean(url?.toLowerCase().includes('.pdf'));
 
   // Manejar selección de foto de mascota
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,7 +64,7 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const validation = validateFile(file);
+    const validation = validateFile(file, licenseAllowedTypes);
     if (!validation.valid) {
       setError(validation.error || 'Archivo inválido');
       return;
@@ -133,9 +138,9 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
 
         if (licenseFile) {
           setUploadProgress('Subiendo registro nacional de mascotas...');
-          const compressed = await compressImage(licenseFile, 1200);
+          const uploadableFile = isPdfFile(licenseFile) ? licenseFile : await compressImage(licenseFile, 1200);
           const uploadedUrl = await uploadPetPhoto(
-            compressed,
+            uploadableFile,
             userId,
             savedPet.id,
             'license'
@@ -184,9 +189,9 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
       // Subir registro si se seleccionó
       if (licenseFile) {
         setUploadProgress('Subiendo registro nacional de mascotas...');
-        const compressed = await compressImage(licenseFile, 1200);
+        const uploadableFile = isPdfFile(licenseFile) ? licenseFile : await compressImage(licenseFile, 1200);
         const uploadedUrl = await uploadPetPhoto(
-          compressed,
+          uploadableFile,
           userId,
           pet?.id || 'temp-' + Date.now(),
           'license'
@@ -370,7 +375,7 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
               file:cursor-pointer file:transition-all"
           />
           <p className="text-xs text-gray-500">
-            Opcional · JPG, PNG o WebP · Máximo 5 MB · Se comprimirá automáticamente
+            Opcional · Máximo 1 archivo · JPG, PNG o WebP · Máximo 5 MB · Se comprimirá automáticamente
           </p>
         </div>
 
@@ -381,14 +386,26 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
 
           {licensePreview && (
             <div className="relative inline-block">
-              <Image
-                src={licensePreview}
-                alt="Preview registro nacional de mascotas"
-                width={128}
-                height={128}
-                className="w-32 h-32 object-cover rounded-xl border-2 border-gray-200"
-                unoptimized
-              />
+              {isPdfFile(licenseFile) || (licenseFile === null && isPdfUrl(licensePreview)) ? (
+                <a
+                  href={licensePreview}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex w-32 flex-col items-center gap-2 rounded-xl border-2 border-gray-200 bg-slate-50 px-4 py-5 text-center text-slate-700 transition-colors hover:border-purple-300 hover:text-purple-700"
+                >
+                  <FileText className="h-8 w-8" />
+                  <span className="text-xs font-semibold">Ver PDF</span>
+                </a>
+              ) : (
+                <Image
+                  src={licensePreview}
+                  alt="Preview registro nacional de mascotas"
+                  width={128}
+                  height={128}
+                  className="w-32 h-32 object-cover rounded-xl border-2 border-gray-200"
+                  unoptimized
+                />
+              )}
               <button
                 type="button"
                 onClick={() => {
@@ -404,7 +421,7 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
 
           <input
             type="file"
-            accept="image/jpeg,image/jpg,image/png,image/webp"
+            accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
             onChange={handleLicenseChange}
             className="block w-full text-sm text-gray-600
               file:mr-4 file:py-3 file:px-6
@@ -416,7 +433,7 @@ export function PetForm({ pet, userId, onSubmit, onSuccess, submitLabel = 'Guard
               file:cursor-pointer file:transition-all"
           />
           <p className="text-xs text-gray-500">
-            Opcional · Sube una foto o captura del registro nacional de mascotas si ya lo tienes
+            Opcional · Máximo 1 archivo · Sube una foto, captura o PDF del registro nacional de mascotas si ya lo tienes
           </p>
           <a
             href="https://registratumascota.cl/"

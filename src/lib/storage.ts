@@ -7,7 +7,8 @@ import { supabase } from './supabase';
 
 const BUCKET_NAME = 'pet-photos';
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const LICENSE_TYPES = [...IMAGE_TYPES, 'application/pdf'];
 
 type PetUploadType = 'photo' | 'license';
 type EventUploadType = 'attachment';
@@ -16,7 +17,10 @@ type FeedbackUploadType = 'feedback';
 /**
  * Valida un archivo antes de subirlo
  */
-export function validateFile(file: File): { valid: boolean; error?: string } {
+export function validateFile(
+  file: File,
+  allowedTypes: string[] = IMAGE_TYPES
+): { valid: boolean; error?: string } {
   if (file.size > MAX_FILE_SIZE) {
     return {
       valid: false,
@@ -24,10 +28,13 @@ export function validateFile(file: File): { valid: boolean; error?: string } {
     };
   }
 
-  if (!ALLOWED_TYPES.includes(file.type)) {
+  if (!allowedTypes.includes(file.type)) {
+    const allowsPdf = allowedTypes.includes('application/pdf');
     return {
       valid: false,
-      error: 'Formato no permitido. Solo JPG, PNG o WebP',
+      error: allowsPdf
+        ? 'Formato no permitido. Solo JPG, PNG, WebP o PDF'
+        : 'Formato no permitido. Solo JPG, PNG o WebP',
     };
   }
 
@@ -41,7 +48,8 @@ async function uploadImageAsset(
   type: PetUploadType | EventUploadType | FeedbackUploadType
 ): Promise<string | null> {
   try {
-    const validation = validateFile(file);
+    const allowedTypes = type === 'license' ? LICENSE_TYPES : IMAGE_TYPES;
+    const validation = validateFile(file, allowedTypes);
     if (!validation.valid) {
       throw new Error(validation.error);
     }
