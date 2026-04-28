@@ -1,7 +1,8 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { Container } from '@/components/ui/Container';
 import { LoginPageContent } from '@/components/auth/LoginPageContent';
+import { Container } from '@/components/ui/Container';
+import { loginPageCopy } from '@/lib/copy';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,9 +22,9 @@ export default function LoginPage() {
             </svg>
           </div>
           <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
-            Bienvenido de vuelta
+            {loginPageCopy.title}
           </h1>
-          <p className="text-gray-600 text-lg">Ingresa a tu cuenta para gestionar tus mascotas</p>
+          <p className="text-gray-600 text-lg">{loginPageCopy.subtitle}</p>
         </div>
 
         <Suspense
@@ -43,12 +44,12 @@ export default function LoginPage() {
         <div className="bg-white p-8 rounded-2xl shadow-card border-2 border-gray-100 mt-6">
           <div className="text-center">
             <p className="text-gray-600">
-              ¿No tienes cuenta?{' '}
+              {loginPageCopy.signupPrompt}{' '}
               <Link
                 href="/signup"
                 className="text-blue-600 hover:text-blue-700 font-bold hover:underline transition-all"
               >
-                Regístrate gratis
+                {loginPageCopy.signupCta}
               </Link>
             </p>
           </div>

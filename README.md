@@ -1,6 +1,6 @@
 # Pet Tracker
 
-Aplicacion web para gestionar mascotas, eventos medicos y enlaces compartidos de lectura.
+Aplicación web para gestionar mascotas, eventos médicos y enlaces compartidos de lectura.
 
 ## Stack
 
@@ -9,19 +9,21 @@ Aplicacion web para gestionar mascotas, eventos medicos y enlaces compartidos de
 - TypeScript
 - Supabase Auth + Postgres + Storage
 - Tailwind CSS v4
-- Playwright para E2E
+- Vitest + Playwright para testing
 
 ## Estado actual
 
-- Autenticacion con Supabase
+- Autenticación con Supabase
 - Dashboard de mascotas
 - CRUD de mascotas y eventos
 - Perfil del tutor
 - Enlaces compartidos de solo lectura
 - Feedback de usuarios y panel admin
-- Upload de imagenes con validaciones
+- Upload de imágenes con validaciones
 
-## Inicio rapido
+## Inicio rápido
+
+Usa este archivo como resumen operativo. El detalle de setup, testing y producto vive en [docs/README.md](docs/README.md).
 
 1. Instala dependencias:
 
@@ -51,7 +53,7 @@ FEEDBACK_ADMIN_EMAIL=...
 npm run dev
 ```
 
-## Comandos utiles
+## Comandos útiles
 
 ```bash
 npm run dev
@@ -60,53 +62,22 @@ npm run lint
 npm run test
 ```
 
-## SMTP con Resend
+## Documentación
 
-Este proyecto no usa un mailer propio para autenticacion. Los correos de registro, confirmacion e invitaciones salen desde Supabase Auth, por lo que Resend debe configurarse como proveedor SMTP dentro de Supabase.
-
-Pasos recomendados:
-
-1. Verifica tu dominio en Resend y crea una API key solo para SMTP.
-2. En Supabase ve a `Authentication -> Email -> SMTP Settings` y habilita `Custom SMTP`.
-3. Usa las credenciales SMTP de Resend:
-
-```text
-Host: smtp.resend.com
-Port: 587
-Username: resend
-Password: <tu api key de Resend>
-```
-
-4. En `Authentication -> URL Configuration` define correctamente:
-   - `Site URL`: la URL publica de la app en Vercel
-   - `Redirect URLs`: incluye `http://localhost:3000/auth/callback` y tu dominio productivo con `/auth/callback`
-5. Prueba estos flujos despues del cambio:
-   - signup normal
-   - email de confirmacion
-   - invitacion beta desde el panel admin
-   - recuperacion o cambio de password si lo habilitas
-
-Notas:
-
-- No guardes credenciales SMTP de Resend en `.env.local` de esta app salvo que luego implementemos un mailer propio.
-- El codigo actual ya usa Supabase Auth para `signUp` e invitaciones admin, asi que no necesita cambios para que el SMTP funcione.
-
-## Estructura de documentacion
-
-- [docs/README.md](docs/README.md): indice general
-- [docs/setup/GETTING_STARTED.md](docs/setup/GETTING_STARTED.md): setup base
-- [docs/setup/SECURITY_IMPROVEMENTS.md](docs/setup/SECURITY_IMPROVEMENTS.md): reglas y decisiones de seguridad
-- [docs/testing/TESTING_GUIDE.md](docs/testing/TESTING_GUIDE.md): como probar
+- [docs/README.md](docs/README.md): índice general y fuente de verdad
+- [docs/setup/GETTING_STARTED.md](docs/setup/GETTING_STARTED.md): setup completo y SMTP con Resend
+- [docs/setup/SECURITY_IMPROVEMENTS.md](docs/setup/SECURITY_IMPROVEMENTS.md): decisiones de seguridad
+- [docs/testing/TESTING_GUIDE.md](docs/testing/TESTING_GUIDE.md): flujo de validación
 - [docs/product/MEJORAS_PRIORITARIAS.md](docs/product/MEJORAS_PRIORITARIAS.md): backlog priorizado
 
 ## Seguridad
 
 - RLS como control principal de acceso a datos
 - Claves sensibles solo en servidor
-- Validacion de formularios en cliente y servidor
-- Restricciones de upload por tipo, tamano y ownership
+- Validación de formularios en cliente y servidor
+- Restricciones de upload por tipo, tamaño y ownership
 
 ## Notas
 
-- `docs/archive/` contiene material historico y ya no es la fuente principal.
-- Si corres Playwright y crea datos de prueba, limpialos al finalizar.
+- `docs/archive/` contiene material histórico y ya no es la fuente principal.
+- Si corres Playwright y crea datos de prueba, límpialos al finalizar.

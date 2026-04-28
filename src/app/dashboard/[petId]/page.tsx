@@ -11,6 +11,7 @@ import { useOnboardingState } from '@/hooks/useOnboardingState';
 import { Event, Pet } from '@/lib/types';
 import { createPetShareLink, deletePet, getPet } from '@/lib/supabase';
 import { analytics } from '@/lib/analytics';
+import { buildQrCodeUrl, copyTextToClipboard } from '@/lib/share';
 import { buildGoogleCalendarUrl, formatDate, formatDateTime, formatPetAge, getEventHistoryGroup, getSpeciesOption, parseLocalDate } from '@/lib/utils';
 import { Container } from '@/components/ui/Container';
 import { Button } from '@/components/ui/Button';
@@ -186,6 +187,14 @@ function getEventIcon(event: Event) {
   return <CheckCircle2 className="h-6 w-6" />;
 }
 
+function shouldLogShareLinkError(error: unknown) {
+  if (!(error instanceof Error)) {
+    return true;
+  }
+
+  return error.message !== 'Forbidden' && error.message !== 'Unauthorized';
+}
+
 export default function PetDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -198,7 +207,10 @@ export default function PetDetailPage() {
   const [shareUrl, setShareUrl] = useState('');
   const [shareExpiresAt, setShareExpiresAt] = useState<string | null>(null);
   const [shareLoading, setShareLoading] = useState(true);
-  const [copiedLink, setCopiedLink] = useState(false);
+  const [shareFeedback, setShareFeedback] = useState<'idle' | 'copied' | 'shared' | 'error'>('idle');
+  const [shareError, setShareError] = useState<string | null>(null);
+  const [qrLoadFailed, setQrLoadFailed] = useState(false);
+  const [qrRetryCount, setQrRetryCount] = useState(0);
   const petId = params.petId as string;
   const { events, loading: eventsLoading } = useEvents(petId);
   const trackedPetViewRef = useRef<string | null>(null);
@@ -232,13 +244,19 @@ export default function PetDetailPage() {
 
       try {
         setShareLoading(true);
+        setShareError(null);
         const data = await createPetShareLink(petId);
         setShareUrl(data.shareUrl);
         setShareExpiresAt(data.expiresAt);
+        setShareFeedback('idle');
+        setQrLoadFailed(false);
       } catch (err) {
-        console.error('Error generating pet share link:', err);
+        if (shouldLogShareLinkError(err)) {
+          console.error('Error generating pet share link:', err);
+        }
         setShareUrl('');
         setShareExpiresAt(null);
+        setShareError('No se pudo generar el enlace temporal. Reintenta en unos segundos.');
       } finally {
         setShareLoading(false);
       }
@@ -277,9 +295,7 @@ export default function PetDetailPage() {
   const shouldForceFirstEventPanel = onboardingIntent === 'pet-created';
   const shouldForceActivationPanel = onboardingIntent === 'event-created';
   const quickAccessLabel = pet?.license_url ? 'Registro listo' : 'Carnet listo';
-  const qrCodeUrl = shareUrl
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=0&data=${encodeURIComponent(shareUrl)}`
-    : '';
+  const qrCodeUrl = shareUrl ? buildQrCodeUrl(shareUrl, qrRetryCount) : '';
   const deferredEventSearch = useDeferredValue(eventSearch);
   const normalizedEventSearch = deferredEventSearch.trim().toLowerCase();
 
@@ -358,6 +374,8 @@ export default function PetDetailPage() {
           url: shareUrl,
         });
         analytics.sharePet(petId, 'native_share');
+        setShareFeedback('shared');
+        setShareError(null);
         return;
       } catch {
         // Fallback to copy below.
@@ -365,12 +383,15 @@ export default function PetDetailPage() {
     }
 
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      await copyTextToClipboard(shareUrl);
       analytics.sharePet(petId, 'clipboard');
-      setCopiedLink(true);
-      window.setTimeout(() => setCopiedLink(false), 2000);
+      setShareFeedback('copied');
+      setShareError(null);
+      window.setTimeout(() => setShareFeedback('idle'), 2000);
     } catch (err) {
       console.error('Error sharing pet card:', err);
+      setShareFeedback('error');
+      setShareError('No pudimos copiar el enlace. Abre el carnet desde el link directo.');
     }
   };
 
@@ -544,7 +565,7 @@ export default function PetDetailPage() {
 
                 <div className="mt-6 flex items-center gap-4 rounded-[1.5rem] bg-white/8 p-4">
                   <div className="flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-[1.35rem] bg-white p-2">
-                    {qrCodeUrl ? (
+                    {qrCodeUrl && !qrLoadFailed ? (
                       <Image
                         src={qrCodeUrl}
                         alt={`QR para compartir el carnet de ${pet.name}`}
@@ -552,9 +573,15 @@ export default function PetDetailPage() {
                         height={96}
                         className="h-full w-full rounded-lg object-contain"
                         unoptimized
+                        onError={() => setQrLoadFailed(true)}
                       />
                     ) : (
-                      <QrCode className="h-10 w-10 text-slate-400" />
+                      <div className="flex flex-col items-center justify-center gap-2 px-2 text-center">
+                        <QrCode className="h-8 w-8 text-slate-400" />
+                        <span className="text-[11px] font-semibold leading-4 text-slate-500">
+                          QR no disponible
+                        </span>
+                      </div>
                     )}
                   </div>
 
@@ -563,24 +590,69 @@ export default function PetDetailPage() {
                       QR listo
                     </p>
                     <p className="mt-2 text-sm leading-6 text-slate-300">
-                      Escanéalo desde el teléfono para abrir este carnet al instante.
+                      {qrLoadFailed
+                        ? 'Si el QR falla, usa el link directo para abrir este carnet al instante.'
+                        : 'Escanéalo desde el teléfono para abrir este carnet al instante.'}
                     </p>
                     <p className="mt-2 text-xs font-medium text-sky-200">
                       {shareExpiresAt
                         ? `Expira el ${formatDateTime(shareExpiresAt)}`
                         : shareLoading
                           ? 'Generando enlace temporal...'
-                          : 'No se pudo generar el enlace temporal'}
+                          : shareError ?? 'No se pudo generar el enlace temporal'}
                     </p>
-                    <button
-                      type="button"
-                      onClick={handleShare}
-                      disabled={!shareUrl || shareLoading}
-                      className="mt-3 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition-colors hover:bg-sky-50 disabled:cursor-not-allowed disabled:bg-slate-200"
-                    >
-                      <Share2 className="h-4 w-4" />
-                      {copiedLink ? 'Link copiado' : 'Compartir carnet'}
-                    </button>
+                    {shareUrl ? (
+                      <div className="mt-3 space-y-3">
+                        <label htmlFor="share-link" className="sr-only">
+                          Link compartido del carnet
+                        </label>
+                        <input
+                          id="share-link"
+                          readOnly
+                          value={shareUrl}
+                          data-testid="share-url-input"
+                          className="w-full rounded-2xl border border-white/15 bg-slate-900/70 px-4 py-3 text-sm text-slate-100 outline-none"
+                        />
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={handleShare}
+                            disabled={shareLoading}
+                            className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition-colors hover:bg-sky-50 disabled:cursor-not-allowed disabled:bg-slate-200"
+                          >
+                            <Share2 className="h-4 w-4" />
+                            {shareFeedback === 'copied'
+                              ? 'Link copiado'
+                              : shareFeedback === 'shared'
+                                ? 'Compartido'
+                                : 'Compartir carnet'}
+                          </button>
+                          <a
+                            href={shareUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                          >
+                            Ver carnet
+                          </a>
+                          {qrLoadFailed ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setQrLoadFailed(false);
+                                setQrRetryCount((current) => current + 1);
+                              }}
+                              className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                            >
+                              Reintentar QR
+                            </button>
+                          ) : null}
+                        </div>
+                      </div>
+                    ) : null}
+                    {shareError && !shareLoading ? (
+                      <p className="mt-3 text-sm font-medium text-amber-200">{shareError}</p>
+                    ) : null}
                   </div>
                 </div>
 

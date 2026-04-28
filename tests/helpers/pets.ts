@@ -73,20 +73,21 @@ export async function createEvent(
 }
 
 export async function extractSharedUrlFromQr(page: Page): Promise<string> {
-  const qrImage = page.locator('img[alt*="QR para compartir"]').first();
-  await expect(qrImage).toBeVisible();
-  const qrSrc = await qrImage.getAttribute('src');
+  const shareInput = page.getByTestId('share-url-input');
+  await expect(shareInput).toBeVisible();
 
-  if (!qrSrc) {
-    throw new Error('QR image src not found');
+  const shareUrl = await shareInput.inputValue();
+
+  if (!shareUrl) {
+    throw new Error('Shared target URL not found');
   }
 
-  const qrUrl = new URL(qrSrc);
-  const encodedTarget = qrUrl.searchParams.get('data');
+  return shareUrl;
+}
 
-  if (!encodedTarget) {
-    throw new Error('QR target URL not found');
-  }
-
-  return encodedTarget;
+export async function deleteCurrentPet(page: Page) {
+  await page.getByRole('button', { name: /^eliminar$/i }).first().click();
+  await expect(page.getByText(/eliminar mascota/i)).toBeVisible();
+  await page.getByRole('button', { name: /^eliminar$/i }).last().click();
+  await page.waitForURL(/\/dashboard$/, { timeout: 15000 });
 }

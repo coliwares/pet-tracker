@@ -12,6 +12,23 @@ function getTokenFromRequest(request: NextRequest) {
   return authorization.slice('Bearer '.length);
 }
 
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof error.message === 'string'
+  ) {
+    return error.message;
+  }
+
+  return 'Unexpected error';
+}
+
 export async function POST(
   request: NextRequest,
   context: { params: Promise<{ petId: string }> }
@@ -26,7 +43,7 @@ export async function POST(
 
     return NextResponse.json({ shareUrl, expiresAt });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error';
+    const message = getErrorMessage(error);
     const status = message === 'Forbidden' ? 403 : message === 'Unauthorized' ? 401 : 500;
 
     return NextResponse.json({ error: message }, { status });

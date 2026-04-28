@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { addHours } from 'date-fns';
-import { createHash, createHmac } from 'crypto';
+import { createHash, createHmac, randomUUID } from 'crypto';
 import { Event, Pet } from '@/lib/types';
 import { getSupabaseAdminClient } from '@/lib/server/supabaseAdmin';
 
@@ -13,6 +13,11 @@ type ShareLinkRecord = {
   expires_at: string;
   revoked_at: string | null;
   created_at: string;
+};
+
+type PostgresErrorLike = {
+  code?: string;
+  message?: string;
 };
 
 export type SharedPetRecord = {
@@ -45,6 +50,15 @@ export function hashShareToken(token: string) {
   return createHash('sha256').update(token).digest('hex');
 }
 
+function isForeignKeyViolation(error: unknown): error is PostgresErrorLike {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    error.code === '23503'
+  );
+}
+
 export async function createPetShareLink(ownerUserId: string, petId: string) {
   const supabase = getSupabaseAdminClient();
   const nowIso = new Date().toISOString();
@@ -64,7 +78,7 @@ export async function createPetShareLink(ownerUserId: string, petId: string) {
     throw new Error('Forbidden');
   }
 
-  const { data: existingShareLink, error: existingShareLinkError } = await supabase
+  const { data: existingShareLinks, error: existingShareLinkError } = await supabase
     .from('pet_share_links')
     .select('*')
     .eq('pet_id', petId)
@@ -72,10 +86,23 @@ export async function createPetShareLink(ownerUserId: string, petId: string) {
     .is('revoked_at', null)
     .gt('expires_at', nowIso)
     .order('created_at', { ascending: false })
-    .maybeSingle<ShareLinkRecord>();
+    .returns<ShareLinkRecord[]>();
 
   if (existingShareLinkError) {
     throw existingShareLinkError;
+  }
+
+  const [existingShareLink, ...staleShareLinks] = existingShareLinks ?? [];
+
+  if (staleShareLinks.length > 0) {
+    const { error: revokeError } = await supabase
+      .from('pet_share_links')
+      .update({ revoked_at: nowIso })
+      .in('id', staleShareLinks.map((shareLink) => shareLink.id));
+
+    if (revokeError) {
+      throw revokeError;
+    }
   }
 
   if (existingShareLink) {
@@ -86,30 +113,27 @@ export async function createPetShareLink(ownerUserId: string, petId: string) {
   }
 
   const expiresAt = addHours(new Date(), getShareLinkTtlHours()).toISOString();
+  const linkId = randomUUID();
+  const token = createShareToken(linkId);
 
-  const { data: insertedShareLink, error: insertError } = await supabase
+  const { error: insertError } = await supabase
     .from('pet_share_links')
     .insert({
+      id: linkId,
       pet_id: petId,
       owner_user_id: ownerUserId,
-      token_hash: '',
+      token_hash: hashShareToken(token),
       expires_at: expiresAt,
     })
-    .select('*')
-    .single<ShareLinkRecord>();
+    .select('id')
+    .single();
 
   if (insertError) {
+    if (isForeignKeyViolation(insertError)) {
+      throw new Error('Forbidden');
+    }
+
     throw insertError;
-  }
-
-  const token = createShareToken(insertedShareLink.id);
-  const { error: updateError } = await supabase
-    .from('pet_share_links')
-    .update({ token_hash: hashShareToken(token) })
-    .eq('id', insertedShareLink.id);
-
-  if (updateError) {
-    throw updateError;
   }
 
   return {
