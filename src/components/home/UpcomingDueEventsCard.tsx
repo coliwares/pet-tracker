@@ -156,7 +156,7 @@ export function UpcomingDueEventsCard({
 
   return (
     <section className={`mb-8 rounded-[1.75rem] border p-6 ${theme.sectionBorder} ${theme.sectionBg} ${theme.sectionShadow}`}>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-2xl">
           <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] ${theme.badgeBg} ${theme.badgeText}`}>
             <AlertCircle className="h-4 w-4" />
@@ -168,6 +168,29 @@ export function UpcomingDueEventsCard({
           <p className="mt-2 text-base leading-7 text-slate-600">
             {description}
           </p>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:min-w-[18rem] lg:max-w-sm">
+          <div className="rounded-[1.35rem] border border-white/80 bg-white/80 p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              Próximos 7 días
+            </p>
+            <p className="mt-2 text-3xl font-black text-slate-950">{events.length}</p>
+            <p className="mt-1 text-sm text-slate-500">
+              {events.length === 1 ? singularLabel : pluralLabel}
+            </p>
+          </div>
+          <div className="rounded-[1.35rem] border border-white/80 bg-white/80 p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              Vista rápida
+            </p>
+            <p className="mt-2 text-lg font-black text-slate-950">
+              {events[0]?.petName ?? 'Mascota'}
+            </p>
+            <p className="mt-1 text-sm text-slate-500">
+              {events[0] ? formatDate(events[0].next_due_date) : 'Sin fecha'}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -201,21 +224,33 @@ export function UpcomingDueEventsCard({
           return (
             <div
               key={event.id}
-              className={`rounded-[1.5rem] border p-5 shadow-sm ${cardClass}`}
+              className={`rounded-[1.5rem] border p-5 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 ${cardClass}`}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3">
                   <div className={`rounded-2xl p-3 ${iconClass}`}>
                     <Icon className="h-5 w-5" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                      Seguimiento activo
+                    </p>
                     <p className="text-lg font-bold text-slate-950">{event.petName}</p>
-                    <p className="text-sm text-slate-500">{event.title}</p>
+                    <p className="truncate text-sm text-slate-500">{event.title}</p>
                   </div>
                 </div>
 
                 <div className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] ${statusPillClass}`}>
                   {statusLabel}
+                </div>
+              </div>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                <div className="rounded-full bg-white/80 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm">
+                  Registrado el {formatDate(event.event_date)}
+                </div>
+                <div className="rounded-full bg-white/80 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm">
+                  Recordatorio activo
                 </div>
               </div>
 

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Pet } from '@/lib/types';
 import { formatPetAge, getPetLifeStage, getSpeciesOption } from '@/lib/utils';
 import { PetPhoto } from '@/components/pet/PetPhoto';
-import { ArrowUpRight, Scale } from 'lucide-react';
+import { ArrowUpRight, HeartPulse, Scale, ShieldCheck, Sparkles } from 'lucide-react';
 
 interface PetCardProps {
   pet: Pet;
@@ -12,10 +12,14 @@ export function PetCard({ pet }: PetCardProps) {
   const age = formatPetAge(pet.birth_date);
   const lifeStage = getPetLifeStage(pet.birth_date, pet.species);
   const speciesLabel = getSpeciesOption(pet.species)?.label ?? pet.species;
+  const highlightLabel = pet.license_url ? 'Registro nacional listo' : 'Perfil listo para completar';
+  const highlightIcon = pet.license_url ? ShieldCheck : Sparkles;
+  const HighlightIcon = highlightIcon;
 
   return (
     <Link href={`/dashboard/${pet.id}`} className="group block h-full">
-      <article className="flex h-full flex-col rounded-[1.75rem] border border-slate-200/80 bg-[linear-gradient(180deg,_#ffffff_0%,_#f8fbff_100%)] p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-sky-200 hover:shadow-[0_24px_60px_rgba(15,23,42,0.12)] sm:p-6">
+      <article className="relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-[linear-gradient(180deg,_#ffffff_0%,_#f8fbff_100%)] p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-sky-200 hover:shadow-[0_24px_60px_rgba(15,23,42,0.12)] sm:p-6">
+        <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.12),_transparent_55%),radial-gradient(circle_at_top_right,_rgba(56,189,248,0.12),_transparent_45%)]" />
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-4">
             <PetPhoto
@@ -71,9 +75,26 @@ export function PetCard({ pet }: PetCardProps) {
           ) : null}
         </div>
 
-        <div className="mt-auto pt-6">
+        <div className="mt-5 rounded-[1.4rem] border border-slate-200/80 bg-white/85 p-4">
+          <div className="flex items-start gap-3">
+            <div className="rounded-2xl bg-sky-50 p-2.5 text-sky-700">
+              <HighlightIcon className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                Estado visual
+              </p>
+              <p className="mt-1 text-sm font-semibold text-slate-700">{highlightLabel}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-auto pt-4">
           <div className="flex items-center justify-between rounded-[1.25rem] border border-slate-200 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700">
-            <span>Ver ficha e historial</span>
+            <span className="inline-flex items-center gap-2">
+              <HeartPulse className="h-4 w-4 text-sky-700" />
+              Ver ficha e historial
+            </span>
             <ArrowUpRight className="h-4 w-4 text-sky-700 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </div>
         </div>

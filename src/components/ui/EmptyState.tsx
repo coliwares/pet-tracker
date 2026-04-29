@@ -10,12 +10,23 @@ interface EmptyStateProps {
 
 export function EmptyState({ title, description, actionLabel, onAction, icon }: EmptyStateProps) {
   return (
-    <div className="text-center py-16 animate-fade-in">
-      {icon && <div className="flex justify-center mb-6">{icon}</div>}
-      <h3 className="text-2xl font-bold text-gray-900 mb-3">{title}</h3>
-      <p className="text-gray-600 text-lg mb-8 max-w-lg mx-auto leading-relaxed">{description}</p>
+    <div className="animate-fade-in py-16 text-center">
+      {icon ? (
+        <div className="mb-6 flex justify-center">
+          <div className="rounded-[2rem] border border-white/80 bg-white/80 p-2 shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
+            {icon}
+          </div>
+        </div>
+      ) : null}
+      <div className="mx-auto max-w-2xl">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+          Estado vacío
+        </p>
+        <h3 className="mt-3 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">{title}</h3>
+        <p className="mx-auto mt-3 max-w-lg text-base leading-7 text-slate-600 sm:text-lg">{description}</p>
+      </div>
       {actionLabel && onAction && (
-        <Button onClick={onAction} size="lg" className="shadow-lg">
+        <Button onClick={onAction} size="lg" className="mt-8 shadow-lg">
           {actionLabel}
         </Button>
       )}

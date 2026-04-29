@@ -18,7 +18,7 @@ import { OnboardingPanel } from '@/components/onboarding/OnboardingPanel';
 import { analytics } from '@/lib/analytics';
 import { Species } from '@/lib/types';
 import { SPECIES_OPTIONS } from '@/lib/constants';
-import { PawPrint, Plus, Search, Sparkles } from 'lucide-react';
+import { HeartPulse, PawPrint, Plus, Search, ShieldCheck, Sparkles } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -76,6 +76,14 @@ export default function DashboardPage() {
   }, [normalizedSearch, pets, speciesFilter]);
 
   const hasActiveFilters = normalizedSearch.length > 0 || speciesFilter !== 'all';
+  const petsWithLicense = useMemo(
+    () => pets.filter((pet) => Boolean(pet.license_url)).length,
+    [pets]
+  );
+  const representedSpecies = useMemo(
+    () => new Set(pets.map((pet) => pet.species)).size,
+    [pets]
+  );
 
   if (authLoading || petsLoading || onboardingLoading) {
     return <Loading text="Cargando mascotas..." />;
@@ -176,6 +184,48 @@ export default function DashboardPage() {
               Historial y recordatorios en una sola vista
             </div>
           </div>
+
+          <div className="relative mt-6 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-[1.35rem] border border-white/80 bg-white/80 p-4 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="rounded-2xl bg-sky-100 p-2.5 text-sky-700">
+                  <PawPrint className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    Mascotas activas
+                  </p>
+                  <p className="mt-1 text-2xl font-black text-slate-950">{pets.length}</p>
+                </div>
+              </div>
+            </div>
+            <div className="rounded-[1.35rem] border border-white/80 bg-white/80 p-4 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="rounded-2xl bg-emerald-100 p-2.5 text-emerald-700">
+                  <ShieldCheck className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    Con registro
+                  </p>
+                  <p className="mt-1 text-2xl font-black text-slate-950">{petsWithLicense}</p>
+                </div>
+              </div>
+            </div>
+            <div className="rounded-[1.35rem] border border-white/80 bg-white/80 p-4 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="rounded-2xl bg-amber-100 p-2.5 text-amber-700">
+                  <HeartPulse className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    Especies
+                  </p>
+                  <p className="mt-1 text-2xl font-black text-slate-950">{representedSpecies}</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
         <div className="mt-6 space-y-6">
@@ -213,6 +263,18 @@ export default function DashboardPage() {
                 </div>
                 <div className="rounded-full bg-sky-50 px-3 py-1.5 text-sm font-semibold text-sky-800">
                   {filteredPets.length} {filteredPets.length === 1 ? 'resultado' : 'resultados'}
+                </div>
+              </div>
+
+              <div className="mb-4 flex flex-wrap gap-2">
+                <div className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  Búsqueda instantánea
+                </div>
+                <div className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  Mobile first
+                </div>
+                <div className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  Vista consistente
                 </div>
               </div>
 
@@ -254,6 +316,9 @@ export default function DashboardPage() {
               <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
                 <div className="rounded-full bg-white px-3 py-1.5 font-medium text-slate-600 shadow-sm">
                   Vista consistente con el detalle individual
+                </div>
+                <div className="rounded-full bg-slate-100 px-3 py-1.5 font-medium text-slate-600">
+                  {hasActiveFilters ? 'Mostrando filtros activos' : 'Sin filtros aplicados'}
                 </div>
                 {hasActiveFilters ? (
                   <Button
