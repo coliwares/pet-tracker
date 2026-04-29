@@ -77,7 +77,7 @@ export default function NewEventPage() {
               onSubmit={handleSubmit}
               onSuccess={(event) => {
                 analytics.createEvent(event.type, Boolean(event.next_due_date));
-                router.push(`/dashboard/${petId}?onboarding=event-created`);
+                router.push(`/dashboard/${petId}`);
               }}
               submitLabel="Crear Evento"
             />

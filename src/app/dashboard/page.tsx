@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { useOnboardingState } from '@/hooks/useOnboardingState';
+import { useUserOnboardingProgress } from '@/hooks/useUserOnboardingProgress';
 import { usePets } from '@/hooks/usePets';
 import { Container } from '@/components/ui/Container';
 import { Button } from '@/components/ui/Button';
@@ -25,10 +26,12 @@ export default function DashboardPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { dismissStep, isDismissed, showStep } = useOnboardingState(user?.id);
+  const { petCount, totalEventCount, loading: onboardingLoading } = useUserOnboardingProgress(user?.id, pets);
   const [search, setSearch] = useState('');
   const [speciesFilter, setSpeciesFilter] = useState<'all' | Species>('all');
 
   const firstPetStepId = 'dashboard-first-pet';
+  const firstEventStepId = 'dashboard-first-event';
   const deferredSearch = useDeferredValue(search);
   const normalizedSearch = deferredSearch.trim().toLowerCase();
 
@@ -50,10 +53,16 @@ export default function DashboardPage() {
   }, [user, searchParams, router]);
 
   useEffect(() => {
-    if (pets.length > 0) {
+    if (petCount === 0) {
       showStep(firstPetStepId);
     }
-  }, [pets.length, showStep]);
+  }, [petCount, showStep]);
+
+  useEffect(() => {
+    if (petCount > 0 && totalEventCount === 0) {
+      showStep(firstEventStepId);
+    }
+  }, [firstEventStepId, petCount, showStep, totalEventCount]);
 
   const filteredPets = useMemo(() => {
     return pets.filter((pet) => {
@@ -68,7 +77,7 @@ export default function DashboardPage() {
 
   const hasActiveFilters = normalizedSearch.length > 0 || speciesFilter !== 'all';
 
-  if (authLoading || petsLoading) {
+  if (authLoading || petsLoading || onboardingLoading) {
     return <Loading text="Cargando mascotas..." />;
   }
 
@@ -79,7 +88,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.16),_transparent_32%),linear-gradient(180deg,_#fff8ef_0%,_#fffdf9_36%,_#f4f9ff_100%)]">
       <Container className="py-8">
-        {pets.length === 0 && !isDismissed(firstPetStepId) ? (
+        {petCount === 0 && !isDismissed(firstPetStepId) ? (
           <div className="mb-4">
             <OnboardingPanel
               badge="Onboarding"
@@ -100,6 +109,31 @@ export default function DashboardPage() {
               secondaryActionHref="/login?demo=true"
               dismissLabel="Saltar"
               onDismiss={() => dismissStep(firstPetStepId)}
+            />
+          </div>
+        ) : null}
+
+        {petCount > 0 && totalEventCount === 0 && !isDismissed(firstEventStepId) ? (
+          <div className="mb-4">
+            <OnboardingPanel
+              badge="Siguiente paso"
+              title="Ya tienes mascota. Falta registrar el primer evento."
+              description="Carga una vacuna, control o tratamiento para activar el historial real."
+              progressLabel="Paso 2 de 3"
+              icon={Sparkles}
+              accentClassName="text-emerald-700"
+              surfaceClassName="border-emerald-200 bg-[linear-gradient(135deg,_#ecfdf5_0%,_#ffffff_100%)]"
+              steps={[
+                { label: 'Agrega tu primera mascota', completed: true },
+                { label: 'Registra su primer evento médico' },
+                { label: 'Comparte el carnet cuando lo necesites' },
+              ]}
+              primaryActionLabel="Abrir primera mascota"
+              primaryActionHref={pets[0] ? `/dashboard/${pets[0].id}` : '/dashboard'}
+              secondaryActionLabel="Agregar otra mascota"
+              secondaryActionHref="/dashboard/new-pet"
+              dismissLabel="Saltar"
+              onDismiss={() => dismissStep(firstEventStepId)}
             />
           </div>
         ) : null}

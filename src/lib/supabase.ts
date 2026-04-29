@@ -119,6 +119,20 @@ export async function getEvents(petId: string) {
   return data;
 }
 
+export async function getEventCountForPets(petIds: string[]) {
+  if (petIds.length === 0) {
+    return 0;
+  }
+
+  const { count, error } = await supabase
+    .from('events')
+    .select('id', { count: 'exact', head: true })
+    .in('pet_id', petIds);
+
+  if (error) throw error;
+  return count ?? 0;
+}
+
 async function archivePreviousVaccineEvents(event: Event) {
   if (event.type !== 'vacuna') {
     return;

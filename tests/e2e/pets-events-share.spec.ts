@@ -6,7 +6,6 @@ import {
   createPetWithDetails,
   deleteCurrentPet,
   extractSharedUrlFromQr,
-  openPetFromDashboard,
   uniqueName,
 } from '../helpers/pets';
 
@@ -19,26 +18,31 @@ test.describe('Mascotas, eventos y enlace compartido', () => {
 
   test('permite crear una mascota y mostrar su carnet', async ({ page }) => {
     const petName = uniqueName('PlaywrightPet');
+    let petId = '';
 
     try {
-      await createPet(page, petName);
+      petId = await createPet(page, petName);
 
       await expect(
         page.getByRole('heading', { name: new RegExp(petName, 'i') })
       ).toBeVisible({ timeout: 15000 });
       await expect(page.getByText(/qr listo/i).first()).toBeVisible({ timeout: 15000 });
-      await expect(page.getByText(/historial m[eé]dico/i).first()).toBeVisible({ timeout: 15000 });
+      await expect(page.getByText(/historial m[eÃ©]dico/i).first()).toBeVisible({ timeout: 15000 });
       await expect(page.getByTestId('share-url-input')).toHaveValue(/\/share\//);
     } finally {
+      if (petId) {
+        await page.goto(`/dashboard/${petId}`);
+      }
       await deleteCurrentPet(page);
     }
   });
 
   test('muestra eventos atrasados cuando existe al menos un recordatorio vencido', async ({ page }) => {
     const petName = uniqueName('PetAtrasada');
+    let petId = '';
 
     try {
-      await createPet(page, petName);
+      petId = await createPet(page, petName);
       await createEvent(page, {
         type: 'visita',
         title: 'Control anual',
@@ -51,22 +55,26 @@ test.describe('Mascotas, eventos y enlace compartido', () => {
         page.getByText(/evento atrasado|eventos atrasados/i).first()
       ).toBeVisible({ timeout: 15000 });
     } finally {
+      if (petId) {
+        await page.goto(`/dashboard/${petId}`);
+      }
       await deleteCurrentPet(page);
     }
   });
 
   test('permite editar una mascota y refleja los cambios en la ficha', async ({ page }) => {
     const petName = uniqueName('PetEditable');
+    let petId = '';
     const updatedBreed = `Labrador ${Date.now()}`;
     const updatedWeight = '18.2';
     const updatedNotes = 'Actualizado por testing E2E';
 
     try {
-      await createPet(page, petName);
+      petId = await createPet(page, petName);
 
       await page.getByRole('link', { name: /editar ficha/i }).click();
       await expect(
-        page.getByRole('heading', { name: new RegExp(`editar informaci[oó]n de ${petName}`, 'i') })
+        page.getByRole('heading', { name: new RegExp(`editar informaci[oÃ³]n de ${petName}`, 'i') })
       ).toBeVisible();
 
       await page.getByPlaceholder(/labrador, persa/i).fill(updatedBreed);
@@ -79,6 +87,9 @@ test.describe('Mascotas, eventos y enlace compartido', () => {
       await expect(page.getByText(new RegExp(`${updatedWeight} kg`))).toBeVisible();
       await expect(page.getByText(updatedNotes)).toBeVisible();
     } finally {
+      if (petId) {
+        await page.goto(`/dashboard/${petId}`);
+      }
       await deleteCurrentPet(page);
     }
   });
@@ -86,12 +97,14 @@ test.describe('Mascotas, eventos y enlace compartido', () => {
   test('permite filtrar mascotas por nombre y especie desde el dashboard', async ({ page }) => {
     const dogName = uniqueName('FiltroPerro');
     const catName = uniqueName('FiltroGato');
+    let dogPetId = '';
+    let catPetId = '';
 
     try {
-      await createPetWithDetails(page, { name: dogName, species: 'Perro', breed: 'Quiltro' });
+      dogPetId = await createPetWithDetails(page, { name: dogName, species: 'Perro', breed: 'Quiltro' });
       await page.goto('/dashboard');
 
-      await createPetWithDetails(page, { name: catName, species: 'Gato', breed: 'Europeo' });
+      catPetId = await createPetWithDetails(page, { name: catName, species: 'Gato', breed: 'Europeo' });
       await page.goto('/dashboard');
 
       await page.getByPlaceholder(/busca por nombre/i).fill(catName);
@@ -104,19 +117,40 @@ test.describe('Mascotas, eventos y enlace compartido', () => {
       await expect(page.getByRole('heading', { name: new RegExp(catName, 'i') })).toBeVisible();
       await expect(page.getByRole('heading', { name: new RegExp(dogName, 'i') })).toHaveCount(0);
     } finally {
-      await page.goto('/dashboard');
-      await openPetFromDashboard(page, catName);
-      await deleteCurrentPet(page);
-      await openPetFromDashboard(page, dogName);
+      if (catPetId) {
+        await page.goto(`/dashboard/${catPetId}`);
+        await deleteCurrentPet(page);
+      }
+      if (dogPetId) {
+        await page.goto(`/dashboard/${dogPetId}`);
+        await deleteCurrentPet(page);
+      }
+    }
+  });
+
+  test('no muestra onboarding de primeros pasos a un usuario con historial existente', async ({ page }) => {
+    const petName = uniqueName('OnboardingExperto');
+    let petId = '';
+
+    try {
+      petId = await createPet(page, petName);
+
+      await expect(page.getByText(/ahora registra el primer evento/i)).toHaveCount(0);
+      await expect(page.getByText(/primer evento guardado/i)).toHaveCount(0);
+    } finally {
+      if (petId) {
+        await page.goto(`/dashboard/${petId}`);
+      }
       await deleteCurrentPet(page);
     }
   });
 
   test('genera un enlace publico reutilizable mientras siga vigente', async ({ page, context }) => {
     const petName = uniqueName('PetShare');
+    let petId = '';
 
     try {
-      await createPet(page, petName);
+      petId = await createPet(page, petName);
 
       const firstShareUrl = await extractSharedUrlFromQr(page);
       await expect(page.getByText(/expira el/i)).toBeVisible();
@@ -132,11 +166,14 @@ test.describe('Mascotas, eventos y enlace compartido', () => {
 
       await expect(sharedPage.getByRole('heading', { name: new RegExp(petName, 'i') })).toBeVisible();
       await expect(sharedPage.getByText(/carnet compartido/i)).toBeVisible();
-      await expect(sharedPage.getByText(/p[uú]blico y de solo lectura/i)).toBeVisible();
+      await expect(sharedPage.getByText(/p[uÃº]blico y de solo lectura/i)).toBeVisible();
       await expect(sharedPage.getByRole('link', { name: /editar ficha/i })).toHaveCount(0);
       await expect(sharedPage.getByRole('button', { name: /agregar evento/i })).toHaveCount(0);
       await sharedPage.close();
     } finally {
+      if (petId) {
+        await page.goto(`/dashboard/${petId}`);
+      }
       await deleteCurrentPet(page);
     }
   });

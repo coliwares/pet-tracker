@@ -4,6 +4,11 @@ export function uniqueName(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 }
 
+function currentPetId(page: Page) {
+  const segments = new URL(page.url()).pathname.split('/').filter(Boolean);
+  return segments[segments.length - 1] ?? '';
+}
+
 function fieldInputAfterLabel(page: Page, labelText: RegExp | string) {
   return page
     .locator('label')
@@ -14,7 +19,7 @@ function fieldInputAfterLabel(page: Page, labelText: RegExp | string) {
 export async function createPet(page: Page, petName: string) {
   await Promise.all([
     page.waitForURL(/\/dashboard\/new-pet$/, { timeout: 15000 }),
-    page.getByRole('link', { name: /agregar mascota|nueva mascota/i }).click(),
+    page.getByRole('link', { name: /agregar mascota|nueva mascota/i }).first().click(),
   ]);
 
   await fieldInputAfterLabel(page, /nombre/i).fill(petName);
@@ -26,6 +31,7 @@ export async function createPet(page: Page, petName: string) {
   await page.getByRole('button', { name: /crear mascota/i }).click();
 
   await page.waitForURL(/\/dashboard\/[^/]+$/, { timeout: 15000 });
+  return currentPetId(page);
 }
 
 export async function createPetWithDetails(
@@ -50,7 +56,7 @@ export async function createPetWithDetails(
 
   await Promise.all([
     page.waitForURL(/\/dashboard\/new-pet$/, { timeout: 15000 }),
-    page.getByRole('link', { name: /agregar mascota|nueva mascota/i }).click(),
+    page.getByRole('link', { name: /agregar mascota|nueva mascota/i }).first().click(),
   ]);
 
   await fieldInputAfterLabel(page, /nombre/i).fill(name);
@@ -62,6 +68,7 @@ export async function createPetWithDetails(
   await page.getByRole('button', { name: /crear mascota/i }).click();
 
   await page.waitForURL(/\/dashboard\/[^/]+$/, { timeout: 15000 });
+  return currentPetId(page);
 }
 
 export async function createEvent(
@@ -123,6 +130,12 @@ export async function createEvent(
 }
 
 export async function openPetFromDashboard(page: Page, petName: string) {
+  const searchInput = page.getByPlaceholder(/busca por nombre/i);
+
+  if (await searchInput.count()) {
+    await searchInput.fill(petName);
+  }
+
   const petCard = page.locator('article').filter({
     has: page.getByRole('heading', { name: new RegExp(petName, 'i') }),
   }).first();
@@ -162,31 +175,52 @@ export async function extractSharedUrlFromQr(page: Page): Promise<string> {
   return shareUrl;
 }
 
-export async function deleteCurrentPet(page: Page) {
+export async function deleteCurrentPet(page: Page, petName?: string) {
   let deleteButton = page.getByRole('button', { name: /^eliminar$/i }).first();
+  const isPetDetailPage = /\/dashboard\/[^/]+$/.test(page.url()) && !/\/dashboard$/.test(page.url());
 
-  if (await deleteButton.count() === 0) {
-    const backToDetailLink = page.getByRole('link', { name: /volver al historial|volver a /i }).first();
+  if (isPetDetailPage) {
+    if ((await deleteButton.count()) === 0) {
+      return;
+    }
 
-    if (await backToDetailLink.count()) {
+    await expect(deleteButton).toBeVisible({ timeout: 15000 });
+  }
+
+  if (!isPetDetailPage && (await deleteButton.count()) === 0) {
+    if (petName) {
+      await page.goto('/dashboard');
+      await openPetFromDashboard(page, petName);
+      deleteButton = page.getByRole('button', { name: /^eliminar$/i }).first();
+    }
+
+    const backToDetailLink = page.getByRole('link', { name: /volver al historial/i }).first();
+
+    if ((await deleteButton.count()) === 0 && (await backToDetailLink.count())) {
       await Promise.all([
         page.waitForURL(/\/dashboard\/[^/]+$/, { timeout: 15000 }),
         backToDetailLink.click(),
       ]);
     }
 
-    const petCardLink = page.locator('main a[href^="/dashboard/"]').filter({
-      has: page.locator('article'),
-    }).first();
+    if ((await deleteButton.count()) === 0) {
+      const petCardLink = page.locator('main a[href^="/dashboard/"]').filter({
+        has: page.locator('article'),
+      }).first();
 
-    if (await petCardLink.count()) {
-      await Promise.all([
-        page.waitForURL(/\/dashboard\/[^/]+$/, { timeout: 15000 }),
-        petCardLink.click(),
-      ]);
+      if (await petCardLink.count()) {
+        await Promise.all([
+          page.waitForURL(/\/dashboard\/[^/]+$/, { timeout: 15000 }),
+          petCardLink.click(),
+        ]);
+      }
     }
 
     deleteButton = page.getByRole('button', { name: /^eliminar$/i }).first();
+  }
+
+  if ((await deleteButton.count()) === 0) {
+    return;
   }
 
   await expect(deleteButton).toBeVisible({ timeout: 15000 });

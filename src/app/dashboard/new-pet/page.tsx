@@ -79,7 +79,7 @@ export default function NewPetPage() {
               onSubmit={handleSubmit}
               onSuccess={(pet) => {
                 analytics.createPet(pet.species, Boolean(pet.photo_url));
-                router.push(`/dashboard/${pet.id}?onboarding=pet-created`);
+                router.push(`/dashboard/${pet.id}`);
               }}
               submitLabel="Crear Mascota"
             />

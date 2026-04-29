@@ -2,12 +2,13 @@
 
 import Image from 'next/image';
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { differenceInCalendarDays } from 'date-fns';
 import { useAuth } from '@/hooks/useAuth';
 import { useEvents } from '@/hooks/useEvents';
 import { useOnboardingState } from '@/hooks/useOnboardingState';
+import { useUserOnboardingProgress } from '@/hooks/useUserOnboardingProgress';
 import { Event, Pet } from '@/lib/types';
 import { createPetShareLink, deletePet, getPet } from '@/lib/supabase';
 import { analytics } from '@/lib/analytics';
@@ -226,7 +227,6 @@ const HISTORY_STATUS_OPTIONS: Array<{
 export default function PetDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const [pet, setPet] = useState<Pet | null>(null);
   const [loading, setLoading] = useState(true);
@@ -242,7 +242,8 @@ export default function PetDetailPage() {
   const petId = params.petId as string;
   const { events, loading: eventsLoading } = useEvents(petId);
   const trackedPetViewRef = useRef<string | null>(null);
-  const { dismissStep, isDismissed } = useOnboardingState(user?.id);
+  const { dismissStep, isDismissed, showStep } = useOnboardingState(user?.id);
+  const { petCount, totalEventCount, loading: onboardingLoading } = useUserOnboardingProgress(user?.id);
   const [eventSearch, setEventSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | Event['type']>('all');
   const [statusFilter, setStatusFilter] = useState<HistoryStatusFilter>('all');
@@ -315,13 +316,10 @@ export default function PetDetailPage() {
   const latestControlDate = latestVisit ?? latestVaccine;
   const upcomingVaccine = getUpcomingVaccine(events);
   const status = getStatus(events, upcomingVaccine?.next_due_date ?? null);
-  const hasStartedTimeline = events.length > 0;
-  const showActivationPanel = events.length === 1;
-  const onboardingIntent = searchParams.get('onboarding');
-  const firstEventStepId = `pet-first-event:${petId}`;
-  const firstActivationStepId = `pet-first-activation:${petId}`;
-  const shouldForceFirstEventPanel = onboardingIntent === 'pet-created';
-  const shouldForceActivationPanel = onboardingIntent === 'event-created';
+  const firstEventStepId = 'pet-first-event:user';
+  const firstActivationStepId = 'pet-first-activation:user';
+  const shouldShowFirstEventPanel = petCount === 1 && totalEventCount === 0 && events.length === 0;
+  const shouldShowActivationPanel = petCount >= 1 && totalEventCount === 1 && events.length === 1;
   const quickAccessLabel = pet?.license_url ? 'Registro listo' : 'Carnet listo';
   const qrCodeUrl = shareUrl ? buildQrCodeUrl(shareUrl, qrRetryCount) : '';
   const deferredEventSearch = useDeferredValue(eventSearch);
@@ -375,7 +373,19 @@ export default function PetDetailPage() {
     normalizedEventSearch.length > 0 || typeFilter !== 'all' || statusFilter !== 'all';
   const speciesLabel = pet ? getSpeciesOption(pet.species)?.label ?? pet.species : '';
 
-  if (authLoading || loading) {
+  useEffect(() => {
+    if (shouldShowFirstEventPanel) {
+      showStep(firstEventStepId);
+    }
+  }, [firstEventStepId, shouldShowFirstEventPanel, showStep]);
+
+  useEffect(() => {
+    if (shouldShowActivationPanel) {
+      showStep(firstActivationStepId);
+    }
+  }, [firstActivationStepId, shouldShowActivationPanel, showStep]);
+
+  if (authLoading || loading || onboardingLoading) {
     return <Loading text="Cargando información..." />;
   }
 
@@ -442,15 +452,11 @@ export default function PetDetailPage() {
           Volver al dashboard
         </Link>
 
-        {!hasStartedTimeline && (!isDismissed(firstEventStepId) || shouldForceFirstEventPanel) ? (
+        {shouldShowFirstEventPanel && !isDismissed(firstEventStepId) ? (
           <div className="mb-4">
             <OnboardingPanel
               badge="Onboarding"
-              title={
-                shouldForceFirstEventPanel
-                  ? 'Mascota creada. Sigamos con el primer evento.'
-                  : 'Tu ficha ya está lista. Ahora registra el primer evento.'
-              }
+              title="Tu ficha ya está lista. Ahora registra el primer evento."
               description="Carga una vacuna, control o tratamiento para activar el historial."
               progressLabel="Paso 2 de 3"
               icon={HeartPulse}
@@ -476,15 +482,11 @@ export default function PetDetailPage() {
           </div>
         ) : null}
 
-        {showActivationPanel && (!isDismissed(firstActivationStepId) || shouldForceActivationPanel) ? (
+        {shouldShowActivationPanel && !isDismissed(firstActivationStepId) ? (
           <div className="mb-4">
             <OnboardingPanel
               badge="Carnet activo"
-              title={
-                shouldForceActivationPanel
-                  ? 'Primer evento guardado. El carnet ya está en marcha.'
-                  : 'El carnet ya está en marcha'
-              }
+              title="Primer evento guardado. El carnet ya está en marcha."
               description="Sigue completando el historial o comparte el carnet desde el QR."
               progressLabel="Paso 3 de 3"
               icon={CheckCircle2}
