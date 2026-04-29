@@ -3,6 +3,7 @@ import {
   applyDueRule,
   getEventCatalogOptions,
   getEventHistoryGroup,
+  getEventReminderStatus,
   getPetLifeStage,
   getSpeciesOption,
   parseLocalDate,
@@ -21,7 +22,7 @@ describe('utils', () => {
     expect(result.getDate()).toBe(10);
   });
 
-  it('applyDueRule calcula dias, meses y años', () => {
+  it('applyDueRule calcula dias, meses y anos', () => {
     expect(applyDueRule('2026-04-10', { amount: 21, unit: 'days' })).toBe('2026-05-01');
     expect(applyDueRule('2026-04-10', { amount: 3, unit: 'months' })).toBe('2026-07-10');
     expect(applyDueRule('2026-04-10', { amount: 1, unit: 'years' })).toBe('2027-04-10');
@@ -66,12 +67,22 @@ describe('utils', () => {
     expect(titles).not.toContain('Vacuna multiple anual');
   });
 
-  it('getEventHistoryGroup usa el historyGroup del catálogo si existe', () => {
+  it('getEventHistoryGroup usa el historyGroup del catalogo si existe', () => {
     expect(getEventHistoryGroup('Vacuna multiple cachorro - 1ra dosis')).toBe('vacuna_multiple_cachorro');
     expect(getEventHistoryGroup('Titulo libre')).toBe('titulo libre');
   });
 
-  it('valida email y password con reglas básicas', () => {
+  it('getEventReminderStatus clasifica recordatorios segun la fecha objetivo', () => {
+    const referenceDate = new Date(2026, 3, 10);
+
+    expect(getEventReminderStatus(null, referenceDate)).toBe('sin_recordatorio');
+    expect(getEventReminderStatus('2026-04-09', referenceDate)).toBe('vencido');
+    expect(getEventReminderStatus('2026-04-10', referenceDate)).toBe('hoy');
+    expect(getEventReminderStatus('2026-04-20', referenceDate)).toBe('proximo');
+    expect(getEventReminderStatus('2026-05-10', referenceDate)).toBe('programado');
+  });
+
+  it('valida email y password con reglas basicas', () => {
     expect(validateEmail('test@pettrack.cl')).toBe(true);
     expect(validateEmail('correo-invalido')).toBe(false);
     expect(validatePassword('123456')).toBe(true);

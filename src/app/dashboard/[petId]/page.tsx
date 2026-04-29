@@ -12,7 +12,16 @@ import { Event, Pet } from '@/lib/types';
 import { createPetShareLink, deletePet, getPet } from '@/lib/supabase';
 import { analytics } from '@/lib/analytics';
 import { buildQrCodeUrl, copyTextToClipboard } from '@/lib/share';
-import { buildGoogleCalendarUrl, formatDate, formatDateTime, formatPetAge, getEventHistoryGroup, getSpeciesOption, parseLocalDate } from '@/lib/utils';
+import {
+  buildGoogleCalendarUrl,
+  formatDate,
+  formatDateTime,
+  formatPetAge,
+  getEventHistoryGroup,
+  getEventReminderStatus,
+  getSpeciesOption,
+  parseLocalDate,
+} from '@/lib/utils';
 import { Container } from '@/components/ui/Container';
 import { Button } from '@/components/ui/Button';
 import { Loading } from '@/components/ui/Loading';
@@ -89,11 +98,7 @@ function getLastVaccine(events: Event[]) {
 
 function getStatus(events: Event[], nextDueDate: string | null) {
   const overdueEvents = getActiveDueEvents(events).filter((event) => {
-    if (!event.next_due_date) {
-      return false;
-    }
-
-    return differenceInCalendarDays(parseLocalDate(event.next_due_date), new Date()) < 0;
+    return getEventReminderStatus(event.next_due_date) === 'vencido';
   });
 
   if (overdueEvents.length > 0) {
@@ -114,20 +119,18 @@ function getStatus(events: Event[], nextDueDate: string | null) {
     };
   }
 
-  const remainingDays = differenceInCalendarDays(parseLocalDate(nextDueDate), new Date());
+  const nextDueStatus = getEventReminderStatus(nextDueDate);
 
-  if (remainingDays < 0) {
-    const overdueDays = Math.abs(remainingDays);
-
+  if (nextDueStatus === 'hoy') {
     return {
-      label: 'Vencida',
-      detail: `Vencida en ${overdueDays} ${overdueDays === 1 ? 'día' : 'días'}`,
-      tone: 'text-rose-700',
-      badge: 'bg-rose-100 text-rose-700',
+      label: 'Atención hoy',
+      detail: 'Tienes un recordatorio para hoy',
+      tone: 'text-amber-700',
+      badge: 'bg-amber-100 text-amber-800',
     };
   }
 
-  if (remainingDays <= 14) {
+  if (nextDueStatus === 'proximo') {
     return {
       label: 'Atención pronto',
       detail: null,
@@ -195,6 +198,31 @@ function shouldLogShareLinkError(error: unknown) {
   return error.message !== 'Forbidden' && error.message !== 'Unauthorized';
 }
 
+type HistoryStatusFilter =
+  | 'all'
+  | 'vencido'
+  | 'hoy'
+  | 'proximo'
+  | 'programado'
+  | 'sin_recordatorio';
+
+const HISTORY_STATUS_OPTIONS: Array<{
+  value: HistoryStatusFilter;
+  label: string;
+  accentClassName: string;
+}> = [
+  { value: 'all', label: 'Todos', accentClassName: 'bg-slate-900 text-white border-slate-900' },
+  { value: 'vencido', label: 'Vencidos', accentClassName: 'bg-rose-50 text-rose-700 border-rose-200' },
+  { value: 'hoy', label: 'Para hoy', accentClassName: 'bg-amber-50 text-amber-800 border-amber-200' },
+  { value: 'proximo', label: 'Próximos', accentClassName: 'bg-sky-50 text-sky-800 border-sky-200' },
+  { value: 'programado', label: 'Programados', accentClassName: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  {
+    value: 'sin_recordatorio',
+    label: 'Sin recordatorio',
+    accentClassName: 'bg-slate-100 text-slate-700 border-slate-200',
+  },
+];
+
 export default function PetDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -217,7 +245,7 @@ export default function PetDetailPage() {
   const { dismissStep, isDismissed } = useOnboardingState(user?.id);
   const [eventSearch, setEventSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | Event['type']>('all');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'proximos' | 'vencidos'>('all');
+  const [statusFilter, setStatusFilter] = useState<HistoryStatusFilter>('all');
 
   useEffect(() => {
     const fetchPet = async () => {
@@ -298,10 +326,28 @@ export default function PetDetailPage() {
   const qrCodeUrl = shareUrl ? buildQrCodeUrl(shareUrl, qrRetryCount) : '';
   const deferredEventSearch = useDeferredValue(eventSearch);
   const normalizedEventSearch = deferredEventSearch.trim().toLowerCase();
+  const eventStatusCounts = useMemo(() => {
+    return events.reduce(
+      (counts, event) => {
+        const reminderStatus = getEventReminderStatus(event.next_due_date);
+
+        counts.all += 1;
+        counts[reminderStatus] += 1;
+
+        return counts;
+      },
+      {
+        all: 0,
+        vencido: 0,
+        hoy: 0,
+        proximo: 0,
+        programado: 0,
+        sin_recordatorio: 0,
+      } as Record<HistoryStatusFilter, number>
+    );
+  }, [events]);
 
   const filteredEvents = useMemo(() => {
-    const today = new Date();
-
     return events.filter((event) => {
       const textMatches = normalizedEventSearch.length === 0
         ? true
@@ -317,17 +363,7 @@ export default function PetDetailPage() {
           return true;
         }
 
-        if (!event.next_due_date) {
-          return false;
-        }
-
-        const diff = differenceInCalendarDays(parseLocalDate(event.next_due_date), today);
-
-        if (statusFilter === 'proximos') {
-          return diff >= 0;
-        }
-
-        return diff < 0;
+        return getEventReminderStatus(event.next_due_date) === statusFilter;
       })();
 
       return textMatches && typeMatches && statusMatches;
@@ -822,7 +858,7 @@ export default function PetDetailPage() {
 
           {!eventsLoading ? (
             <div className="mb-6 rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-4">
-              <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr_0.8fr]">
+              <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
                 <div>
                   <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                     Buscar en historial
@@ -854,20 +890,66 @@ export default function PetDetailPage() {
                     <option value="otro">Otros</option>
                   </select>
                 </div>
+              </div>
 
-                <div>
-                  <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                    Estado
-                  </label>
-                  <select
-                    value={statusFilter}
-                    onChange={(event) => setStatusFilter(event.target.value as 'all' | 'proximos' | 'vencidos')}
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 outline-none transition-colors focus:border-sky-300"
-                  >
-                    <option value="all">Todos</option>
-                    <option value="proximos">Próximos</option>
-                    <option value="vencidos">Vencidos</option>
-                  </select>
+              <div className="mt-4">
+                <p className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Estado del recordatorio
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {HISTORY_STATUS_OPTIONS.map((option) => {
+                    const isActive = statusFilter === option.value;
+                    const optionCount = eventStatusCounts[option.value];
+
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setStatusFilter(option.value)}
+                        className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                          isActive
+                            ? option.accentClassName
+                            : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                        }`}
+                      >
+                        <span>{option.label}</span>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs ${
+                            isActive ? 'bg-white/20 text-current' : 'bg-slate-100 text-slate-500'
+                          }`}
+                        >
+                          {optionCount}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="rounded-2xl border border-rose-100 bg-white p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    Vencidos
+                  </p>
+                  <p className="mt-2 text-2xl font-black text-rose-700">{eventStatusCounts.vencido}</p>
+                </div>
+                <div className="rounded-2xl border border-amber-100 bg-white p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    Para hoy
+                  </p>
+                  <p className="mt-2 text-2xl font-black text-amber-700">{eventStatusCounts.hoy}</p>
+                </div>
+                <div className="rounded-2xl border border-sky-100 bg-white p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    Próximos 14 días
+                  </p>
+                  <p className="mt-2 text-2xl font-black text-sky-700">{eventStatusCounts.proximo}</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    Sin recordatorio
+                  </p>
+                  <p className="mt-2 text-2xl font-black text-slate-700">{eventStatusCounts.sin_recordatorio}</p>
                 </div>
               </div>
 

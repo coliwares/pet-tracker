@@ -13,6 +13,21 @@ import { es } from 'date-fns/locale';
 import { EVENT_CATALOG, EventCatalogItem, EventDueRule, SPECIES_OPTIONS } from './constants';
 import { Pet, Species } from './types';
 
+export type EventReminderStatus =
+  | 'sin_recordatorio'
+  | 'vencido'
+  | 'hoy'
+  | 'proximo'
+  | 'programado';
+
+export const EVENT_REMINDER_STATUS_LABELS: Record<EventReminderStatus, string> = {
+  sin_recordatorio: 'Sin recordatorio',
+  vencido: 'Vencido',
+  hoy: 'Para hoy',
+  proximo: 'Próximo',
+  programado: 'Programado',
+};
+
 /**
  * Parsea una fecha en formato YYYY-MM-DD como fecha local (sin conversión UTC)
  * Soluciona el problema de zona horaria donde "2026-04-10" se mostraba como "2026-04-09"
@@ -185,6 +200,31 @@ export function isPastDate(dateString: string): boolean {
 
 export function isSameDayDate(dateString1: string, dateString2: string): boolean {
   return isSameDay(parseLocalDate(dateString1), parseLocalDate(dateString2));
+}
+
+export function getEventReminderStatus(
+  nextDueDate: string | null,
+  referenceDate: Date = new Date()
+): EventReminderStatus {
+  if (!nextDueDate) {
+    return 'sin_recordatorio';
+  }
+
+  const remainingDays = differenceInCalendarDays(parseLocalDate(nextDueDate), referenceDate);
+
+  if (remainingDays < 0) {
+    return 'vencido';
+  }
+
+  if (remainingDays === 0) {
+    return 'hoy';
+  }
+
+  if (remainingDays <= 14) {
+    return 'proximo';
+  }
+
+  return 'programado';
 }
 
 export function cn(...classes: (string | undefined | null | false)[]): string {

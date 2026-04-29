@@ -6,7 +6,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Event } from '@/lib/types';
 import { EVENT_TYPE_LABELS, EVENT_TYPE_COLORS } from '@/lib/constants';
-import { buildGoogleCalendarUrl, formatDate } from '@/lib/utils';
+import {
+  buildGoogleCalendarUrl,
+  EVENT_REMINDER_STATUS_LABELS,
+  formatDate,
+  getEventReminderStatus,
+} from '@/lib/utils';
 import { deleteEvent } from '@/lib/supabase';
 import { deleteStorageFile } from '@/lib/storage';
 import { Calendar, Edit, ExternalLink, FileText, Trash2 } from 'lucide-react';
@@ -22,6 +27,23 @@ export function EventCard({ event }: EventCardProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const calendarUrl = buildGoogleCalendarUrl(event);
+  const reminderStatus = getEventReminderStatus(event.next_due_date);
+  const reminderBadgeClassName =
+    reminderStatus === 'vencido'
+      ? 'bg-rose-50 text-rose-700'
+      : reminderStatus === 'hoy'
+        ? 'bg-amber-100 text-amber-800'
+        : reminderStatus === 'proximo'
+          ? 'bg-sky-100 text-sky-800'
+          : reminderStatus === 'programado'
+            ? 'bg-emerald-50 text-emerald-700'
+            : 'bg-slate-100 text-slate-700';
+  const reminderCopy =
+    reminderStatus === 'vencido'
+      ? 'Recordatorio vencido'
+      : reminderStatus === 'hoy'
+        ? 'Corresponde hoy'
+        : 'Próximo recordatorio';
 
   const handleDelete = async () => {
     try {
@@ -51,13 +73,18 @@ export function EventCard({ event }: EventCardProps) {
       <div className="group rounded-2xl border-2 border-gray-100 bg-white p-5 transition-all duration-300 hover:border-blue-200 hover:shadow-card-hover">
         <div className="mb-3 flex items-start justify-between">
           <div className="flex-1">
-            <div className="mb-3 flex items-center gap-2">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
               <span
                 className={`rounded-full px-4 py-1.5 text-sm font-bold shadow-sm ${
                   EVENT_TYPE_COLORS[event.type]
                 }`}
               >
                 {EVENT_TYPE_LABELS[event.type]}
+              </span>
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] ${reminderBadgeClassName}`}
+              >
+                {EVENT_REMINDER_STATUS_LABELS[reminderStatus]}
               </span>
             </div>
             <h4 className="text-lg font-bold text-gray-900 transition-colors group-hover:text-blue-600">
@@ -81,7 +108,7 @@ export function EventCard({ event }: EventCardProps) {
           <div className="mt-3 rounded-xl border-2 border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 p-3">
             <span className="flex items-center gap-2 font-bold text-amber-800">
               <span className="text-lg">⏰</span>
-              Próxima dosis: {formatDate(event.next_due_date)}
+              {reminderCopy}: {formatDate(event.next_due_date)}
             </span>
           </div>
         )}
