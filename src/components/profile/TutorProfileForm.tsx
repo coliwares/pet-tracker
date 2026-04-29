@@ -5,7 +5,11 @@ import { HeartHandshake, MapPin, Phone, UserRound } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { TutorProfile } from '@/lib/types';
-import { getTutorProfileCompletionSteps, validateTutorProfileInput } from '@/lib/tutorProfile';
+import {
+  getTutorProfileCompletionSteps,
+  TUTOR_PROFILE_LIMITS,
+  validateTutorProfileInput,
+} from '@/lib/tutorProfile';
 import { updateTutorProfile } from '@/lib/supabase';
 
 type TutorProfileFormProps = {
@@ -47,12 +51,11 @@ export function TutorProfileForm({
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const completionSteps = useMemo(() => {
-    return getTutorProfileCompletionSteps(savedProfile ?? null);
-  }, [savedProfile]);
-
+  const completionSteps = useMemo(() => getTutorProfileCompletionSteps(form), [form]);
   const completedCount = completionSteps.filter((step) => step.completed).length;
   const isUnavailable = Boolean(unavailableMessage);
+  const notesLength = form.notes.length;
+  const hasSavedProfile = Boolean(savedProfile);
 
   const updateField = (field: keyof TutorProfileFormState, value: string) => {
     setForm((current) => ({
@@ -89,14 +92,20 @@ export function TutorProfileForm({
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(300px,0.8fr)]">
-      <form onSubmit={handleSubmit} className="space-y-6 rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-sm backdrop-blur">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-6 rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-sm backdrop-blur"
+      >
         <div className="rounded-[1.5rem] border border-sky-100 bg-gradient-to-br from-sky-50 to-white p-4">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-sky-700">Perfil principal</p>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-sky-700">
+            Perfil principal
+          </p>
           <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950">
             Datos del tutor responsable
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Este perfil nos ayuda a mostrar mejor el contexto del tutor y a dejar un contacto claro cuando compartes información de tus mascotas.
+            Este perfil ayuda a dejar un contacto claro y a completar mejor el contexto del tutor
+            cuando compartes información de tus mascotas.
           </p>
         </div>
 
@@ -112,14 +121,20 @@ export function TutorProfileForm({
             value={form.full_name}
             onChange={(event) => updateField('full_name', event.target.value)}
             placeholder="Ej.: Camila Soto"
+            autoComplete="name"
+            maxLength={TUTOR_PROFILE_LIMITS.fullName.max}
             disabled={isUnavailable || loading}
             required
           />
           <Input
-            label="Telefono principal *"
+            label="Teléfono principal *"
             value={form.phone}
             onChange={(event) => updateField('phone', event.target.value)}
             placeholder="Ej.: +56 9 1234 5678"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            maxLength={TUTOR_PROFILE_LIMITS.phone.max}
             disabled={isUnavailable || loading}
             required
           />
@@ -131,13 +146,17 @@ export function TutorProfileForm({
             value={form.city}
             onChange={(event) => updateField('city', event.target.value)}
             placeholder="Ej.: Providencia"
+            autoComplete="address-level2"
+            maxLength={TUTOR_PROFILE_LIMITS.city.max}
             disabled={isUnavailable || loading}
           />
           <Input
-            label="Direccion"
+            label="Dirección"
             value={form.address}
             onChange={(event) => updateField('address', event.target.value)}
             placeholder="Ej.: Av. Siempre Viva 123"
+            autoComplete="street-address"
+            maxLength={TUTOR_PROFILE_LIMITS.address.max}
             disabled={isUnavailable || loading}
           />
         </div>
@@ -161,25 +180,37 @@ export function TutorProfileForm({
               value={form.emergency_contact_name}
               onChange={(event) => updateField('emergency_contact_name', event.target.value)}
               placeholder="Ej.: Diego Perez"
+              autoComplete="off"
+              maxLength={TUTOR_PROFILE_LIMITS.emergencyName.max}
               disabled={isUnavailable || loading}
             />
             <Input
-              label="Telefono del contacto"
+              label="Teléfono del contacto"
               value={form.emergency_contact_phone}
               onChange={(event) => updateField('emergency_contact_phone', event.target.value)}
               placeholder="Ej.: +56 9 8765 4321"
+              type="tel"
+              inputMode="tel"
+              autoComplete="off"
+              maxLength={TUTOR_PROFILE_LIMITS.emergencyPhone.max}
               disabled={isUnavailable || loading}
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-semibold text-gray-700">Notas del tutor</label>
+          <div className="flex items-center justify-between gap-3">
+            <label className="block text-sm font-semibold text-gray-700">Notas del tutor</label>
+            <span className="text-xs font-medium text-slate-500">
+              {notesLength}/{TUTOR_PROFILE_LIMITS.notes.max}
+            </span>
+          </div>
           <textarea
             value={form.notes}
             onChange={(event) => updateField('notes', event.target.value)}
-            placeholder="Horario ideal de contacto, indicaciones de entrega, observaciones utiles..."
+            placeholder="Horario ideal de contacto, indicaciones de entrega, observaciones útiles..."
             rows={5}
+            maxLength={TUTOR_PROFILE_LIMITS.notes.max}
             disabled={isUnavailable || loading}
             className="w-full resize-none rounded-2xl border-2 border-gray-200 bg-white px-4 py-3 text-base transition-all duration-200 hover:border-gray-300 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:cursor-not-allowed disabled:bg-slate-50"
           />
@@ -190,9 +221,12 @@ export function TutorProfileForm({
           <input
             value={userEmail}
             disabled
+            autoComplete="email"
             className="w-full rounded-2xl border-2 border-slate-200 bg-slate-100 px-4 py-3 text-base text-slate-500"
           />
-          <p className="text-xs text-slate-500">Este dato viene de tu cuenta y no se edita desde aqui.</p>
+          <p className="text-xs text-slate-500">
+            Este dato viene de tu cuenta y no se edita desde aquí.
+          </p>
         </div>
 
         {error ? (
@@ -202,13 +236,25 @@ export function TutorProfileForm({
         ) : null}
 
         {success ? (
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+          <div
+            className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700"
+            aria-live="polite"
+          >
             {success}
           </div>
         ) : null}
 
-        <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={loading || isUnavailable}>
-          {loading ? 'Guardando perfil...' : 'Guardar perfil'}
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full sm:w-auto"
+          disabled={loading || isUnavailable}
+        >
+          {loading
+            ? 'Guardando perfil...'
+            : hasSavedProfile
+              ? 'Guardar cambios'
+              : 'Guardar perfil'}
         </Button>
       </form>
 
@@ -220,7 +266,7 @@ export function TutorProfileForm({
               <p className="text-3xl font-black tracking-tight text-slate-950">
                 {completedCount}/{completionSteps.length}
               </p>
-              <p className="text-sm text-slate-600">bloques principales completados</p>
+              <p className="text-sm text-slate-600">bloques principales completos</p>
             </div>
             <div className="rounded-2xl bg-sky-100 p-3 text-sky-700">
               <UserRound className="h-6 w-6" />
@@ -236,9 +282,7 @@ export function TutorProfileForm({
                 <span className="text-sm font-medium text-slate-700">{step.label}</span>
                 <span
                   className={`rounded-full px-2.5 py-1 text-xs font-bold uppercase tracking-[0.14em] ${
-                    step.completed
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : 'bg-amber-100 text-amber-700'
+                    step.completed ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
                   }`}
                 >
                   {step.completed ? 'Listo' : 'Pendiente'}
@@ -257,9 +301,10 @@ export function TutorProfileForm({
               <MapPin className="h-5 w-5" />
             </div>
           </div>
-          <h3 className="mt-4 text-xl font-black tracking-tight">Para que sirve este perfil</h3>
+          <h3 className="mt-4 text-xl font-black tracking-tight">Para qué sirve este perfil</h3>
           <p className="mt-2 text-sm leading-6 text-slate-200">
-            Te deja lista la información del tutor para futuros flujos de contacto, contexto compartido y mejoras del carnet.
+            Deja lista la información del tutor para próximos flujos de contacto, contexto
+            compartido y mejoras del carnet.
           </p>
         </section>
       </aside>

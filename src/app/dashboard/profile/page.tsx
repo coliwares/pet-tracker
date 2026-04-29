@@ -23,7 +23,7 @@ export default async function TutorProfilePage() {
 
   const unavailableMessage =
     error?.code === '42P01'
-      ? 'Falta aplicar la migracion de tutor_profiles en Supabase para activar este formulario.'
+      ? 'Falta aplicar la migración de tutor_profiles en Supabase para activar este formulario.'
       : null;
 
   return (
@@ -47,7 +47,8 @@ export default async function TutorProfilePage() {
               Perfil del tutor
             </h1>
             <p className="mt-2 max-w-2xl text-lg text-slate-600">
-              Guarda tus datos principales para tener una ficha más completa y preparada para próximos flujos de contacto.
+              Guarda tus datos principales para tener una ficha más completa y preparada para
+              próximos flujos de contacto.
             </p>
           </div>
         </div>

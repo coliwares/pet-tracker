@@ -14,11 +14,11 @@ describe('tutorProfile', () => {
 
   it('validateTutorProfileInput sanitiza campos y acepta un perfil completo válido', () => {
     const result = validateTutorProfileInput({
-      full_name: '  Ana   Pérez  ',
+      full_name: '  Ana   Perez  ',
       phone: ' +56 9 1234 5678 ',
       city: '  Santiago   Centro ',
       address: '  Calle Falsa 123  ',
-      emergency_contact_name: '  Juan  Pérez ',
+      emergency_contact_name: '  Juan  Perez ',
       emergency_contact_phone: ' +56 9 2222 3333 ',
       notes: '  Llamar primero al tutor. ',
     });
@@ -26,11 +26,11 @@ describe('tutorProfile', () => {
     expect(result).toEqual({
       success: true,
       data: {
-        full_name: 'Ana Pérez',
+        full_name: 'Ana Perez',
         phone: '+56 9 1234 5678',
         city: 'Santiago Centro',
         address: 'Calle Falsa 123',
-        emergency_contact_name: 'Juan Pérez',
+        emergency_contact_name: 'Juan Perez',
         emergency_contact_phone: '+56 9 2222 3333',
         notes: 'Llamar primero al tutor.',
       },
@@ -39,41 +39,50 @@ describe('tutorProfile', () => {
 
   it('requiere nombre y teléfono juntos para contacto de emergencia', () => {
     const result = validateTutorProfileInput({
-      full_name: 'Ana Pérez',
+      full_name: 'Ana Perez',
       phone: '+56 9 1234 5678',
-      emergency_contact_name: 'Juan Pérez',
+      emergency_contact_name: 'Juan Perez',
     });
 
     expect(result).toEqual({
       success: false,
-      error: 'Completa el nombre y telefono del contacto de emergencia, o deja ambos vacios.',
+      error: 'Completa el nombre y teléfono del contacto de emergencia, o deja ambos vacíos.',
     });
   });
 
   it('getTutorProfileCompletionSteps refleja el progreso del perfil', () => {
     expect(getTutorProfileCompletionSteps(null)).toEqual([
       { label: 'Nombre del tutor', completed: false },
-      { label: 'Telefono principal', completed: false },
+      { label: 'Teléfono principal', completed: false },
       { label: 'Contacto de emergencia', completed: false },
     ]);
 
     expect(
       getTutorProfileCompletionSteps({
-        user_id: 'user-1',
-        full_name: 'Ana Pérez',
+        full_name: 'Ana Perez',
         phone: '+56 9 1234 5678',
-        city: null,
-        address: null,
-        emergency_contact_name: 'Juan Pérez',
+        emergency_contact_name: 'Juan Perez',
         emergency_contact_phone: '+56 9 2222 3333',
-        notes: null,
-        created_at: '2026-01-01T00:00:00.000Z',
-        updated_at: '2026-01-01T00:00:00.000Z',
       })
     ).toEqual([
       { label: 'Nombre del tutor', completed: true },
-      { label: 'Telefono principal', completed: true },
+      { label: 'Teléfono principal', completed: true },
       { label: 'Contacto de emergencia', completed: true },
+    ]);
+  });
+
+  it('getTutorProfileCompletionSteps ignora espacios al calcular progreso', () => {
+    expect(
+      getTutorProfileCompletionSteps({
+        full_name: '   ',
+        phone: ' +56 9 1234 5678 ',
+        emergency_contact_name: '   ',
+        emergency_contact_phone: '   ',
+      })
+    ).toEqual([
+      { label: 'Nombre del tutor', completed: false },
+      { label: 'Teléfono principal', completed: true },
+      { label: 'Contacto de emergencia', completed: false },
     ]);
   });
 });

@@ -32,6 +32,10 @@ export function validateTutorPhone(phone: string) {
   return /^[+\d\s()-]+$/.test(phone) && digits.length >= 7 && digits.length <= 15;
 }
 
+function hasValue(value: unknown) {
+  return sanitizeText(value).length > 0;
+}
+
 export function validateTutorProfileInput(input: Partial<TutorProfileInput>): TutorProfileValidationResult {
   const full_name = sanitizeText(input.full_name);
   const phone = sanitizeText(input.phone);
@@ -58,7 +62,7 @@ export function validateTutorProfileInput(input: Partial<TutorProfileInput>): Tu
   ) {
     return {
       success: false,
-      error: 'Ingresa un telefono valido con codigo de pais o area.',
+      error: 'Ingresa un teléfono válido con código de país o área.',
     };
   }
 
@@ -79,7 +83,7 @@ export function validateTutorProfileInput(input: Partial<TutorProfileInput>): Tu
   ) {
     return {
       success: false,
-      error: `La direccion debe tener entre ${TUTOR_PROFILE_LIMITS.address.min} y ${TUTOR_PROFILE_LIMITS.address.max} caracteres.`,
+      error: `La dirección debe tener entre ${TUTOR_PROFILE_LIMITS.address.min} y ${TUTOR_PROFILE_LIMITS.address.max} caracteres.`,
     };
   }
 
@@ -98,7 +102,7 @@ export function validateTutorProfileInput(input: Partial<TutorProfileInput>): Tu
     if (!emergency_contact_name || !emergency_contact_phone) {
       return {
         success: false,
-        error: 'Completa el nombre y telefono del contacto de emergencia, o deja ambos vacios.',
+        error: 'Completa el nombre y teléfono del contacto de emergencia, o deja ambos vacíos.',
       };
     }
 
@@ -109,7 +113,7 @@ export function validateTutorProfileInput(input: Partial<TutorProfileInput>): Tu
     ) {
       return {
         success: false,
-        error: 'El telefono del contacto de emergencia no es valido.',
+        error: 'El teléfono del contacto de emergencia no es válido.',
       };
     }
   }
@@ -135,19 +139,26 @@ export function validateTutorProfileInput(input: Partial<TutorProfileInput>): Tu
   };
 }
 
-export function getTutorProfileCompletionSteps(profile: TutorProfile | null) {
+export function getTutorProfileCompletionSteps(
+  profile:
+    | Pick<
+        TutorProfile | TutorProfileInput,
+        'full_name' | 'phone' | 'emergency_contact_name' | 'emergency_contact_phone'
+      >
+    | null
+) {
   return [
     {
       label: 'Nombre del tutor',
-      completed: Boolean(profile?.full_name),
+      completed: hasValue(profile?.full_name),
     },
     {
-      label: 'Telefono principal',
-      completed: Boolean(profile?.phone),
+      label: 'Teléfono principal',
+      completed: hasValue(profile?.phone),
     },
     {
       label: 'Contacto de emergencia',
-      completed: Boolean(profile?.emergency_contact_name && profile?.emergency_contact_phone),
+      completed: hasValue(profile?.emergency_contact_name) && hasValue(profile?.emergency_contact_phone),
     },
   ];
 }

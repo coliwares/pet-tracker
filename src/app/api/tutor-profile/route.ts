@@ -26,7 +26,7 @@ export async function GET() {
   if (error) {
     if (isMissingRelationError(error)) {
       return NextResponse.json(
-        { error: 'La tabla de perfil del tutor aun no esta creada.' },
+        { error: 'La tabla de perfil del tutor aún no está creada.' },
         { status: 503 }
       );
     }
@@ -70,7 +70,7 @@ export async function PUT(request: Request) {
   if (error) {
     if (isMissingRelationError(error)) {
       return NextResponse.json(
-        { error: 'La tabla de perfil del tutor aun no esta creada.' },
+        { error: 'La tabla de perfil del tutor aún no está creada.' },
         { status: 503 }
       );
     }

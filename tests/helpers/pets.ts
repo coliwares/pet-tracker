@@ -14,7 +14,7 @@ function fieldInputAfterLabel(page: Page, labelText: RegExp | string) {
 export async function createPet(page: Page, petName: string) {
   await Promise.all([
     page.waitForURL(/\/dashboard\/new-pet$/, { timeout: 15000 }),
-    page.getByRole('link', { name: /nueva mascota/i }).click(),
+    page.getByRole('link', { name: /agregar mascota|nueva mascota/i }).click(),
   ]);
 
   await fieldInputAfterLabel(page, /nombre/i).fill(petName);
@@ -74,7 +74,21 @@ export async function createEvent(
 
 export async function extractSharedUrlFromQr(page: Page): Promise<string> {
   const shareInput = page.getByTestId('share-url-input');
-  await expect(shareInput).toBeVisible();
+
+  if (await shareInput.count() === 0) {
+    const petCardLink = page.locator('main a[href^="/dashboard/"]').filter({
+      has: page.locator('article'),
+    }).first();
+
+    if (await petCardLink.count()) {
+      await Promise.all([
+        page.waitForURL(/\/dashboard\/[^/]+$/, { timeout: 15000 }),
+        petCardLink.click(),
+      ]);
+    }
+  }
+
+  await expect(shareInput).toBeVisible({ timeout: 15000 });
 
   const shareUrl = await shareInput.inputValue();
 
@@ -86,7 +100,23 @@ export async function extractSharedUrlFromQr(page: Page): Promise<string> {
 }
 
 export async function deleteCurrentPet(page: Page) {
-  await page.getByRole('button', { name: /^eliminar$/i }).first().click();
+  const deleteButton = page.getByRole('button', { name: /^eliminar$/i }).first();
+
+  if (await deleteButton.count() === 0) {
+    const petCardLink = page.locator('main a[href^="/dashboard/"]').filter({
+      has: page.locator('article'),
+    }).first();
+
+    if (await petCardLink.count()) {
+      await Promise.all([
+        page.waitForURL(/\/dashboard\/[^/]+$/, { timeout: 15000 }),
+        petCardLink.click(),
+      ]);
+    }
+  }
+
+  await expect(deleteButton).toBeVisible({ timeout: 15000 });
+  await deleteButton.click();
   await expect(page.getByText(/eliminar mascota/i)).toBeVisible();
   await page.getByRole('button', { name: /^eliminar$/i }).last().click();
   await page.waitForURL(/\/dashboard$/, { timeout: 15000 });

@@ -77,8 +77,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      <Container className="py-12">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.16),_transparent_32%),linear-gradient(180deg,_#fff8ef_0%,_#fffdf9_36%,_#f4f9ff_100%)]">
+      <Container className="py-8">
         {pets.length === 0 && !isDismissed(firstPetStepId) ? (
           <div className="mb-4">
             <OnboardingPanel
@@ -104,36 +104,57 @@ export default function DashboardPage() {
           </div>
         ) : null}
 
-        <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h1 className="mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-4xl font-extrabold text-transparent">
-              Mis Mascotas
-            </h1>
-            <p className="text-lg text-gray-600">
+        <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/80 p-5 shadow-[0_28px_80px_rgba(15,23,42,0.08)] backdrop-blur sm:p-8">
+          <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.18),_transparent_34%),radial-gradient(circle_at_top_right,_rgba(251,146,60,0.16),_transparent_30%)]" />
+
+          <div className="relative flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-sky-700">
+                Panel general
+              </p>
+              <h1 className="mt-2 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
+                Mis mascotas
+              </h1>
+              <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
+                {pets.length === 0
+                  ? 'Comienza agregando tu primera mascota'
+                  : 'Revisa fichas, mantén el historial al día y entra rápido al detalle de cada mascota.'}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <Link href="/dashboard/new-pet">
+                <Button size="lg" className="shadow-lg">
+                  <Plus className="mr-2 h-5 w-5" />
+                  Agregar mascota
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          <div className="relative mt-6 flex flex-wrap gap-3 text-sm">
+            <div className="rounded-full bg-sky-100 px-4 py-2 font-semibold text-sky-800">
               {pets.length === 0
-                ? 'Comienza agregando tu primera mascota'
+                ? 'Sin mascotas registradas'
                 : `${pets.length} ${pets.length === 1 ? 'mascota registrada' : 'mascotas registradas'}`}
-            </p>
+            </div>
+            <div className="rounded-full bg-white/90 px-4 py-2 font-medium text-slate-600">
+              Historial y recordatorios en una sola vista
+            </div>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/dashboard/new-pet">
-              <Button size="lg" className="shadow-lg">
-                <Plus className="mr-2 h-5 w-5" />
-                Nueva Mascota
-              </Button>
-            </Link>
-          </div>
+        </section>
+
+        <div className="mt-6 space-y-6">
+          <UpcomingVaccinesCard />
+          <UpcomingVisitsCard />
         </div>
 
-        <UpcomingVaccinesCard />
-        <UpcomingVisitsCard />
-
         {pets.length === 0 ? (
-          <div className="space-y-6">
-            <div className="rounded-3xl border-2 border-gray-100 bg-white p-12 shadow-card">
+          <div className="mt-6 space-y-6">
+            <div className="rounded-[1.75rem] border border-slate-200 bg-white/90 p-12 shadow-sm">
               <EmptyState
                 icon={
-                  <div className="rounded-3xl bg-gradient-to-br from-blue-400 to-purple-500 p-6 shadow-xl">
+                  <div className="rounded-3xl bg-gradient-to-br from-sky-500 to-indigo-600 p-6 shadow-xl">
                     <PawPrint className="h-20 w-20 text-white" />
                   </div>
                 }
@@ -145,8 +166,22 @@ export default function DashboardPage() {
             </div>
           </div>
         ) : (
-          <div className="space-y-6">
-            <section className="rounded-[1.5rem] border border-white/80 bg-white/85 p-4 shadow-sm backdrop-blur">
+          <div className="mt-6 space-y-6">
+            <section className="rounded-[1.75rem] border border-white/80 bg-white/85 p-4 shadow-sm backdrop-blur sm:p-6">
+              <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Buscar y filtrar
+                  </p>
+                  <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950">
+                    Encuentra una mascota rápido
+                  </h2>
+                </div>
+                <div className="rounded-full bg-sky-50 px-3 py-1.5 text-sm font-semibold text-sky-800">
+                  {filteredPets.length} {filteredPets.length === 1 ? 'resultado' : 'resultados'}
+                </div>
+              </div>
+
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex-1">
                   <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
@@ -183,8 +218,8 @@ export default function DashboardPage() {
               </div>
 
               <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
-                <div className="rounded-full bg-sky-50 px-3 py-1.5 font-semibold text-sky-800">
-                  {filteredPets.length} {filteredPets.length === 1 ? 'resultado' : 'resultados'}
+                <div className="rounded-full bg-white px-3 py-1.5 font-medium text-slate-600 shadow-sm">
+                  Vista consistente con el detalle individual
                 </div>
                 {hasActiveFilters ? (
                   <Button
@@ -203,7 +238,7 @@ export default function DashboardPage() {
             </section>
 
             {filteredPets.length > 0 ? (
-              <div className="grid animate-fade-in gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid animate-fade-in gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {filteredPets.map((pet) => (
                   <PetCard key={pet.id} pet={pet} />
                 ))}
