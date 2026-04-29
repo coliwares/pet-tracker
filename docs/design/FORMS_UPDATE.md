@@ -6,10 +6,10 @@ Mantener formularios claros, validables y seguros.
 
 ## Reglas
 
-- Labels explicitos
+- Labels explícitos
 - Estados de error visibles
 - Hint breve cuando agrega contexto real
-- Validacion en cliente y servidor
+- Validación en cliente y servidor
 - CTA principal claro
 
 ## Formularios sensibles
@@ -20,7 +20,7 @@ Mantener formularios claros, validables y seguros.
 - Perfil del tutor
 - Feedback
 
-## Checklist rapido
+## Checklist rápido
 
 - Campos obligatorios bien marcados
 - Mensajes de error entendibles
