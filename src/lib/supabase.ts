@@ -8,6 +8,8 @@ import {
   BetaAccessRequest,
   TutorProfile,
   TutorProfileInput,
+  DailyCareLog,
+  DailyCareLogInput,
 } from './types';
 import { FeedbackInput } from './feedback';
 import { getEventHistoryGroup } from './utils';
@@ -205,6 +207,85 @@ export async function deleteEvent(eventId: string) {
     .delete()
     .eq('id', eventId);
   if (error) throw error;
+}
+
+export async function getDailyCareLogs(
+  petId: string,
+  options?: {
+    from?: string;
+    to?: string;
+    logDate?: string;
+  }
+) {
+  let query = supabase
+    .from('daily_care_logs')
+    .select('*')
+    .eq('pet_id', petId)
+    .order('log_date', { ascending: true });
+
+  if (options?.logDate) {
+    query = query.eq('log_date', options.logDate);
+  }
+
+  if (options?.from) {
+    query = query.gte('log_date', options.from);
+  }
+
+  if (options?.to) {
+    query = query.lte('log_date', options.to);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data ?? []) as DailyCareLog[];
+}
+
+export async function getDailyCareLogsForPets(
+  petIds: string[],
+  options?: {
+    from?: string;
+    to?: string;
+    logDate?: string;
+  }
+) {
+  if (petIds.length === 0) {
+    return [] as DailyCareLog[];
+  }
+
+  let query = supabase
+    .from('daily_care_logs')
+    .select('*')
+    .in('pet_id', petIds)
+    .order('log_date', { ascending: true });
+
+  if (options?.logDate) {
+    query = query.eq('log_date', options.logDate);
+  }
+
+  if (options?.from) {
+    query = query.gte('log_date', options.from);
+  }
+
+  if (options?.to) {
+    query = query.lte('log_date', options.to);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data ?? []) as DailyCareLog[];
+}
+
+export async function upsertDailyCareLog(log: DailyCareLogInput) {
+  const { data, error } = await supabase
+    .from('daily_care_logs')
+    .upsert([log], {
+      onConflict: 'pet_id,log_date',
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as DailyCareLog;
 }
 
 export async function getFeedback(userId: string) {

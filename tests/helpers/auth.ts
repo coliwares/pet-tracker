@@ -8,7 +8,7 @@ export async function loginAsDemo(page: Page) {
   await page.locator('input[type="email"]').fill(demoEmail);
   await page.locator('input[type="password"]').fill(demoPassword);
   await page.locator('form').getByTestId('login-submit').click();
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page).toHaveURL(/\/dashboard(?:\?login=demo)?$/);
 }
 
 export async function logout(page: Page) {

@@ -23,7 +23,7 @@ interface SendEmailInput {
   }>;
 }
 
-export async function sendFeedbackReplyEmail({
+export async function sendTransactionalEmail({
   to,
   subject,
   html,
@@ -72,4 +72,8 @@ export async function sendFeedbackReplyEmail({
   }
 
   return payload.id;
+}
+
+export async function sendFeedbackReplyEmail(input: SendEmailInput) {
+  return sendTransactionalEmail(input);
 }

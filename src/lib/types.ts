@@ -50,6 +50,33 @@ export type Event = {
   updated_at: string;
 };
 
+export type SymptomSeverity = 'none' | 'minor' | 'severe';
+
+export type DailyCareLog = {
+  id: string;
+  pet_id: string;
+  log_date: string;
+  meals_logged: boolean;
+  breakfast_completed: boolean;
+  lunch_completed: boolean;
+  dinner_completed: boolean;
+  hydration_logged: boolean;
+  hydration_ml: number;
+  exercise_logged: boolean;
+  exercise_minutes: number;
+  health_logged: boolean;
+  symptoms_severity: SymptomSeverity;
+  care_logged: boolean;
+  medicines_on_time: boolean;
+  grooming_completed: boolean;
+  ears_eyes_cleaning_completed: boolean;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type DailyCareLogInput = Omit<DailyCareLog, 'id' | 'created_at' | 'updated_at'>;
+
 export type FeedbackType = 'bug' | 'mejora';
 
 export type FeedbackStatus = 'nuevo' | 'en_revision' | 'resuelto';

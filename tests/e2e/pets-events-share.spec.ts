@@ -24,10 +24,10 @@ test.describe('Mascotas, eventos y enlace compartido', () => {
       petId = await createPet(page, petName);
 
       await expect(
-        page.getByRole('heading', { name: new RegExp(petName, 'i') })
+        page.getByRole('heading', { level: 1, name: new RegExp(petName, 'i') })
       ).toBeVisible({ timeout: 15000 });
       await expect(page.getByText(/qr listo/i).first()).toBeVisible({ timeout: 15000 });
-      await expect(page.getByText(/historial m[eÃ©]dico/i).first()).toBeVisible({ timeout: 15000 });
+      await expect(page.getByText(/historial m[eé]dico/i).first()).toBeVisible({ timeout: 15000 });
       await expect(page.getByTestId('share-url-input')).toHaveValue(/\/share\//);
     } finally {
       if (petId) {
@@ -51,9 +51,9 @@ test.describe('Mascotas, eventos y enlace compartido', () => {
       });
 
       await expect(page.getByText(/eventos atrasados/i).first()).toBeVisible({ timeout: 15000 });
-      await expect(
-        page.getByText(/evento atrasado|eventos atrasados/i).first()
-      ).toBeVisible({ timeout: 15000 });
+      await expect(page.getByText(/evento atrasado|eventos atrasados/i).first()).toBeVisible({
+        timeout: 15000,
+      });
     } finally {
       if (petId) {
         await page.goto(`/dashboard/${petId}`);
@@ -74,7 +74,7 @@ test.describe('Mascotas, eventos y enlace compartido', () => {
 
       await page.getByRole('link', { name: /editar ficha/i }).click();
       await expect(
-        page.getByRole('heading', { name: new RegExp(`editar informaci[oÃ³]n de ${petName}`, 'i') })
+        page.getByRole('heading', { name: new RegExp(`editar informaci.*${petName}`, 'i') })
       ).toBeVisible();
 
       await page.getByPlaceholder(/labrador, persa/i).fill(updatedBreed);
@@ -82,10 +82,12 @@ test.describe('Mascotas, eventos y enlace compartido', () => {
       await page.getByPlaceholder(/alergias, condiciones especiales/i).fill(updatedNotes);
       await page.getByRole('button', { name: /guardar cambios/i }).click();
 
-      await expect(page.getByRole('heading', { name: new RegExp(petName, 'i') })).toBeVisible({ timeout: 15000 });
-      await expect(page.getByText(updatedBreed)).toBeVisible();
-      await expect(page.getByText(new RegExp(`${updatedWeight} kg`))).toBeVisible();
-      await expect(page.getByText(updatedNotes)).toBeVisible();
+      await expect(
+        page.getByRole('heading', { level: 1, name: new RegExp(petName, 'i') })
+      ).toBeVisible({ timeout: 15000 });
+      await expect(page.getByText(updatedBreed).first()).toBeVisible();
+      await expect(page.getByText(new RegExp(`${updatedWeight} kg`)).first()).toBeVisible();
+      await expect(page.getByText(updatedNotes).first()).toBeVisible();
     } finally {
       if (petId) {
         await page.goto(`/dashboard/${petId}`);
@@ -156,7 +158,9 @@ test.describe('Mascotas, eventos y enlace compartido', () => {
       await expect(page.getByText(/expira el/i)).toBeVisible();
 
       await page.reload();
-      await expect(page.getByRole('heading', { name: new RegExp(petName, 'i') })).toBeVisible();
+      await expect(
+        page.getByRole('heading', { level: 1, name: new RegExp(petName, 'i') })
+      ).toBeVisible();
 
       const secondShareUrl = await extractSharedUrlFromQr(page);
       await expect.poll(() => secondShareUrl.startsWith('http://localhost:3000/share/')).toBe(true);
@@ -166,10 +170,12 @@ test.describe('Mascotas, eventos y enlace compartido', () => {
 
       await expect(sharedPage.getByRole('heading', { name: new RegExp(petName, 'i') })).toBeVisible();
       await expect(sharedPage.getByText(/carnet compartido/i)).toBeVisible();
-      await expect(sharedPage.getByText(/p[uÃº]blico y de solo lectura/i)).toBeVisible();
+      await expect(sharedPage.getByText(/publico y de solo lectura/i)).toBeVisible();
       await expect(sharedPage.getByRole('link', { name: /editar ficha/i })).toHaveCount(0);
       await expect(sharedPage.getByRole('button', { name: /agregar evento/i })).toHaveCount(0);
       await sharedPage.close();
+
+      expect(firstShareUrl).toBe(secondShareUrl);
     } finally {
       if (petId) {
         await page.goto(`/dashboard/${petId}`);

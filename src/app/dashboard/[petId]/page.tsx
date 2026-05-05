@@ -26,6 +26,7 @@ import {
 import { Container } from '@/components/ui/Container';
 import { Button } from '@/components/ui/Button';
 import { Loading } from '@/components/ui/Loading';
+import { PetGamificationCard } from '@/components/gamification/PetGamificationCard';
 import { Timeline } from '@/components/event/Timeline';
 import { OnboardingPanel } from '@/components/onboarding/OnboardingPanel';
 import {
@@ -582,6 +583,64 @@ export default function PetDetailPage() {
                     Eliminar
                   </Button>
                 </div>
+
+                <div className="mt-6 grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
+                  <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="min-w-0">
+                        <p className="text-sm text-slate-500">Último control</p>
+                        <p className="mt-2 break-words text-2xl font-black leading-tight text-slate-950">
+                          {latestControlDate ? formatDate(latestControlDate.event_date) : 'Sin registro'}
+                        </p>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm text-slate-500">Próxima vacuna</p>
+                        <p className="mt-2 break-words text-2xl font-black leading-tight text-slate-950">
+                          {upcomingVaccine?.next_due_date ? formatDate(upcomingVaccine.next_due_date) : 'Sin fecha'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-2xl bg-emerald-50 p-3 text-emerald-600">
+                        <HeartPulse className="h-6 w-6" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                          Resumen clínico
+                        </p>
+                        <p className="break-words text-lg font-bold leading-tight text-slate-950">
+                          {events.length === 0
+                            ? 'Aún no hay eventos cargados'
+                            : `${events.length} ${events.length === 1 ? 'evento registrado' : 'eventos registrados'}`}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 grid gap-3 xl:grid-cols-2">
+                      <div className="min-w-0 rounded-2xl bg-slate-50 p-4">
+                        <p className="text-sm text-slate-500">Última actualización</p>
+                        <p className="mt-1 break-words font-semibold leading-tight text-slate-900">
+                          {sortedEvents[0] ? formatDate(sortedEvents[0].event_date) : 'Pendiente'}
+                        </p>
+                      </div>
+                      <div className="min-w-0 rounded-2xl bg-slate-50 p-4">
+                        <p className="text-sm text-slate-500">Próximo hito</p>
+                        <p className="mt-1 break-words font-semibold leading-tight text-slate-900">
+                          {upcomingVaccine ? upcomingVaccine.title : 'Sin recordatorios activos'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {events.length === 0 ? (
+                  <div className="mt-6 rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50/70 px-6 py-7 text-center text-base text-slate-500">
+                    {`Agrega vacunas, controles o tratamientos para empezar a construir el carnet visual de ${pet.name}.`}
+                  </div>
+                ) : null}
               </div>
 
               <div
@@ -735,64 +794,9 @@ export default function PetDetailPage() {
               </div>
             </div>
 
-            <div className="mt-6 grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
-              <div className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <div>
-                    <p className="text-sm text-slate-500">Último control</p>
-                    <p className="mt-2 text-2xl font-black text-slate-950">
-                      {latestControlDate ? formatDate(latestControlDate.event_date) : 'Sin registro'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-slate-500">Próxima vacuna</p>
-                    <p className="mt-2 text-2xl font-black text-slate-950">
-                      {upcomingVaccine?.next_due_date ? formatDate(upcomingVaccine.next_due_date) : 'Sin fecha'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-slate-500">Estado</p>
-                    <p className={`mt-2 text-2xl font-black ${status.tone}`}>{status.label}</p>
-                    {status.detail && (
-                      <p className="mt-1 text-sm font-bold uppercase tracking-[0.12em] text-rose-700">
-                        {status.detail}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-2xl bg-emerald-50 p-3 text-emerald-600">
-                    <HeartPulse className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
-                      Resumen clínico
-                    </p>
-                    <p className="text-lg font-bold text-slate-950">
-                      {events.length === 0
-                        ? 'Aún no hay eventos cargados'
-                        : `${events.length} ${events.length === 1 ? 'evento registrado' : 'eventos registrados'}`}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-sm text-slate-500">Última actualización</p>
-                    <p className="mt-1 font-semibold text-slate-900">
-                      {sortedEvents[0] ? formatDate(sortedEvents[0].event_date) : 'Pendiente'}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-sm text-slate-500">Próximo hito</p>
-                    <p className="mt-1 font-semibold text-slate-900">
-                      {upcomingVaccine ? upcomingVaccine.title : 'Sin recordatorios activos'}
-                    </p>
-                  </div>
-                </div>
+            <div className="mt-6 grid gap-5">
+              <div className="lg:col-span-2">
+                <PetGamificationCard pet={pet} />
               </div>
             </div>
 
@@ -833,13 +837,11 @@ export default function PetDetailPage() {
                     </div>
                   </article>
                 ))
-              ) : (
+              ) : hasActiveEventFilters ? (
                 <div className="rounded-[1.6rem] border border-dashed border-slate-300 bg-white/80 px-6 py-8 text-center text-slate-500">
-                  {hasActiveEventFilters
-                    ? 'No encontramos eventos con esos filtros. Ajusta la búsqueda o limpia los criterios.'
-                    : `Agrega vacunas, controles o tratamientos para empezar a construir el carnet visual de ${pet.name}.`}
+                  No encontramos eventos con esos filtros. Ajusta la búsqueda o limpia los criterios.
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         </section>

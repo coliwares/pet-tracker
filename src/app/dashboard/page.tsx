@@ -11,7 +11,8 @@ import { Container } from '@/components/ui/Container';
 import { Button } from '@/components/ui/Button';
 import { Loading } from '@/components/ui/Loading';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { PetCard } from '@/components/pet/PetCard';
+import { PetGamificationCard } from '@/components/gamification/PetGamificationCard';
+import { GamificationOverviewSection } from '@/components/gamification/GamificationOverviewSection';
 import { UpcomingVaccinesCard } from '@/components/home/UpcomingVaccinesCard';
 import { UpcomingVisitsCard } from '@/components/home/UpcomingVisitsCard';
 import { OnboardingPanel } from '@/components/onboarding/OnboardingPanel';
@@ -180,9 +181,6 @@ export default function DashboardPage() {
                 ? 'Sin mascotas registradas'
                 : `${pets.length} ${pets.length === 1 ? 'mascota registrada' : 'mascotas registradas'}`}
             </div>
-            <div className="rounded-full bg-white/90 px-4 py-2 font-medium text-slate-600">
-              Historial y recordatorios en una sola vista
-            </div>
           </div>
 
           <div className="relative mt-6 grid gap-3 sm:grid-cols-3">
@@ -251,6 +249,8 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="mt-6 space-y-6">
+            <GamificationOverviewSection pets={pets} />
+
             <section className="rounded-[1.75rem] border border-white/80 bg-white/85 p-4 shadow-sm backdrop-blur sm:p-6">
               <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
                 <div>
@@ -266,17 +266,6 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              <div className="mb-4 flex flex-wrap gap-2">
-                <div className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                  Búsqueda instantánea
-                </div>
-                <div className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                  Mobile first
-                </div>
-                <div className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                  Vista consistente
-                </div>
-              </div>
 
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex-1">
@@ -314,9 +303,6 @@ export default function DashboardPage() {
               </div>
 
               <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
-                <div className="rounded-full bg-white px-3 py-1.5 font-medium text-slate-600 shadow-sm">
-                  Vista consistente con el detalle individual
-                </div>
                 <div className="rounded-full bg-slate-100 px-3 py-1.5 font-medium text-slate-600">
                   {hasActiveFilters ? 'Mostrando filtros activos' : 'Sin filtros aplicados'}
                 </div>
@@ -339,7 +325,7 @@ export default function DashboardPage() {
             {filteredPets.length > 0 ? (
               <div className="grid animate-fade-in gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {filteredPets.map((pet) => (
-                  <PetCard key={pet.id} pet={pet} />
+                  <PetGamificationCard key={pet.id} pet={pet} compact />
                 ))}
               </div>
             ) : (

@@ -35,7 +35,7 @@ export default async function SharedPetPage({
               Enlace no disponible
             </p>
             <h1 className="mt-3 text-4xl font-black tracking-tight text-slate-950">
-              Este carnet compartido ya no está disponible
+              Este carnet compartido ya no esta disponible
             </h1>
             <p className="mt-5 text-lg leading-8 text-slate-600">
               El enlace puede haber expirado o fue revocado por su propietario.
@@ -86,42 +86,40 @@ export default async function SharedPetPage({
                       <span className="rounded-full bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-800">
                         {speciesLabel}
                       </span>
-                      {pet.breed && (
+                      {pet.breed ? (
                         <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
                           {pet.breed}
                         </span>
-                      )}
-                      {pet.weight && (
+                      ) : null}
+                      {pet.weight ? (
                         <span className="rounded-full bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800">
                           {pet.weight} kg
                         </span>
-                      )}
+                      ) : null}
                     </div>
                   </div>
                 </div>
 
-                {pet.notes && (
+                {pet.notes ? (
                   <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50/90 p-4 text-sm leading-6 text-amber-950">
                     <p className="font-semibold">Notas importantes</p>
                     <p className="mt-1 text-amber-800">{pet.notes}</p>
                   </div>
-                )}
+                ) : null}
               </div>
 
               <div className="rounded-[1.75rem] bg-slate-950 p-6 text-white shadow-[0_24px_70px_rgba(15,23,42,0.24)]">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-sky-200">
-                  Información del enlace
+                  Informacion del enlace
                 </p>
                 <p className="mt-4 text-2xl font-black leading-tight">
-                  Este acceso es público y de solo lectura.
+                  Este acceso es publico y de solo lectura.
                 </p>
                 <p className="mt-3 text-sm leading-6 text-slate-300">
-                  Puedes revisar el historial médico sin iniciar sesión mientras el enlace siga activo.
+                  Puedes revisar el historial medico sin iniciar sesion mientras el enlace siga activo.
                 </p>
                 <div className="mt-6 rounded-2xl bg-white/10 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-100">
-                    Caduca
-                  </p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-100">Caduca</p>
                   <p className="mt-2 text-lg font-bold text-white">{formatDateTime(expiresAt)}</p>
                 </div>
               </div>
@@ -130,7 +128,7 @@ export default async function SharedPetPage({
 
           <section className="rounded-[2rem] border border-white/80 bg-white/88 p-8 shadow-[0_24px_70px_rgba(15,23,42,0.06)] backdrop-blur">
             <div className="mb-8">
-              <h2 className="text-3xl font-extrabold text-slate-950">Historial médico</h2>
+              <h2 className="text-3xl font-extrabold text-slate-950">Historial medico</h2>
               <p className="mt-2 text-slate-600">Vista compartida con vacunas, visitas y tratamientos.</p>
             </div>
 
@@ -154,9 +152,9 @@ export default async function SharedPetPage({
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
                             <p className="text-xl font-bold tracking-tight text-slate-950">{event.title}</p>
-                            {event.description && (
+                            {event.description ? (
                               <p className="mt-1 text-sm leading-6 text-slate-600">{event.description}</p>
-                            )}
+                            ) : null}
                           </div>
                           <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700">
                             <CalendarDays className="h-4 w-4" />
@@ -164,17 +162,17 @@ export default async function SharedPetPage({
                           </div>
                         </div>
 
-                        {event.next_due_date && (
+                        {event.next_due_date ? (
                           <div className="mt-3 rounded-xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
-                            Próximo recordatorio: {formatDate(event.next_due_date)}
+                            Proximo recordatorio: {formatDate(event.next_due_date)}
                           </div>
-                        )}
+                        ) : null}
 
-                        {event.notes && (
+                        {event.notes ? (
                           <p className="mt-3 rounded-xl bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
                             {event.notes}
                           </p>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                   </article>

@@ -14,6 +14,8 @@ interface ModalProps {
   cancelLabel?: string;
   confirmVariant?: 'primary' | 'danger';
   loading?: boolean;
+  maxWidthClassName?: string;
+  bodyClassName?: string;
 }
 
 export function Modal({
@@ -26,6 +28,8 @@ export function Modal({
   cancelLabel = 'Cancelar',
   confirmVariant = 'primary',
   loading = false,
+  maxWidthClassName = 'max-w-md',
+  bodyClassName = '',
 }: ModalProps) {
   useEffect(() => {
     if (isOpen) {
@@ -43,17 +47,17 @@ export function Modal({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center p-4">
+      <div className="flex min-h-full items-start justify-center p-4 sm:p-6">
         {/* Backdrop */}
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+          className="fixed inset-0 bg-black/55 backdrop-blur-[2px] transition-opacity"
           onClick={onClose}
         />
 
         {/* Modal */}
-        <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6 z-10">
-          <div className="flex justify-between items-start mb-4">
-            <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
+        <div className={`relative z-10 mt-14 flex max-h-[calc(100vh-6rem)] w-full flex-col overflow-hidden rounded-[1.5rem] bg-white shadow-2xl sm:mt-8 ${maxWidthClassName}`}>
+          <div className="flex items-start justify-between border-b border-gray-100 px-6 py-4">
+            <h3 className="pr-4 text-xl font-semibold text-gray-900">{title}</h3>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -62,10 +66,12 @@ export function Modal({
             </button>
           </div>
 
-          <div className="mb-6">{children}</div>
+          <div className={`overflow-y-auto overscroll-contain px-6 py-4 ${bodyClassName}`}>
+            {children}
+          </div>
 
           {onConfirm && (
-            <div className="flex gap-3 justify-end">
+            <div className="flex justify-end gap-3 border-t border-gray-100 px-6 py-4">
               <Button variant="ghost" onClick={onClose} disabled={loading}>
                 {cancelLabel}
               </Button>
